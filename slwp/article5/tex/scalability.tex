@@ -1,0 +1,141 @@
+\section{Scalability}
+There are several degrees of scalability with this login scheme.
+
+\subsection{Keyring}
+Instead of a nice and round 100,
+you can put any number of keys in a keyring file.
+The value of 100 is just convenient;
+all keys are numbered with a two-digit number,
+which can easily be remembered.
+\par
+Any number will do,
+from zero
+(which leaves only the keyring identifier,
+and allows you to login to zero websites)
+up to any amount of keys you bother to carry around with you.
+Having more keys than sites you want to login to is just a way to make things a bit harder for those that do not own the keyring to choose keys.
+If you are not happy with this,
+you can just add new keys as you acquire them,
+just as with real keys.
+(Nothing stops you from adding bogus brass and steel keys to the keyring that holds your carkeys.
+But I don't believe it is common practice to add BMW and Ford keys to a keyring of a Toyota owner.)
+
+\subsection{Key lengths}
+\label{sec:key_length}
+The length of keys is generally considered as an important aspect.
+The more bits, the better the key.
+\par
+That is true if such a key is used to encrypt data that is in any way predictable,
+like, for example, a piece of text.
+If the encrypted data has patterns of any kind,
+you can directly work with intermediate decryption attempts.
+Statistical analysis of resulting bit patterns can reveil if a certain key or method is getting close or closer.
+\par
+But all values encrypted with our keys are comprised of random bits only.
+This implies that any result of decryption has to be tried,
+to establish if the decryption was in any way successful.
+That would mean many login attempts
+(millions, billions, or more)
+which is infeasable.
+And that is just to crack a user key,
+which only gives you one login.
+
+\subsubsection{Minimum key length}
+With a Secret key fixed on 256 bits to accommodate the \AES\ encryption,
+all other keys can be a lot smaller than that.
+Theoretically,
+a 1-bit key could suffice,
+but this obviously is not strong enough,
+as it would take only two attempts to test all possible values.
+\par
+To rule out any feasable brute force attempts
+(supposing that a site does not stop countless consecutive failed attempts)
+a key length of 24 bits should be enough.
+Assuming that a single login attempt,
+exhausting all Secret keys each time,
+could be done in a second
+(taking into account the network traffic to download and upload webpages and values),
+a 16 bit key would be cracked in at most 18 hours.
+365 days have 8760 hours,
+and if Secret keys are replaced every half year,
+then,
+if an attempt takes more than 4380 hours,
+it must be considered futile.
+Doubling the time with each bit,
+a 24 bit key would take 4608 hours of continuous effort,
+which is well over half a year.
+
+\subsubsection{Maximum key length}
+There is no limit to the number of bits in a key,
+but using more and more bits for keys has its trade-offs.
+Keys longer than 64 bits require more processing,
+as they do not fit in CPU registers common today.
+But even keys longer than 32 bits may be subobtimal in some programming languages that are used to make client side login pages,
+or server side login programs.
+\par
+Part of the exchanged values are least significant parts of \SHA\ hashes.
+These give ample proof of having the right key,
+but reveal nothing of the hashed value---even if the hash function should be reversible.
+Therefore,
+the number of bits of the user and site keys must not equal the number of bits of the hash result.
+\par
+There are of course hash functions that produce longer hashes,
+like \E{AES}{512},
+but putting more than,
+say,
+128 bits into a key brings no more security.
+\par
+If this scheme is somehow flawed,
+it most likely will not because of insufficient key lengths.
+As such,
+128-bit keys should be considered the maximum practical key length.
+
+\subsection{Old Secret keys}
+At least one old Secret key is required,
+if Secret keys are to be replaced every now and then.
+An HSM can store many keys,
+so there is no real practical limit there.
+More likely,
+the amount of effort needed to safely work with keys will cap the number to a small integer.
+
+\subsection{Encryption algorithms}
+In this article,
+the basis for generating the keypairs for the site and the user is \AES.
+All site keys and user keys are related using this algorithm,
+so it has to be secure.
+The encryption algorithm has to be a block cypher,
+using a secret key.
+A hashing function does not do the trick,
+as this would directly reveil user keys once you have the site keys.
+But any other block cypher may be employed for this task.
+\par
+Hashes are computed using \SHA\ in this article.
+The hash values that are exchanged between website and user are incomplete by design,
+and just contain some of the least significant bits of the hash.
+The key length of the site and user keys
+should not exceed the lenght of the hash value,
+nor have equal length,
+as that would weaken the login algorithm.
+Using 128-bit keys, a hash function like \MDV\ is not recommended, as this produces a 128-bit hash.
+
+\subsection{Server roles}
+There is no technical restriction whatsoever combining all server roles
+(webserver, account server, login server)
+into a single server.
+For security reasons it is advisable to split those roles, however.
+\par
+The webserver should be separate from the accounts server, if at all possible.
+The login server function could be combined with the accounts server;
+both somewhere in the back office.
+This combination may leave system administrators with two different sets
+of security constraints for the two roles.
+A separate login server would be preferrable in those cases.
+\par
+As a final separation option,
+the login server may be located outside the domain of the webserver's company.
+A stand-alone login server may exist
+(well, several of them, in fact)
+on the Internet.
+These login servers may offer websites their computing capabilities for logins,
+and also reduce the burden of dealing with Secret keys.
+That would leave a company using this login scheme with minimal changes to its login scheme.

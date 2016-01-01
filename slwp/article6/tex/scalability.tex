@@ -1,0 +1,49 @@
+\section{Scalability}
+There are several degrees of scalability with this login scheme.
+
+\subsection{Keyring}
+Instead of a nice and round 100,
+you can put any number of keys in a keyring file.
+The value of 100 is just convenient;
+all keys are numbered with a two-digit number,
+which can easily be remembered.
+\par
+Any number will do,
+from zero
+(which leaves only the keyring identifier,
+and allows you to login to zero websites)
+up to any amount of keys you bother to carry around with you.
+Having more keys than sites you want to login to is just a way to make things a bit harder for those that do not own the keyring to choose keys.
+If you are not happy with this,
+you can just add new keys as you acquire them,
+just as with real keys.
+(Nothing stops you from adding bogus brass and steel keys to the keyring that holds your carkeys.
+But I don't believe it is common practice to add BMW and Ford keys to a keyring of a Toyota owner.)
+
+\subsection{Old Secret keys}
+At least one old Secret key is required,
+if Secret keys are to be replaced every now and then.
+An HSM can store many keys,
+so there is no real practical limit there.
+More likely,
+the amount of effort needed to safely work with keys will cap the number to a small integer.
+
+\subsection{Encryption algorithms}
+In this article,
+the basis for generating the keypairs for the site and the user is \AES.
+All site keys and user keys are related using this algorithm,
+so it has to be secure.
+The encryption algorithm has to be a block cypher,
+using a secret key.
+A hashing function does not do the trick,
+as this would directly reveil user keys once you have the site keys.
+But any other block cypher may be employed for this task.
+\par
+Hashes are computed using \SHA\ in this article.
+The hash values that are exchanged between website and user are incomplete by design,
+and just contain some of the least significant bits of the hash.
+The key length of the site and user keys
+should not exceed the lenght of the hash value,
+nor have equal length,
+as that would weaken the login algorithm.
+Using 128-bit keys, a hash function like \MDV\ is not recommended, as this produces a 128-bit hash.

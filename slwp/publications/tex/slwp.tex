@@ -1,0 +1,89 @@
+% $Header: /usr/local/src/slwp/article/tex/slwp.tex,v 1.13 2014/02/01 13:39:44 timo Exp $
+\documentclass[a4paper,final]{article}
+\input{tex/layout.tex}
+\input{tex/macros.tex}
+%\title{Secure Login without Passwords}
+%\author{T.M.C. Ruiter \and \epsfig{file=XORkey_logo_FC.eps,width=3cm}}
+% \makeindex
+\begin{document}
+\raggedbottom
+\begin{titlepage}
+\begin{center}
+\hspace*{2.5cm}\epsfig{file=XORkey_icons.eps,width=4cm}
+\newline
+\dashes
+\vspace*{1.0cm}
+\Huge
+\sffamily
+\textbf{\textcolor{darkxor}{Secure Login}} \\
+\textbf{\textcolor{darkxor}{without Passwords}} \\
+\vspace{20mm}
+\hspace*{2.7cm}\epsfig{file=XORkey_logo.eps,width=4cm}
+\newline
+\normalsize
+\textcolor{darkxor}{The key to the Internet}
+\end{center}
+\end{titlepage}
+%\maketitle
+\newpage
+%%% The back of the title page.
+\thispagestyle{empty}
+\vspace*{6.00cm}
+\dashes
+\begin{center}
+\vspace*{-.5em}
+\textbf{XORkey - The key to the Internet} \\
+\vspace{1em}
+\small
+Copyright \copyright\ 2014,2015 by T.M.C. Ruiter, XORkey B.V. \\
+Winterkoning 5 - 1722 CA Zuid-Scharwoude - The Netherlands \\
++31 6 5376 0646 - hello@xorkey.com 
+\normalsize
+\end{center}
+\newpage
+%%% The first inner page.
+\begin{center}
+\dashes\newline
+\huge
+\vspace{-0.3em}
+\textsf{\textbf{\textcolor{darkxor}{Secure Login without Passwords}}}
+\rmfamily
+\normalsize
+\newline
+\dashes
+\Large
+\vspace*{1.0cm}
+\textrm{T.M.C. Ruiter~-~XORkey B.V.} \\
+\vspace{0.5cm}
+\today
+\normalsize
+\vspace*{1.0cm}
+\begin{quote}
+Any person can invent a security system so clever that he or she can't imagine a way of breaking it.
+\footnote{Also known as Schneier's Law.}
+\end{quote}
+\end{center}
+\dashes
+\newcommand{\includesection}[1]{\input{tex/#1}\newpage}
+\newcommand{\includesectionnopagebreak}[1]{\input{tex/#1}}
+\includesection{abstract}
+\tableofcontents
+\newpage
+\includesection{introduction}
+\includesection{general}
+%\includesection{keys}
+\input{tex/keys.tex}
+\input{tex/key-lengths.subsec}
+\newpage
+\includesection{dummies}
+\includesection{login}
+\includesection{schema}
+\includesection{security}
+\includesection{implementation}
+\includesectionnopagebreak{conclusion}
+\bibliographystyle{plain}
+\bibliography{article,misc}
+% \printindex
+\listoftables
+% \lstlistoflistings
+\end{document}

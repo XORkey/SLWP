@@ -1,0 +1,27 @@
+\begin{abstract}
+These are the ingredients for secure logins:
+\begin{itemize}
+\item The website maintains a small array with Secret keys in an HSM, which will be renewed regularly
+(oldest key removed, all keys shifted one position, new key added).
+\item All cryptographic operations at the website take place in the HSM;
+no values are remembered, except Secret keys.
+\item For each user, a 128 bit random number acts as the site key for that user.
+The user gets a different 128 bit value, which is the \E{AES} encryption of the site key for that user with the newest Secret key.
+\item Logging in is a process of proving that both the website and the user have the right key by sending hashes of
+random 128 bit numbers encrypted with these keys.
+Neither the site key nor the user key are ever sent over the line.
+\item When Secret keys are changed,
+the user automatically gets a new key.
+This way, user keys are changed regularly as well.
+\item All user keys are put on a keyring,
+which is a set of at least 99 keys, each 128 bit long, most of them dummies.
+No other information whatsoever is stored in a keyring, which may be stored in an ordinary file.
+The keyring may be encrypted with its own keys.
+\item The user selects which key is used for what, which it needs to write down or remember.
+Although keys themselves are changed regularly,
+the key number and its purpose will never change during the lifetime of the keyring, which might be forever.
+This makes remembering key numbers, at least for those keys that are used regularly, doable for most people.
+\item The keyring itself is something you must have; the key number something you must know,
+so logging in using a keyring is a basic form of two-factor authentication.
+\end{itemize}
+\end{abstract}

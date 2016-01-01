@@ -1,0 +1,64 @@
+\section{Software}
+Several little pieces of software are needed to make things happen.
+
+\subsection{Login server functions}
+\label{sec:login_server_functions}
+The login server needs to perform the following functions (in relatively random order):
+\begin{itemize}
+\item Since the login server uses an HSM,
+it could offer to generate a new keyring for a user
+(just a blob of 100 random 128 bit numbers).
+\item Generate a set of keys for a new user ($K_s$ and $K_x$,
+see section \ref{sec:applying}) given a dummy key $K_d$ and a \SHA hash of a userid.
+\par
+It should send the site key $K_s$ and the hash to the server that has all account information in a database using an insert query.
+The encrypted user key $K_x$ should be sent back to the webserver, so it can transport it to the user.
+\item Store a new Secret key,
+given the new key and \texttt{MAX\_KEYS};
+the latter may change,
+due to a policy change.
+\par
+The new key should be stored in slot 0 of the array, by first moving all existing keys one position.
+If there are already \texttt{MAX\_KEYS} Secret keys stored in the array,
+all keys with an index greater or equal to \texttt{MAX\_KEYS} should be discarded.
+\item Calculate the values $B_s$, $P_s$, and $Q_s$,
+in response to the three values $A_u$, $K_s$,
+and an index $i$ (see section \ref{sec:login_step3}).
+\par The input values come from the webserver;
+the output values should be returned.
+\end{itemize}
+
+\subsection{HSM}
+The HSM used by the login server should just present the functions needed for the login server,
+and nothing more.
+This way,
+misuse can be prevented.
+Anyway, it should be able to perform the functions described in section \ref{sec:login_server_functions}.
+
+\subsection{Accounts Database}
+The database that is used for holding all accounts should be able to return the site key $K_s$ in response to a \SHA hash of a userid the user has sent (see section \ref{sec:login_step2}).
+
+\subsection{Webserver}
+The webserver should be able to do some basic tasks:
+\begin{itemize}
+\item Relay values received by the user to the accounts database and accept the site key $K_s$ (see section \ref{sec:login_step2}).
+\item Iteratively send values $A_u$, $K_s$, and an index $i$, to the login server, and relay the results back to the user (see section \ref{sec:login_step3}).
+\item Act according the replies of the user to find the right Secret key (see section \ref{sec:login_step4}).
+\item Verify that the user has sent the right hash $Q_u$ and log the user in (see section \ref{sec:login_step5}).
+\end{itemize}
+
+\subsection{Browser}
+The software for the browser has to do some diverse tasks:
+\begin{itemize}
+\item Present all keys in some graphical form, so the user can select one.
+\item Compute the \SHA hash of the userid,
+generate a random value,
+XOR this with the key selected by the user,
+and send this to the webserver (see section \ref{sec:login_step1}).
+\item Verify the \SHA hashes the webserver will send (see section \ref{sec:login_step4}).
+\item Decrypt the challenge from the webserver,
+compute the \SHA hash of the result,
+and send it back (see section \ref{sec:login_step5}).
+\item Optionally, replace keys on the keyring (see section \ref{sec:login_step6}).
+\end{itemize}
+%%%

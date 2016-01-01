@@ -1,0 +1,141 @@
+\section{Combinations and simplifications}
+The solution presented in the previous chapters is the most elaborate solution possible.
+All roles assigned to different servers and all values encrypted.
+In some situations roles can be combined or encryption skipped,
+at the cost of reduced security.
+\subsection{Combining server roles}
+There is no technical restriction whatsoever combining all server roles
+(webserver, account server, login server---and even the client, for that matter)
+into a single computer.
+For security reasons it is advisable that those roles be split.
+Yet costs or lower security requirements may incline people to decide to combine things.
+\par
+To protect the webserver from harm,
+this solution aims at significantly reducing the data value for hackers.
+The less valueable the data items,
+the less likely they are stolen.
+\subsubsection{Login and accounts server}
+\label{sec:login+accounts}
+If the login server is operated locally,
+it could be combined with the accounts server,
+both somewhere in the back office.
+This server could use the HSM for storing the private key for the accounts database as well.
+\subsubsection{Webserver and accounts server}
+In this case, a hacker that owns this server can collect site keys,
+because they are decrypted here.
+This in itself does not help the hacker much,
+but he or she can get its hands on unencrypted keys.
+\subsubsection{Webserver and login server}
+X
+\subsubsection{Webserver, accounts server and login server}
+Y
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Simplifications}
+The login scheme
+(starting with section \vref{sec:full_login})
+is complete and offers the whole set of security measures you would want for a safe login scheme.
+Several measures are taken to establish this level of security.
+This section explores what happens when you leave them out.
+\subsubsection{Storing plain site keys}
+Instead of storing encrypted site keys in the accounts database
+(step 4 of the application process,
+see section~\vref{sec:apply_step4}),
+site keys could be encrypted by the webserver just before sending them to the login server,
+in step 2 of the login process (see section~\vref{sec:login_step2}).
+Storing plain keys can be considered if the webserver and accounts server are combined
+(see section~\vref{sec:login+accounts})
+or when the key refactoring that is needed when the public key of the login server expires is found to be too cumbersome.
+\par
+Security penalty: low.
+\subsubsection{Sending plain site keys}
+Sending plain site keys does not require a certificate from the login server.
+\par
+Security penalty: medium.
+\subsubsection{Using traditional userids}
+Instead of using a value dependent of $Z[0]$,
+you could stick to the old fashioned userid to indicate as which user you want to log in.
+You will need a userid that is unique for the website.
+What's more:
+you will need a userid,
+period.
+\subsubsection{Getting rid of the HSM}
+\begin{dialogue}
+\speak{Jen}		\direct{Holding an invoice.}
+				That's quite an expensive set of toys you have there, lads, your\ldots
+				\direct{Reads.}
+				H-S-Ms.
+\speak{Moss}	Thank you for taking an interest!
+				For a whole week I was wondering if you'd notice.
+\speak{Jen}		Why on earth did you order two of those?
+\speak{Moss}	One is none, I always say.
+				\direct{Pauses.}
+				I keep wondering why this sounds contradictory\ldots
+\speak{Roy}		Could we not have three? We all would sleep better.
+				\direct{\refer{Moss} nods affirmative.}
+\speak{Jen}		Could we do without, instead?
+				\direct{With a firm look,
+				\refer{Jen} strides purposefuly towards the apparatus,
+				with her her hand reaching for the power plug.}
+\speak{Moss}	\direct{Looks up in horror.}
+				Impossible!
+\speak{Roy}		\direct{Lunges forward with a wild look to block \refer{Jen}'s path.}
+				Over my dead body!
+\speak{Jen}		\direct{Mildly disgusted.}
+				So that's where you keep your porn, then?
+\speak{Roy}		\direct{Rolls his eyes.}
+				Yeah, you've got us.
+\attrib{The IT Crowd (not).}
+\end{dialogue}
+Yes, you can do without.
+But you will probably be hacked.
+And hacked again,
+most likely;
+just for sport.
+Your secret keys on your harddrive are a prize,
+even if publishing them does not directly harm your security.
+You have a lot of explaining to do when this happens for the second time.
+The third time\ldots, oh, don't bother.
+\par
+The HSM is used for generating good quality random numbers.
+Using some other pseudo-random generator will probably yield numbers less random,
+which may be an attack vector.
+\par
+An HSM gives you physical and logical security,
+at the cost of personnel.
+The hardware costs are minimal compared to the people involved in securely handling your sensitive Secret keys.
+But do it right,
+and you are safe,
+even if you are hacked.
+\subsubsection{Eliminating Secret keys}
+Instead of having different keys for website and user,
+you may opt to store the user key in the website's user database.
+Doing so will yield usable login data when the accounts of the website will be stolen.
+\par
+This is not recommended,
+but not necessarily wrong.
+Still,
+no replay of logins can occur,
+as there is still the use of random numbers for this.
+\par
+A possible bonus for this large omission in security could be that you don't need to store any Secret keys anywhere,
+except the keys belonging to the users.
+See if your users will put up with this for very long.
+\subsubsection{Skipping website authentication}
+A website may be offering user authentication only.
+When Secret keys have been dismissed as well,
+this could be considered the most rudimentary login scheme.
+\par
+In this case,
+a user only sends its user id.
+The website uses the corresponding user key to encrypt a random value.
+All the user has to do is return the right hash value to log in.
+\par
+With the absence of the site verification,
+the user loses the ability to verify that it is talking to the website that offered him its key originally.
+It could be any other website,
+possibly allowing him to login anyway and lure him to reveil sensitive or valuable information.
+\par
+Of course there are certificates that indicate the trustworthyness of a webserver,
+but site authentication makes almost absolutely sure,
+and you cannot annoyingly ``click this away'' like a warning for a bogus website certificate.

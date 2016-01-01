@@ -1,0 +1,137 @@
+%
+% $Header: /usr/local/src/slwp/article/keys.tex,v 1.5 2013/03/09 15:32:54 timo Exp $
+%
+% AUTHOR:	ing. T.M.C Ruiter
+%
+\section{Keys}
+%The exchanged values in the login process and the keys in a keyring are 128 bits long in this article,
+%but could be taken much smaller;
+%say,
+%16 bits each,
+%without doing great injustice to the level of security.
+%The use of 128 bits is only a convenient size,
+%as it is the \AES\ blocksize, and \SHA\ works with this length naturally.
+%This way,
+%we take full advantage of their cryptographic power.
+
+\subsection{Secret keys}
+\label{sec:secret_keys}
+The keys used to encrypt other keys%
+---called Secret keys in this article---%
+are used to perform \AES\ encryptions of site keys,
+and are 256 bits long.
+\par
+Several Secret keys are used and
+are considered to be stored in array $S$, in this article.
+With this array, three values are defined.
+\begin{enumerate}
+\item	The number of stored Secret keys is represented by $m$.
+\item	The constant%
+\footnote{Although declared a constant, the value of \texttt{MAX\_KEYS} may change over time.
+When the login policy regarding the use of old keys is changed, more or fewer old keys will be stored.
+For this, \texttt{MAX\_KEYS} needs to be changed.}
+\texttt{MAX\_KEYS}, which is the maximum number of keys that will be kept.
+The value of $m$ starts at 0 and will reach \texttt{MAX\_KEYS} eventually and grow no more.
+The value \texttt{MAX\_KEYS} has a minimum of 2 (a new key and at least 1 old key).
+All values in the array $S$ are shifted up one position when a new key is stored, which will always be inserted at $S[0]$.
+This way, with at least one key loaded ($m>0$), it always holds that $S[0]$ is the newest key,
+and $S[m-1]$ is the oldest key.
+With $m>1$, $S[1]$ is the jongest old key.
+\item	The constant \texttt{MAX\_ACTIVE\_KEYS},
+which is the maximum number of keys that will be used for logging users in.
+This value lies in the range $[2, \mathtt{MAX\_KEYS}]$.
+\par
+Subtracting \texttt{MAX\_ACTIVE\_KEYS} from \texttt{MAX\_KEYS}
+gives the number of inactive keys which can be used to reactivate expired user keys.
+Users using a user key that is older than the oldest active Secret key cannot login,
+but their key can be restored with an inactive Secret key.
+If a key is used that is older than the oldest inactive key,
+the key cannot be restored and is lost forever.
+\end{enumerate}
+
+\subsection{Site keys}
+For each user, there exists a site key and a derived user key (see section~\ref{sec:userkeys}).
+The site keys are stored in a table of a database,
+where the \SHA\ hash of the userid will act as the primary key for that table.
+Since the user only sends the \SHA\ hash of its userid, no actual userids will be stored.
+\par
+Site keys are generated once by a pseudo-random generator, and need never be replaced.
+\par
+Each time a user tries to login,
+the database is queried with the \SHA\ hash of the userid,
+and the site key for that user is returned for further processing.
+
+\subsection{User keys}
+\label{sec:userkeys}
+A user key is computed by encrypting the site key for the user with the joungest (or current) Secret key,
+using the \AES\ algorithm.
+\par
+The keys users get from the website are stored on a keyring (see section \ref{sec:keyring}).
+These keys are automatically changed for new keys by the website when the Secret key is changed.
+
+\subsection{Key lifetime and old keys}
+For enhanced security, Secret keys need to be replaced at regular intervals.
+This change of keys is initiated by the website,
+without the possibility to make individual arrangements with any of its users.
+\par
+After changing the Secret key, it is no longer possible to login with any user key.
+Therefore, an array of Secret keys needs to be kept, allowing users to login using an old(er) Secret key.
+At least one old Secret key needs to be stored; otherwise, the Secret key cannot be changed without rendering all user keys permanently useless.
+\par
+Upon successful login with an old key, the user will be provided with a new user key,
+with which it can login using the newest Secret key, from that moment on.
+Changing of user keys is seamless and the user might, just as well, be kept unaware of this.
+\par
+The website's security policy should prescribe with what frequency Secret keys are to be changed, and how many old keys should be kept.
+If, for instance, the Secret key is changed every month, and 11 old keys are kept, users can still login using a key that is a year old.
+If the user key is older than that, the site is not able to verify the user's key any longer.
+
+\subsection{Storing user keys in a keyring}
+\label{sec:keyring}
+Keys for the user are collected and stored in a keyring.
+The keyring is a block of
+(at least)
+100 random numbers with 128 bits, most of them dummy keys.
+The keyring will be considered an array $Z$ in the rest of the article.
+Since all bits are entirely random in a keyring%
+---for dummies and real keys---%
+a keyring stores no information whatsoever.
+\par
+Real keys in the keyring should be randomly put between the dummy keys.
+
+\subsubsection{Creating a keyring}
+A keyring is created by using a random generator of sufficient quality,
+which generates 100 random numbers of 128 bits.
+Key number zero is used to identify the keyring and will never change after its creation.
+The other 99 keys are dummies
+(random bits with no meaning whatsoever).
+These random numbers are then encrypted and written to a file%
+\footnote{A password protected PKCS\#12 file would do nicely.}
+on a storage device.
+Unencrypted values should never be written to a storage device and only be kept in volatile memory.
+It is up to the user to remember how to decrypt its keyring.
+
+\subsubsection{Copying keys and keyrings}
+A keyring can be freely copied to other devices, so all keys are available there as well.
+The keys of one keyring can be copied to other keyrings, in different locations.
+It is up to the user to keep a registration of this.
+\par
+Encrypted keyrings can be stored in a public place, for easy access, and act as a backup.
+A dedicated webserver can be employed for storing encrypted keyrings,
+which can be used to restore lost keyrings.
+They can also be used to login when away from home with no access to your own keyring.
+These temporary keyrings should be discarded when logging out.
+
+\subsubsection{Irretrievably lost keys and keyrings}
+When a key number is forgotten and no record of it can be found,
+the key must be considered lost.
+\par
+As the user has supplied websites with personal information,
+it may be easy to regain login capabilities by just asking for a new key,
+provided a username and maybe some other information can be given.
+Selecting a free keynumber on the keyring and replacing that key with the new one should restore the ability to login.
+\par
+Keyrings can become unusable or lost in two situations:
+the device holding it is defective (like a harddisk crash) and no backup has been made,
+or the encryption cannot be reversed (PIN forgotten).
+In both cases, the user has to start over and create a new keyring, containing only dummy keys.

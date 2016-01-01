@@ -1,0 +1,39 @@
+% $Header: /usr/local/src/slwp/article/tex/slwp.tex,v 1.10 2013/10/26 17:49:18 timo Exp $
+\documentclass[a4paper,twoside]{article}
+\usepackage[english]{babel}
+\usepackage{algorithm}
+\usepackage{listings}
+\usepackage[noend]{algpseudocode}
+\usepackage{url}
+\usepackage{fancyhdr}
+\usepackage{varioref}
+\usepackage{dialogue}
+\usepackage{attrib}
+\input{tex/layout.tex}
+\input{tex/macros.tex}
+\title{Secure Login without Passwords}
+\author{T.M.C. Ruiter, \XORlogo}
+% \makeindex
+\begin{document}
+\maketitle
+\begin{quote}
+Any person can invent a security system so clever that he or she can't imagine a way of breaking it.
+%\footnote{Also known as Schneier's Law.}
+\end{quote}
+\input{tex/abstract}
+\newpage
+\tableofcontents
+%\newpage
+\include{tex/introduction}
+\include{tex/general}
+\include{tex/keys}
+\include{tex/login}
+\include{tex/scalability}
+\include{tex/security}
+\include{tex/implementation}
+\include{tex/conclusion}
+\bibliographystyle{plain}
+\bibliography{article,misc}
+% \printindex
+\lstlistoflistings
+\end{document}

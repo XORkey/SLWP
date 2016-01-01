@@ -1,0 +1,30 @@
+		?>
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="http://localhost:8888/keyring.js"></script>
+		<title>Login successful</title>
+	</head>
+	<body>
+		<h1>LOGIN SUCCESS!!!</h1>
+		<a href="welcome.php">Go to the welcome page</a>
+		<a href="logout.php">Logout</a>
+			<?php
+			if ($F != $_SESSION["Au"])
+			{
+			?>
+				<script>
+					if (sessionStorage.j > 1)
+						UpdateKeyring(sessionStorage.Rs, <?php echo $_SESSION["k"] ?>);
+				</script>
+			<?php
+			}
+			else
+			{
+				echo "document.write(\"Key update denied.\");\n";
+			}
+			?>
+	</body>
+</html>
+		<?php

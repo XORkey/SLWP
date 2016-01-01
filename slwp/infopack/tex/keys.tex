@@ -1,0 +1,255 @@
+%
+% $Header: /usr/local/src/slwp/article/tex/keys.tex,v 1.8 2014/02/01 13:15:42 timo Exp $
+%
+% AUTHOR:	ing. T.M.C Ruiter
+%
+\Section{Keys}
+The keys used in this login scheme do not all have the same length.
+The Secret keys have 256 bits, for instance.
+The $\mathtt{RSA}$ operations use keys of 2048 bits.
+Keys stored in a key ring have 128 bits,
+but fewer bits may actually be used.
+The number of bits in such a key may differ among websites,
+and is denoted in this article as value $n$.
+%See \vref{sec:key_length} for a discussion of key lengths.
+\par
+Three sorts of keys are used:
+user keys
+(on a key ring),
+site keys
+(in a database),
+and Secret keys
+(in an array in an HSM).
+A user key is the result of encrypting the site key for that user with a Secret key.
+
+\Subsection{Secret keys}
+\label{sec:secret_keys}
+The keys used to encrypt other keys%
+---called Secret keys in this article---%
+are used to perform \AES\ encryptions of site keys to get user keys,
+and are 256 bits long.
+They reside in the HSM of a login server.
+\subsubsection{Array of Secret keys}
+For enhanced security,
+Secret keys need to be replaced at regular intervals.
+This change of keys is initiated by the website,
+without the possibility to make individual arrangements with any of its users.
+\par
+If there were only one Secret key,
+changing it would render all user keys permanently useless.
+Therefore,
+an array of Secret keys needs to be kept
+(with room for at least one old Secret key),
+allowing users to login using an old(er) key.
+Several Secret keys are used this way and
+are considered to be stored in array $S$.
+%, in this article.
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+1 & 2 & \ldots & $\mathtt{MAX\_ACTIVE\_KEYS}$ & \ldots & $\mathtt{MAX\_KEYS}$ \\
+\hline
+\end{tabular}
+\end{table}
+\par
+With this array, three values are defined.
+\begin{enumerate}
+\item	The number of stored Secret keys is represented by $m$.
+\item	The constant%
+\footnote{Although declared a constant, the value of \texttt{MAX\_KEYS} may change over time.
+When the login policy regarding the use of old keys is changed, more or fewer old keys will be stored.
+For this, \texttt{MAX\_KEYS} needs to be changed.}
+\texttt{MAX\_KEYS}, which is the maximum number of keys that will be kept.
+The value of $m$ starts at 0 and will reach \texttt{MAX\_KEYS} eventually and grow no more.
+The value \texttt{MAX\_KEYS} has a minimum of 2 (a new key and at least 1 old key).
+All values in the array $S$ are shifted up one position when a new key is stored, which will always be inserted at $S[0]$.
+This way, with at least one key loaded ($m>0$), it always holds that $S[0]$ is the newest key,
+and $S[m-1]$ is the oldest key.
+With $m>1$, $S[1]$ is the youngest old key.
+\item	The constant \texttt{MAX\_ACTIVE\_KEYS},
+which is the maximum number of keys that will be used for logging users in.
+This value lies in the range $[1, \mathtt{MAX\_KEYS}]$.
+\par
+Subtracting \texttt{MAX\_ACTIVE\_KEYS} from \texttt{MAX\_KEYS}
+gives the number of inactive keys which can be used to reactivate expired user keys.
+Users using a user key that is older than the oldest active Secret key cannot login,
+but their key can be restored with an inactive Secret key.
+If a key is used that is older than the oldest inactive key,
+the key cannot be restored and is lost forever.
+\end{enumerate}
+\par
+Upon successful login with an old key,
+the user will be provided with a new user key automatically.
+%with which it can login using the newest Secret key,
+%from that moment on.
+The new user key is based on the newest Secret key and can be used for logins as long as that Secret key in use.
+Changing of user keys is seamless
+(see section~\vref{sec:userkeys})
+and invisible to the user.
+%and the user might,
+%just as well,
+%be kept unaware of this.
+\par
+The website's security policy should determine with what frequency Secret keys are to be changed,
+and how many old keys should be kept.
+If,
+for instance,
+the Secret key is changed every month,
+and 11 old keys are kept,
+users can still login using a key that is up to a year old.
+If the user key is older than that,
+the site is not able to verify the user's key any longer.
+
+%------------------------------------------------------------------
+\subsubsection{Terminated accounts}
+When deleting the oldest Secret key from memory,
+all accounts with a `latest login' date older than the installation
+date of the second oldest Secret key should be marked `terminated'.
+Removal of the oldest Secret key renders unusable all user keys associated with it.
+Those accounts can be purged, as they cannot be used again.
+
+%------------------------------------------------------------------
+\subsubsection{Expired accounts}
+In some situations user access may be barred until some condition is met
+(see also \vref{sec:conditional_key_replacement}).
+Accounts can be made temporarily inaccessible for this purpose by letting keys expire.
+Expiration can happen automatically when users do not login in time to get their keys replaced,
+or purposely by denying key updates.
+Expired user keys are associated with Secret keys with an index in the range $[\texttt{MAX\_ACTIVE\_KEYS},\texttt{MAX\_KEYS})$.
+\par
+Expired accounts can easily be made active again by using inactive Secret keys for the login process
+(and then renew the user key).
+\par
+Expired accounts can be reinstated,
+but only before the associated Secret key is erased from memory.
+After that, there is no way to regenerate the user key for logging in.
+The user should apply for a new account if he/she wants to regain access.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\Subsection{Site keys}
+For each user,
+a site key is generated once by a pseudo-random generator of the HSM of the login server
+(see section~\vref{sec:apply_step3}),
+and never needs to be replaced.
+\par
+The site keys are stored in a table of a database of the accounts server,
+where a hash value will act as the primary key for that table.
+Each time a user tries to login,
+the database is queried with the hash value the user supplies,
+and the site key for that user is returned for further processing.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\Subsection{User keys and key rings}
+\label{sec:userkeys}
+Together with the site key,
+a user key is computed by encrypting the site key for the user with the youngest
+(or current)
+Secret key,
+using the \AES\ algorithm
+(also see section~\vref{sec:apply_step3}).
+\par
+The keys users get from the website will be stored on a key ring (see section~\vref{sec:key ring}).
+%The key ring will be considered an array $Z$ in the rest of the article.
+A key in a key ring is automatically replaced with a new key by the web server
+whenever the Secret key of the login server is changed
+(see section~\vref{sec:login_step6}).
+
+\subsubsection{Storing user keys in a key ring}
+\label{sec:key ring}
+A key ring is created by using a random generator of sufficient quality,
+generating a set of random numbers of 128 bits,
+stored in a file.
+Key number zero is used to identify the key ring and will never change after its creation.
+The other keys are dummies
+(random bits with no meaning whatsoever),
+some of which will be overwritten with real keys over time.
+Real keys in the key ring should be put randomly between the dummy keys.
+\par
+Typically,
+1000 random numbers are generated this way,
+so all keys are conveniently numbered with a three digit number
+(001 through 999),
+which can easily be remembered.
+However,
+you can put any number of keys in a key ring file.
+From zero keys
+(which leaves only the key ring identifier $Z[0]$,
+and allows you to login to zero websites)
+up to any number of keys you bother to carry around with you.
+\par
+Having more keys than sites you want to login to is just a way to make things
+a bit harder for those that do not own the key ring to choose keys.
+If you are not happy with this,
+you can just add new keys as you acquire them,
+just as with real keys.
+\par
+Finally,
+for convenience the user may have a small program that automatically selects
+which key to use for which website by using the domain name of the URL.
+This way,
+nothing needs to be remembered about which key to select.
+
+\subsubsection{Copying key rings}
+A key ring can be freely copied to other devices, so all keys are available there as well.
+\par
+Encrypted key rings can be stored in a public place or in the Cloud,
+for easy access,
+and act as a backup.
+A dedicated web server can be employed for storing encrypted key rings,
+which can be used to restore lost key rings.
+They can also be used to login when away from home with no access to your own key ring.
+These temporary key rings should be discarded when logging out.
+
+\subsubsection{Irretrievably lost keys and key rings}
+When a key number is forgotten,
+or a key inadvertently overwritten,
+and no record or backup of it can be found,
+the key must be considered lost.
+\par
+As the user has supplied websites with personal information,
+it may be easy to regain login capabilities by just asking for a new key,
+provided a username and maybe some other information can be given.
+Selecting a free key number on the key ring and replacing that key with the new one should restore the ability to login.
+\par
+Key rings can become unusable or lost in two situations:
+the device holding it is defective
+(like a hard disk crash)
+and no backup has been made,
+or the encryption cannot be reversed
+(PIN forgotten).
+In both cases,
+the user has to start over and create a new key ring,
+containing only dummy keys.
+
+\Subsection{Certificates and key pairs}
+As part of the security of the login process,
+keys need to be exchanged in encrypted form to and from the login server.
+Furthermore,
+the website may want to notify its users that it is using a trusted login server.
+\par
+To accommodate this requirement, the login server needs a certificate that holds a public encryption key.
+The private key that belongs to it is stored in the HSM.
+With this certificate the users of the login system can validate the trustworthiness of the used login server
+by validating the chain of trust.
+The certificate is signed by a Certificate Authority (CA).
+This CA's certificate is also signed, etcetera, up to a Root CA.
+A list of all trusted Root CA's is stored in the browser of the user
+and is already used to validate the certificates of websites.
+%\subsubsection{Login server keys}
+\par
+The login server uses two types of \RSA\ keys:
+an encryption key and a signing key; both private parts tucked away in its HSM.
+The public counterparts of these keys are presented to the user with a certificate,
+signed by a Certificate Authority so the user can validate them.
+\par
+The encryption keys of the login server are called $K_{le}$ for the public key
+(`l' for `login'; `e' for `encryption'),
+and $K_{LE}$ for the private key.
+The signing keys of the login server are called $K_{ls}$ for the public key
+(`s' for `signing'),
+and $K_{LS}$ for the private key.
+%\subsubsection{Accounts server keys}
+%Like the login server, the accounts server needs its own set of keys for encryption of other keys.
+%No signing is necessary,
+%so we have $K_{ae}$ as the public key
+%(`a' for `account')
+%and $K_{AE}$ as the private key.

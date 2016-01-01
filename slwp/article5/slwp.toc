@@ -1,0 +1,82 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{3}
+\contentsline {subsection}{\numberline {1.1}On human behavior}{3}
+\contentsline {subsection}{\numberline {1.2}A new login approach}{3}
+\contentsline {section}{\numberline {2}Login for dummies}{4}
+\contentsline {subsection}{\numberline {2.1}A new login scheme}{4}
+\contentsline {subsubsection}{\numberline {2.1.1}How do we do things now?}{4}
+\contentsline {subsubsection}{\numberline {2.1.2}What is new?}{4}
+\contentsline {subsubsection}{\numberline {2.1.3}Storing keys}{4}
+\contentsline {subsubsection}{\numberline {2.1.4}Who is computing what?}{5}
+\contentsline {subsection}{\numberline {2.2}Random values}{5}
+\contentsline {subsection}{\numberline {2.3}Loging in part I}{5}
+\contentsline {subsection}{\numberline {2.4}Loging in part II}{6}
+\contentsline {subsection}{\numberline {2.5}On site keys and user keys}{6}
+\contentsline {subsection}{\numberline {2.6}More about keys}{6}
+\contentsline {section}{\numberline {3}Keys}{8}
+\contentsline {subsection}{\numberline {3.1}Secret keys}{8}
+\contentsline {subsection}{\numberline {3.2}Site keys}{8}
+\contentsline {subsection}{\numberline {3.3}User keys}{8}
+\contentsline {subsection}{\numberline {3.4}Key lifetime and old keys}{9}
+\contentsline {subsection}{\numberline {3.5}Storing user keys in a keyring}{9}
+\contentsline {subsubsection}{\numberline {3.5.1}Creating a keyring}{9}
+\contentsline {subsubsection}{\numberline {3.5.2}Copying keys and keyrings}{9}
+\contentsline {subsubsection}{\numberline {3.5.3}Irretrievably lost keys and keyrings}{10}
+\contentsline {section}{\numberline {4}Logging in}{11}
+\contentsline {subsection}{\numberline {4.1}User IDs}{11}
+\contentsline {subsection}{\numberline {4.2}Applying for an account}{11}
+\contentsline {subsection}{\numberline {4.3}Basic login scheme}{12}
+\contentsline {subsubsection}{\numberline {4.3.1}Step 1: Knock, knock\dots }{12}
+\contentsline {subsubsection}{\numberline {4.3.2}Step 2: Site key lookup and key matching attempts}{13}
+\contentsline {subsubsection}{\numberline {4.3.3}Step 3: Login server actions}{13}
+\contentsline {subsubsection}{\numberline {4.3.4}Step 4: user verifies site key}{14}
+\contentsline {subsubsection}{\numberline {4.3.5}Step 5: site verifies user key}{14}
+\contentsline {subsubsection}{\numberline {4.3.6}Step 6: user key replacement}{15}
+\contentsline {subsection}{\numberline {4.4}Changing Secret keys}{15}
+\contentsline {subsubsection}{\numberline {4.4.1}Terminated accounts}{15}
+\contentsline {subsubsection}{\numberline {4.4.2}Expired accounts}{15}
+\contentsline {subsection}{\numberline {4.5}Changing site keys}{15}
+\contentsline {subsection}{\numberline {4.6}Optimizations and enhancements}{15}
+\contentsline {subsubsection}{\numberline {4.6.1}Aborting the login procedure}{16}
+\contentsline {subsubsection}{\numberline {4.6.2}Using last login date}{16}
+\contentsline {subsubsection}{\numberline {4.6.3}Conditional key replacement}{16}
+\contentsline {subsubsection}{\numberline {4.6.4}Certifying the login server}{16}
+\contentsline {subsubsection}{\numberline {4.6.5}Encrypting $K_s$}{17}
+\contentsline {subsection}{\numberline {4.7}Simplifications}{17}
+\contentsline {subsubsection}{\numberline {4.7.1}Using traditional userids}{17}
+\contentsline {subsubsection}{\numberline {4.7.2}Getting rid of the HSM}{17}
+\contentsline {subsubsection}{\numberline {4.7.3}Eliminating Secret keys}{18}
+\contentsline {subsubsection}{\numberline {4.7.4}Skipping website authentication}{18}
+\contentsline {section}{\numberline {5}Scalability}{19}
+\contentsline {subsection}{\numberline {5.1}Keyring}{19}
+\contentsline {subsection}{\numberline {5.2}Key lengths}{19}
+\contentsline {subsubsection}{\numberline {5.2.1}Minimum key length}{19}
+\contentsline {subsubsection}{\numberline {5.2.2}Maximum key length}{20}
+\contentsline {subsection}{\numberline {5.3}Old Secret keys}{20}
+\contentsline {subsection}{\numberline {5.4}Encryption algorithms}{20}
+\contentsline {subsection}{\numberline {5.5}Server roles}{20}
+\contentsline {section}{\numberline {6}Security proof}{22}
+\contentsline {subsection}{\numberline {6.1}On random numbers}{22}
+\contentsline {subsection}{\numberline {6.2}Eavesdropping the connections}{22}
+\contentsline {subsubsection}{\numberline {6.2.1}Applying for an account}{22}
+\contentsline {paragraph}{\numberline {6.2.1.1}Values passing the webserver}{22}
+\contentsline {paragraph}{\numberline {6.2.1.2}Values passing the login server}{23}
+\contentsline {paragraph}{\numberline {6.2.1.3}Values passing the accounts server}{23}
+\contentsline {subsubsection}{\numberline {6.2.2}Logging in}{23}
+\contentsline {paragraph}{\numberline {6.2.2.1}Values passing the webserver}{23}
+\contentsline {paragraph}{\numberline {6.2.2.2}Values passing the login server}{24}
+\contentsline {subsection}{\numberline {6.3}Manipulating values}{25}
+\contentsline {section}{\numberline {7}Implementation}{26}
+\contentsline {subsection}{\numberline {7.1}Algorithms}{26}
+\contentsline {subsubsection}{\numberline {7.1.1}Userid hashes}{26}
+\contentsline {subsubsection}{\numberline {7.1.2}New account}{26}
+\contentsline {subsubsection}{\numberline {7.1.3}User login program}{26}
+\contentsline {subsubsection}{\numberline {7.1.4}Webserver program}{26}
+\contentsline {subsubsection}{\numberline {7.1.5}Login server program}{28}
+\contentsline {subsection}{\numberline {7.2}Login webpages}{28}
+\contentsline {subsubsection}{\numberline {7.2.1}First page}{28}
+\contentsline {subsubsection}{\numberline {7.2.2}Initial PHP page}{28}
+\contentsline {subsubsection}{\numberline {7.2.3}Second PHP page}{30}
+\contentsline {section}{\numberline {8}Conclusions}{34}
+\contentsline {subsection}{\numberline {8.1}Advantages}{34}
+\contentsline {subsection}{\numberline {8.2}Acknowledgements}{36}

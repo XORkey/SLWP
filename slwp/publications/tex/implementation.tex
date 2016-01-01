@@ -1,0 +1,485 @@
+\clearpage
+\SectionWithoutText{Implementation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\Subsection{Algorithms}
+The several algorithms explained in Section \ref{logging_in} are represented here in a concise manner.
+\subsubsection{Userid hashes}
+The hash that is used in the login procedure is composed of something you have
+(the key ring)
+and something you know
+(the userid).
+Together,
+they are one part of the values needed to login.
+It is calculated with Algorithm~\vref{alg:userid_hash}.
+\begin{algorithm}
+\caption{Computing the hash of the userid.}
+\label{alg:userid_hash}
+\begin{algorithmic}[1]
+\Procedure{UserIDHash}{$Z,userid,domain$}
+\State $H_0\gets\F{\SHA}{Z[0]}$\Comment{Hash the key ring identifier.}
+\State $H_1\gets\F{\SHA}{\texttt{userid+domain}}$\Comment{Hash the userid and the domain name.}
+\State \Return{$\xor{H_0}{H_1}$}\Comment{This will be value $U_h$.}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%%%%%%%%%%%%%
+\subsubsection{New account}
+Algorithm~\vref{alg:new_account} is run by the login server to get the login values for a new user.
+It is called by the web server when the user has provided all necessary data.
+The values returned will be relayed to the accounts server.
+\begin{algorithm}
+\caption{Generate values for a new account.}
+\label{alg:new_account}
+\begin{algorithmic}[1]
+\Procedure{NewAccount}{$K_h$,$n$}
+\State $K_s\gets\Call{Random}{n}$\Comment{Generate n-bit pseudo-random number.}
+\State $K_y\gets\Enc{K_s}{K_{le}}$	\Comment{Encrypt $K_s$ with login server public key.}
+\State $K_u\gets\aes{K_s}{S[0]}$ \Comment{This is the new user key.}
+\State $K_x\gets\xor{K_u}{\Dec{K_h}{K_{LE}}}$ \Comment{Encrypt this with the decrypted dummy key.}
+\State \Return{$K_x,K_y$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\par
+%%%%%%%%%%%%%%
+\subsubsection{User login program}
+A user must complete Algorithm~\vref{alg:user_login} successfully to login.
+\begin{algorithm}
+\caption{The login program of the user.}
+\label{alg:user_login}
+\begin{algorithmic}[1]
+\Procedure{UserLogin}{$U_h,Z,k,K_{ls}$}
+\State $R_u\gets\Call{Random}{n}$\Comment{Generate n-bit pseudo-random number.}
+\State $K_u\gets Z[k]$\Comment{Take key from key ring.}
+\State $A_u\gets\xor{R_u}{K_u}$\Comment{Compute a challenge.}
+\State $B_u\gets\xor{K_u}{\sha{R_u}}$\Comment{And the response also.}
+\State $Q_u,j\gets 0,0$\Comment{Initialize.}
+\State $B_s,P_s\gets$\Call{SendToWebServer}{$U_h,A_u$}\Comment{Wait for $B_s$ and $P_s$.}
+\While{$B_s\ne 0$}\Comment{Website is trying keys for us.}
+\If{$\Ver{B_u+\xor{K_u}{B_s}}{K_{ls}}$}	\Comment{Verify $B_s$. Website found the right key!}
+\State $R_s\gets\xor{P_s}{K_u}$
+\State $Q_u\gets\xor{R_u}{\sha{R_s}}$\Comment{Compute response to $P_s$.}
+\Else
+\State $Q_u\gets\Call{AskToContinue}{j}$\Comment{Return 0 to continue; 1 to stop.}
+\EndIf
+\State $B_s,P_s\gets$\Call{SendToWebServer}{$Q_u$}\Comment{Answer to million dollar question.}
+\State $j\gets j+1$ \Comment{One more attempt.}
+\EndWhile
+\If{$Q_u>1\ \mathbf{and}\ P_s>1$} \Comment{Login succeeded.}
+\If{$j>1$} \Comment{Not the first attempt with this key.}
+\If{$P_s\ne A_u$} \Comment{We are not denied a new key.}
+\State\Call{UpdateKeyRing}{$Z,k,R_s$} \Comment{New key is sent with $R_s$.}
+\EndIf
+\EndIf
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+It is called with the hash, the key ring, an index, and the decryption key from the certificate of the login server.
+The function \textsc{AskToContinue} is called with the attempts counter as parameter.
+Only after two attempts should the user be asked if further attempts should be tried.
+It is up to the implementer if this question is asked once,
+at every further attempt,
+or at some other interval.
+If no actual question is asked,
+the function can return $\mathtt{0}$ directly.
+%%%%%%%%%%%%%%
+\subsubsection{Web server program}
+With Algorithm~\vref{alg:web server_login} the web server determines whether a user should be granted access.
+This simple algorithm does not calculate anything,
+it just compares values and sends data around.
+\par
+The accounts server can indicate to the web server
+(through account status $s$,
+and the site key $K_s$)
+what is required of the user;
+either now or in the near future.
+\begin{algorithm}
+\caption{The login program of the web server.}
+\label{alg:web server_login}
+\begin{algorithmic}[1]
+\Procedure{WebServerLogin}{$U_h,A_u,v$}
+\State $F,Q_s,Q_u\gets 0,41,43$ \Comment{Initialize.}
+\State $k\gets\mathtt{MAX\_KEYS}$ \Comment{Use all keys.}
+\State $K_y,s,D\gets\Call{GetAccountInfo}{U_h}$ \Comment{Query the accounts server.}
+\If{$s>0$} \Comment{Something required from the user.}
+\State $k\gets\mathtt{MAX\_ACTIVE\_KEYS}$ \Comment{Use only some keys.}
+\EndIf
+\If {$K_y\ne 0$}
+\State $i\gets\Call{GetIndex}{s,D}$	\Comment{Use account status and last login date to get $i$.}
+%\Repeat
+\While{$i<k\ \mathbf{and}\ Q_u\neq Q_s$}
+\State $B_s,P_s,Q_s\gets$\Call{HSM}{$A_u,K_y,n,v,i$} \Comment{Call this function on login server.}
+\If{$Q_s\ne 0$}
+\State $Q_u\gets$\Call{SendToUser}{$B_s,P_s$}\Comment{Wait for $Q_u$.}
+\Else\Comment{Array S exhausted.}
+\State $Q_u\gets Q_s$\Comment{No point going on: terminate loop.}
+\EndIf
+\If{$Q_u=1$}\Comment{User aborted login.}
+\State $Q_s\gets Q_u$\Comment{Terminate loop at user's request.}
+\EndIf
+%\If{$s>0$} \Comment{Something required from the user.}
+%\If{$i<\mathtt{MAX\_ACTIVE\_KEYS}$}
+\State $i\gets i+1$
+%\Else
+%\State $Q_u\gets Q_s$\Comment{Terminate loop ($Q_s = 0$).}
+%\State $i\gets i-1$ \Comment{Deny user new keys.}
+%\Else \Comment{All is OK.}
+%\State $i\gets i+1$ \Comment{Normal key index.}
+%\EndIf
+%\EndIf
+\EndWhile
+%\Until{$Q_u=Q_s$}
+\State $F\gets Q_s$ \Comment{Return $Q_s$ by default.}
+\If {$Q_s>1\ \mathbf{and}\ s>0$} \Comment{Login succeeded but something required.}
+\State $F\gets A_u$ \Comment{Login granted for now.}
+\EndIf
+\EndIf
+\State \Call{SendToUser}{$0,F$} \Comment{Indicate login state.}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%%%%%%%%%%%%%
+\subsubsection{Login server program}
+Algorithm~\vref{alg:hsm} computes values for the web server to check.
+It uses private key $K_{LE}$ for decryption of the site key.
+Private key $K_{LS}$ is used to sign the user random $R_u$ and yield $B_s$.
+%\nopagebreak
+\begin{algorithm}[H]
+\caption{The program of the login server, running inside the HSM.}
+\label{alg:hsm}
+\begin{algorithmic}[1]
+\Procedure{HSM}{$A_u$, $K_y$, $n$, $v$, $i$}
+%\State $I\gets\Call{Abs}{i}$ \Comment{Index $i$ may be negative to deny new keys.}
+\If{$i< \mathtt{MAX\_KEYS}$}\Comment{Use all keys from array $S$.}
+\State $K_s\gets\mod{\Dec{K_y}{K_{LE}}}{2^n}$	\Comment{Decrypt the site key $K_s$.}
+\State $K_u\gets\aes{K_s}{S[i]}$	\Comment{Temporarily regenerate user key.}
+\State $R_u\gets\xor{A_u}{K_u}$	\Comment{Calculate the user random.}
+\State $B_s\gets\xor{K_u}{\sha{R_u}}$	\Comment{Compute the hash over the random.}
+\If{$v = \mathtt{true}$}	\Comment{User can verify using certifcate.}
+\State $B_s\gets\Sgn{B_s}{K_{LS}}$	\Comment{Replace hash with signature.}
+\EndIf
+\If{$i>0$}\Comment{Not the first attempt with $K_s$.}
+\State $R_s\gets\aes{K_s}{S[0]}$\Comment{Send user a new key.}
+\Else\Comment{First attempt or not allowed a new key.}
+\State $R_s\gets\Call{Random}{n}$\Comment{Generate n-bit pseudo-random number.}
+\EndIf
+\State $P_s\gets\xor{R_s}{K_u}$\Comment{Compute a challenge.}
+\State $Q_s\gets\xor{R_u}{\sha{R_s}}$\Comment{And the response also.}
+\Else\Comment{Array $S$ is exhausted.}
+\State $B_s,P_s,Q_s\gets0,0,0$\Comment{It's game over.}
+\EndIf
+\State \Return $B_s, P_s, Q_s$\Comment{Return these to the web server.}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\Subsection{Login webpages}
+The login algorithms for both the user and the web server are presented as contiguous programs.
+Since there are several exchanges of values,
+and the user has no login program at his disposal,
+the algorithms need to be broken apart.
+\par
+The website can present login code to the user through the inclusion of JavaScript in the HTML login pages.
+At the server side, PHP can be used to generate HTML with JavaScript.
+%In this example implementation we use 32-bit random values.
+\subsubsection{First page}
+This can be a normal HTML page.
+It must contain JavaScript code to start the login process,
+by calculating $Au$, $Uh$, and the key index $k$, which the user must select.
+It also calculates $Bu$, and its value is stored in the sessionStorage of the browser.
+%See Listing \ref{login1} on page~\pageref{login1}.
+%\begin{algorithm}[H]
+%\caption{The function to start the login, included in the initial HTML page.}
+%\label{alg:startlogin}
+%\begin{algorithmic}[1]
+%\Procedure{StartLogin}{$k$, $\mathtt{userid}$}
+%\State $Ru\gets\Call{Random}{n}$
+%\State $H0\gets\F{\SHA}{Z[0]}$
+%\State $H1\gets\F{\SHA}{\mathtt{userid+domain}}$
+%\State $Au\gets\xor{Ru}{Z[k]}$
+%\State $Uh\gets\xor{H0}{H1}$
+%\State $\mathtt{sessionStorage.Bu}\gets\sha{Ru}$
+%\State $\mathtt{sessionStorage.j}\gets 0$
+%\State \Call{Submit}{$Au$,$Uh$}
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%\lstset{language=HTML,basicstyle=\footnotesize\ttfamily}
+%\begin{lstlisting}[breaklines=true,frame=lines,float=tbhp,label=login1,title=login.html,caption=Initial Login Page]
+%<!DOCTYPE html>
+%<html>
+%  <head>
+%    <title>Login 32-bit implementation</title>
+%    <meta charset="utf-8">
+%    <link rel="stylesheet" type="text/css" href="style/login.css" />
+%    <script src="http://localhost:8888/slwp/sha256.js"></script>
+%    <script src="http://localhost:8888/slwp/key ring.js"></script>
+%    <script>
+%      function StartLogin(keynumber)
+%      {
+%        var Ru = new Number(Math.floor(Math.random()*Math.pow(2, 31)));
+%        var H0 = SHA256(Z[0]);
+%        document.forms['login']['k'].value = keynumber;
+%        document.forms['login']['Au'].value = XorKu(Ru, keynumber);
+%        document.forms['login']['Uh'].value =
+%		  parseInt(SHA256(UserId + H0.substr(UserId.length - 1)).substr(-8), 16);
+%        sessionStorage.Bu =
+%		  parseInt(SHA256(Ru.toString()).substr(-8), 16);
+%        sessionStorage.j = Number(0);
+%        document.login.submit();
+%      }
+%    </script>
+%  </head>
+%  <body>
+%    <h1>Secure Login without Passwords</h1>
+%    <input name="key ring" type="file">
+%    <form name="login" method="post" action="login2.php">
+%      <input id="k"  name="k"  type="password" hidden>
+%      <input id="Uh" name="Uh" type="password" hidden>
+%      <input id="Au" name="Au" type="password" hidden>
+%      <input id="ID" name="ID" type="text" value="default userid" readonly>
+%    </form>
+%    <div class=keypad>
+%      <script>DisplayKeys(true);</script>
+%    </div>
+%  </body>
+%</html>
+%\end{lstlisting}
+\subsubsection{Initial PHP page}
+The initial PHP page queries the accounts database for a user with hash $U_h$.
+If such user hash exists the site key $K_y$ is returned and stored in the session array.
+Otherwise a page is displayed to inform the user the login process has failed due to a mismatch.
+\par
+From that moment on,
+the web server sends webpages to the browser that calculate the value $Q_u$.
+These pages are identical, except for the values of $B_s$ and $P_s$ that are sent along.
+After computation of $Q_s$, the form,
+containing an input element that will hold the $Q_u$ value,
+is automatically submitted.
+\par
+The initial PHP page sends the first of these
+(almost identical)
+webpages;
+the action option in the form will call the second PHP page for all subsequent calculations.
+%See Listing \ref{login2} on page~\pageref{login2}.
+%\begin{algorithm}[H]
+%\caption{First PHP page.}
+%\label{alg:phplogin1}
+%\begin{algorithmic}[1]
+%\Procedure{PHPlogin1}{$Uh$, $Au$}
+%\State $\mathtt{\$\_SESSION[Ks]}\gets\Call{getAccountInfo}{Uh}$
+%\State $\mathtt{\$\_SESSION[Au]}\gets Au$
+%\State $\mathtt{\$\_SESSION[i]}\gets 0$
+%\State $Bs,Qs,Ps\gets 0,0,0$
+%\If{$\mathtt{\$\_SESSION[Ks]}\neq 0$}
+%\State \Call{SendBsPs}{}
+%\Else
+%\State \Call{LoginFailed}{"No such user."}
+%\EndIf
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+%\lstset{language=PHP}
+%\begin{lstlisting}[frame=lines,float=tbhp,label=login2,title=login2.php,caption=Second Login Page]
+%<?php
+%  session_start();
+%  require 'user_pages.php';
+%  $_SESSION["Ks"] = getAccountInfo($_POST["Uh"]);
+%  $_SESSION["Au"] = $_POST["Au"];
+%  $_SESSION["k"] = $_POST["k"];
+%  $_SESSION["i"] = 0;
+%  $Bs = $Qs = $Ps = 0;
+%  if ($_SESSION["Ks"] != 0)
+%    send_bs_ps();
+%  else
+%    login_failed("No such user");
+%?>
+%\end{lstlisting}
+%%%%%
+\subsubsection{Second PHP page}
+The second,
+and only other,
+PHP page will compare values and send one of three possible webpages as a result of this:
+login succeeded,
+login failed,
+or another copy of the calculation page for $Q_s$.
+%See Listing \ref{login3} on page~\pageref{login3}.
+%\lstset{language=PHP}
+%\begin{lstlisting}[frame=lines,float=tbhp,label=login3,title=login3.php,caption=Final Login Page]
+%<?php
+%  session_start();
+%  require 'user_pages.php';
+%  if ($_POST["Qu"] == 1)
+%    $_SESSION["Qs"] = $_POST["Qu"];
+%  if ($_SESSION["s"] > 0)
+%    $_SESSION["i"] -= 1;
+%  else
+%    $_SESSION["i"] += 1;
+%  if ($_POST["Qu"] == $_SESSION["Qs"])
+%  {
+%    $F = $_SESSION["Qs"];
+%    if ($F > 1 && $_SESSION["s"] > 0)
+%      $F = $_SESSION["Au"];
+%    if ($_POST["Qu"] > 1 && $F > 1)
+%    {
+%      $_SESSION["login_ok"] = $F;
+%      login_succeeded("welcome.php");
+%    }
+%    else
+%      login_failed("cancelled");
+%  }
+%  else
+%    send_bs_ps();
+%?>
+%\end{lstlisting}
+%\lstset{language=PHP}
+%\begin{lstlisting}[frame=lines,float=tbhp,label=login_succeeded,title=user_pages.php,caption=login-succeeded]
+%<?php
+%  function login_succeeded($ref)
+%  {
+%    global $F;
+%    ?>
+%<!DOCTYPE HTML>
+%<html>
+%  <head>
+%    <meta charset="utf-8">
+%    <script src="http://localhost:8888/slwp/key ring.js"></script>
+%    <title>Login successful</title>
+%  </head>
+%  <body>
+%    <h1>LOGIN SUCCESS!!!</h1>
+%    <a href="<?php echo $ref ?>">Go to the welcome page</a>
+%    <a href="logout.php">Logout</a>
+%    <script>
+%      <?php
+%      if ($F != $_SESSION["Au"])
+%        echo "if (sessionStorage.j > 1)\n  UpdateKeyRing(sessionStorage.Rs, " . $_SESSION["k"] . ");\n";
+%      else
+%        echo "document.write(\"Key update denied.\");\n";
+%      ?>
+%    </script>
+%  </body>
+%</html>
+%    <?php
+%  }
+%?>
+%\end{lstlisting}
+%\lstset{language=PHP}
+%\begin{lstlisting}[frame=lines,float=tbhp,label=login_failed,title=user_pages3.php,caption=login-failed]
+%<?php
+%  function login_failed($reason)
+%  {
+%    ?>
+%<!DOCTYPE HTML>
+%<html>
+%  <head>
+%    <meta charset="utf-8">
+%    <title>Login FAILED</title>
+%  </head>
+%  <body>
+%    <h1>Login FAILED (<?php echo $reason ?>)</h1>
+%    <p>Combination of userid and key number did not yield valid login credentials.</p>
+%      <a href="login.html">Try again...</a>
+%  </body>
+%</html>
+%    <?php
+%  }
+%?>
+%\end{lstlisting}
+%\lstset{language=PHP}
+%\begin{lstlisting}[frame=lines,float=tbhp,label=send_bs_ps,title=user_pages3.php,caption=send-bs-ps]
+%<?php
+%  require 'hsm.php';
+%  function send_bs_ps()
+%  {
+%    global $Qs, $Bs, $Ps;
+%    HSM($_SESSION["Au"], $_SESSION["Ks"], $_SESSION["i"]);
+%    if ($Qs != 0)          // Found something to test.
+%    {
+%      $_SESSION["Qs"] = $Qs;      // Save Qs.
+%    ?>
+%<!DOCTYPE HTML>
+%<html>
+%  <head>
+%    <meta charset="utf-8">
+%    <script src="http://localhost:8888/slwp/sha256.js"></script>
+%    <script src="http://localhost:8888/slwp/key ring.js"></script>
+%    <title>Login step</title>
+%    <script>
+%      function LoginStep()
+%      {
+%        var Rs = new Number(XorKu(<?php echo $Ps . ", " . $_SESSION["k"] ?>));
+%        sessionStorage.Rs = Rs;
+%        if (<?php echo "\"" . $Bs . "\"" ?> == sessionStorage.Bu)
+%          document.getElementById("Qu").value =
+%		    parseInt(SHA256(Rs.toString()).substr(-8), 16);
+%        else
+%          document.getElementById("Qu").value =
+%		    AskToContinue(sessionStorage.j);
+%        sessionStorage.j = Number(sessionStorage.j) + 1;
+%        document.login_step.submit();
+%      }
+%    </script>
+%  </head>
+%  <body onload=LoginStep()>
+%    <form name="login_step" method=post action=login3.php>
+%      <input type=text id=Qu name=Qu required>
+%    </form>
+%  </body>
+%</html>
+%    <?php
+%    }
+%    else              // No more keys to try.  End of the line.
+%    {
+%      login_failed("No more server keys");
+%    }
+%  }
+%?>
+%\end{lstlisting}
+%\lstset{language=PHP}
+%\begin{lstlisting}[frame=lines,float=tbhp,label=HSM,title=hsm.php,caption=HSM function]
+%<?php
+%  require 'crypto.php';  // Random(), AES(), SHA().
+%  function HSM($Au, $Ks, $i)
+%  {
+%    global $Bs, $Ps, $Qs;
+%    static $S = array(0x4452ff1e, 0x0351cb58, 0x34fd12bc, 0x425c3f62,
+%                      0xffeeddcc, 0x12345678, 0xaaaabbbb, 0x00ff1111);
+%    $I = abs($i);
+%    if ($I < count($S))
+%    {
+%      $Ku = AES($Ks, $S[$I]);
+%      $Ru = $Au ^ $Ku;
+%      $Bs = (int)SHA($Ru);
+%      if ($i > 0)
+%        $Rs = AES($Ks, $S[0]);
+%      else
+%        $Rs = Random(32);
+%      $Ps = $Rs ^ $Ku;
+%      $Qs = (int)SHA($Rs);
+%    }
+%    else
+%      $Bs = $Qs = $Ps = 0;
+%    $Ku = $Ru = $Rs = 0; // Forget all temporary values.
+%  }
+%?>
+%\end{lstlisting}
+%\lstset{language=PHP}
+%\begin{lstlisting}[frame=lines,float=tbhp,label=crypto,title=crypto.php,caption=Crypto functions]
+%<?php
+%  function Random($bits)
+%  {
+%    return mt_rand();  // Will give 32-bits random regardless of $bits.
+%  }
+%  function AES($v, $k)
+%  {
+%    return $v ^ $k;  // Secretly use XOR for this.
+%  }
+%  function SHA($s)
+%  {
+%    return intval("0x" . substr(hash('sha256', $s), -8), 0);
+%  }
+%?>
+%
+%\end{lstlisting}

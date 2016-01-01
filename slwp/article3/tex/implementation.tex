@@ -1,0 +1,212 @@
+\section{Implementation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Algorithms}
+The several algorithms explained in Section \ref{logging_in} are represented here in a consise manner.
+\subsubsection{Userid hashes}
+The hash that is used in the login procedure is composed of something you have
+(the keyring)
+and something you know
+(the userid).
+Together,
+they are one part of the values needed to login.
+It is calculated with Algorithm~\vref{alg:userid_hash}.
+\begin{algorithm}
+\caption{Computing the hash of the userid.}
+\label{alg:userid_hash}
+\begin{algorithmic}[1]
+\Procedure{UserIDHash}{$Z,userid$}
+\State $H_0\gets\F{\SHA}{Z[0]}$\Comment{Hash the keyring identifier.}
+\State $H_0'\gets\Call{ReplaceMSB}{H_0,userid}$\Comment{Pepper it with the userid.}
+\State \Return{\F{\SHA}{$H_0'$}}\Comment{This will be value $U_h$.}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%%%%%%%%%%%%%
+\subsubsection{New account}
+Algorithm~\vref{alg:new_account} is run by the login server to get the login values for a new user.
+It is called by the webserver when the user has provided all necessary data.
+The values returned will be relayed to the accounts server.
+\begin{algorithm}
+\caption{Generate values for a new account.}
+\label{alg:new_account}
+\begin{algorithmic}[1]
+\Procedure{NewAccount}{$K_d$,W}
+\State $K_w\gets\Call{GetWebsiteKey}{W}$	\Comment{Get 128-bit pre-shared key for website $W$.}
+\State $K_s\gets\Call{Random}{128}$\Comment{Generate 128-bit pseudo-random number.}
+\State $K_u\gets\F{\AES}{K_s,S[0]}$ \Comment{This is the new user key.}
+\State $K_x\gets\XOR{K_u}{K_d}$ \Comment{Encrypt this with the dummy key.}
+\State \Return{$\F{\AES}{K_s,K_w},\F{\AES}{K_x,K_w}$} \Comment{Encrypt both values with $K_w$.}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\par
+%%%%%%%%%%%%%%
+\subsubsection{User login program}
+A user must complete Algorithm~\vref{alg:user_login} successfully to login.
+\begin{algorithm}
+\caption{The login program of the user.}
+\label{alg:user_login}
+\begin{algorithmic}[1]
+\Procedure{UserLogin}{$U_h,Z,k,D_{ls}$}
+\State $R_u\gets\Call{Random}{128}$\Comment{Generate 128-bit pseudo-random number.}
+\State $K_u\gets Z[k]$\Comment{Take key from keyring.}
+\State $A_u\gets\XOR{R_u}{K_u}$\Comment{Compute a challenge.}
+\State $B_u\gets\sha{R_u}$\Comment{And the response also.}
+\State $Q_u\gets 0$
+\State $j\gets 0$\Comment{Attempts counter.}
+\State $B_s,P_s\gets$\Call{SendToWebserver}{$U_h,A_u$}\Comment{Wait for $B_s$ and $P_s$.}
+\While{$B_s\ne 0$}\Comment{Website is trying keys for us.}
+\If{$B_u=\F{\RSA}{D_{ls},B_s}$}	\Comment{Website found the right key!}
+\State $R_s\gets\XOR{P_s}{K_u}$
+\State $Q_u\gets\sha{R_s}$\Comment{Compute response to $P_s$.}
+\Else
+\State $Q_u\gets\Call{AskToContinue}{j}$\Comment{Return 0 to continue; 1 to stop.}
+\EndIf
+\State $B_s,P_s\gets$\Call{SendToWebserver}{$Q_u$}\Comment{Answer to million dollar question.}
+\State $j\gets j+1$
+\EndWhile
+\If{$Q_u>1\ \mathbf{and}\ P_s>1$} \Comment{Login succeeded.}
+\If{$j>1$} \Comment{Not the first attempt with this key.}
+\If{$P_s\ne A_u$} \Comment{We are not denied a new key.}
+\State\Call{UpdateKeyring}{$Z,k,R_s$} \Comment{New key is sent with $R_s$.}
+\EndIf
+\EndIf
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+It is called with the hash, the keyring, an index, and the decryption key from the certificate of the login server.
+The function \textsc{AskToContinue} is called with the attempts counter as parameter.
+Only after two attempts should the user be asked if further attempts should be tried.
+It is up to the implementer if this question is asked once,
+at every further attempt,
+or at some other interval.
+If no actual question is asked,
+the function can return $\mathtt{0}$ directly.
+%%%%%%%%%%%%%%
+\subsubsection{Webserver program}
+With Algorithm~\vref{alg:webserver_login} the webserver determines whether a user should be granted access.
+This simple algorithm does not calculate anything,
+it just compares values and sends data around.
+\par
+The accounts server can indicate to the webserver
+(through account status $s$,
+and the site key $K_s$)
+what is required of the user;
+either now or in the near future.
+\begin{algorithm}
+\caption{The login program of the webserver.}
+\label{alg:webserver_login}
+\begin{algorithmic}[1]
+\Procedure{WebserverLogin}{$U_h,A_u$}
+\State $F\gets 0$ \Comment{Login state.}
+\State $K_s,s\gets\Call{GetAccountInfo}{U_h}$ \Comment{Query the accounts server.}
+\If {$K_s\ne 0$}
+\State $i\gets 0$
+\Repeat
+\State $B_s,P_s,Q_s\gets$\Call{HSM}{$A_u,K_s,i,W$} \Comment{Call this function on login server.}
+\If{$Q_s\ne 0$}
+\State $Q_u\gets$\Call{SendToUser}{$B_s,P_s$}\Comment{Wait for $Q_u$.}
+\Else\Comment{Array S exhausted.}
+\State $Q_u\gets Q_s$\Comment{No point going on: terminate loop.}
+\EndIf
+\If{$Q_u=1$}\Comment{User aborted login.}
+\State $Q_s\gets Q_u$\Comment{Terminate loop at user's request.}
+\EndIf
+\If{$s>0$} \Comment{Something required from the user.}
+\State $i\gets i-1$ \Comment{Deny user new keys.}
+\Else \Comment{All is OK.}
+\State $i\gets i+1$ \Comment{Normal key index.}
+\EndIf
+\Until{$Q_u=Q_s$}
+\State $F\gets Q_s$ \Comment{Return $Q_s$ by default.}
+\If {$Q_s>1\ \mathbf{and}\ s>0$} \Comment{Login succeeded but something required.}
+\State $F\gets A_u$ \Comment{Login granted for now.}
+\EndIf
+\EndIf
+\State \Call{SendToUser}{$0,F$} \Comment{Indicate login state.}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%%%%%%%%%%%%%%
+\subsubsection{Login attempts}
+Algorithm~\vref{alg:hsm} computes values for the webserver to check.
+\nopagebreak
+\begin{algorithm}[H]
+\caption{The program of the login server, running inside the HSM.}
+\label{alg:hsm}
+\begin{algorithmic}[1]
+\Procedure{HSM}{$A_u$, $K_s$, $i$, $W$}
+\State $I\gets\Call{Abs}{i}$ \Comment{Index $i$ may be negative to deny new keys.}
+\If{$I< \mathtt{MAX\_ACTIVE\_KEYS}$}\Comment{Use only active keys from array $S$.}
+\State $K_p\gets\Call{GetSiteKey}{W}$ \Comment{Search RSA key for this site.}
+\State $K_u\gets\F{\AES}{K_s,S[I]}$	\Comment{Temporarily regenerate user key.}
+\State $B_s\gets\F{\RSA}{K_p,\sha{\XOR{A_u}{K_u}}}$ \Comment{Compute response to $A_u$.}
+\If{$i>0$}\Comment{Not the first attempt with $K_s$.}
+\State $R_s\gets\F{\AES}{K_s,S[0]}$\Comment{Send user a new key.}
+\Else\Comment{First attempt or not allowed a new key.}
+\State $R_s\gets\Call{Random}{128}$\Comment{Generate 128-bit pseudo-random number.}
+\EndIf
+\State $P_s\gets\XOR{R_s}{K_u}$\Comment{Compute a challenge.}
+\State $Q_s\gets\sha{R_s}$\Comment{And the response also.}
+\Else\Comment{Array $S$ is exhausted.}
+\State $B_s,P_s,Q_s\gets0,0,0$\Comment{It's game over.}
+\EndIf
+\State \Return $B_s, P_s, Q_s$\Comment{Return these to the webserver.}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%\clearpage
+\subsection{Login webpages}
+The login algorithms for both the user and the server are presented as contiguous programs.
+Since there are several exchanges of values,
+and the fact that the user has no login program at its disposal,
+the algorithms need to be broken apart.
+\par
+The website can present login code to the user through the inclusion of JavaScript in the HTML login pages.
+At the server side PHP can be used to generate HTML and JavaScript.
+In this example implementation we use 32-bit random values.
+\subsubsection{First page}
+This can be a normal HTML page.
+It must contain JavaScript code to start the login process,
+by calculating $Au$, $Uh$, and the key index $k$, which the user must select.
+It also calculates $Bu$, and its value is stored in the sessionStorage of the browser.
+\begin{algorithm}[H]
+\caption{The login webpage, calculating the initial values using JavaScript.}
+\label{html:login}
+\begin{algorithmic}[1]
+\Procedure{StartLogin}{}
+\State $R_u\gets\Call{Random}{32}$\Comment{Generate 32-bit pseudo-random number.}
+\State $H_0\gets\F{\SHA}{Z[0]}$\Comment{Hash the keyring identifier.}
+\State $H_0'\gets\Call{ReplaceMSB}{H_0,userid}$\Comment{Pepper it with the userid.}
+\State $Hu\gets\F{\SHA}{H_0'}$
+\State $sessionStorage.B_u\gets\sha{R_u}$
+\State $sessionStorage.j\gets 0$
+\State $\Call{document.login.submit}{}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\subsubsection{Initial PHP page}
+The initial PHP page queries the accounts database for a user with hash $U_h$.
+If such user hash exists the site key $K_s$ is returned and stored in the session array.
+Otherwise a page is displayed to inform the user the login process has failed due to a mismatch.
+\par
+From that moment on,
+the webserver sends webpages to the browser that calculate the value $Q_u$.
+These pages are identical, except for the values of $B_s$ and $P_s$ that are sent along.
+After computation of $Q_s$, the form,
+containing an input element that will hold the $Q_u$ value,
+is automatically submitted.
+\par
+The initial PHP page sends the first of these
+(almost identical)
+webpages;
+the action option in the form will call the second PHP page for all subsequent calculations.
+\subsubsection{Second PHP page}
+The second,
+and only other,
+PHP page will compare values and send one of three possible webpages as a result of this:
+login succeeded,
+login failed,
+or another copy of the calculation page for $Q_s$.

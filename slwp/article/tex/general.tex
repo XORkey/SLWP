@@ -1,0 +1,223 @@
+\section{Login for dummies}
+Not that you are one if you decide to read this section.
+It serves as a general description of the login process,
+without going into technical details too much.
+
+\subsection{A new login scheme}
+Userids tend to be in short supply for people with first names like John, Peter, and Chris,
+or surnames like Jones or Smith.
+This is true for people in almost any country.
+And the larger the site, the rarer free userids.
+\par
+Passwords tend to be weak,
+as people choose short, real-life words, like things or names.
+Not that people are not willing, but remembering too long, too difficult passwords is not easy.
+It is very frustrating when you cannot login because you have forgotten your password,
+or,
+just when you are starting to remember it,
+you need to change it again.
+\par
+As a radical measure, we do away with all this!
+\par
+Instead of userids, the website holds hashes based on keyring identifiers.
+Instead of a password for an account, the website holds one part of a key, of which you have the other part,
+like the broken locket Annie clings to in the musical that bears her name.
+Your key is different from the key the website has, but they are related to each other.
+It is not possible to login with the key that is stored on the website;
+you can only login with your personal key, which is verified with the key from the website.
+\par
+We will let the computers
+(yours, the one running the website, and another one dedicated for logins)
+do what they do best: compute.
+Give them some random bits to chew on, and they are in heaven.
+We will let humans (you, your neighbor and your fellow earthlings) do what they do best:
+remembering small ordinal numbers.
+
+\subsection{Storing your keys}
+Keys are just long strings of random bits with no information whatsoever.
+Your keys are personal and are stored locally.
+\par
+Imagine a keyring,
+	not unlike your own keyring on which you have keys for your car,
+		your house,
+			shed,
+				or locker.
+This keyring has a label and 99 keys on it,
+	numbered 1 through 99.
+Instead of brass or steel,
+	these keys are made of 128 random bits each.
+The label is another 128 bits long,
+	and as random as possible,
+		like the keys.
+Instead of being on a steel ring,
+	these keys,
+		with the keyring label,
+			are written to a file on disk;
+				a blob of 100 strings of 128 bits.
+\par
+The use of keys on this keyring is not entirely different from using real physical keys.
+The bits in a key are comparable with the tooths or holes of a physical key you use to unlock your home.
+You do not need to remember exactly how far the tooths need to protrude or exactly where and how deep the holes in your key need to be,
+	to be able to unlock the door;
+		you just select the right key
+			(the whole physical thing at once, with all the right tooths or holes)
+				by recognising its form or its label.
+
+\subsection{Computers and links}
+This proposed way of logging in concentrates on computing values and communication of the results.
+It is therefore appropriate at this point to elaborate a bit on who is communicating with whom and why.
+\subsubsection{Computer roles}
+Four computer roles can be distinguished when logging in.
+\begin{description}
+\item[Webserver]
+	This is the front-end server to which the user is communicating.
+	From our point of view,
+	it is the central system,
+	acting as a hub.
+	It communicates with three other servers:
+	the accounts server, the login server, and of course the client computer.
+	We consider it the most vulnerable to `visits' with malicious intent,
+	so it has been appointed the most simplests of tasks.
+	It does not compute anything remotely valuable,
+	it just compares values provided by others.
+\item[Accounts server]
+	This server is typically located in a network only accessible by the webserver.
+	It stores all kind of user related account data, but no userid or passwords;
+	it stores hashes and site keys instead.
+	Like the webserver it does not compute anything either.
+\item[Login server]
+	This server uses an HSM which stores an array of secret keys per website it services.
+	This server computes nothing on its own,
+	it lets the HSM do all the work secretly,
+	using some of its finest cryptographic functions.
+	It receives login requests from the webserver and returns values that the webserver can compare or relay.
+\item[Client computer]
+	With this device the user communicates with the webserver.
+	It generates random numbers and uses \XOR\ and \SHA\ to compute the values exchanged with the webserver.
+\end{description}
+These roles can be played by as many computers as there are roles,
+but that need not always be the case.
+In fact,
+each and every role may be combined;
+a single computer may perform them all,
+for that matter.
+\par
+The accounts server and the login server may be combined in a single server in the back-office.
+The webserver and the accounts server may be combined,
+with the login server somewhere on the Internet.
+The combination of webserver, accounts server, and login server is also valid;
+although this concentration of roles is not highly preferred.
+\subsubsection{Secure links}
+Traditionally,
+the communication channel between the user and the webserver is secured by means of TLS.
+The user sees the URL that starts with ``https://'',
+which means that the webserver has authenticated itself using a digital certificate.
+The browser will validate the supplied certificate using other trusted certificates.
+This security measure is sufficient but required.
+\par
+The communication between the webserver and the accounts server should be conducted over a secure channel as well.
+\par
+Finally,
+the communication between the webserver and the login server needs to be encrypted.
+For this,
+TLS is a sufficient security measure,
+although in this case mutual authentication is a must.
+The webserver needs to know it is talking to a legitimate and trusted login server,
+and the login server needs to know it is receiving valid requests.
+The certificate of the websever is used to select which array of secret keys to use,
+as the login server may service more than one webserver.
+\subsection{Logging in}
+\subsubsection{Part I}
+Before starting the login process you select a key from your keyring;
+the one you know to belong to the website you are trying to login to.
+\par
+To login you don't send your key to the server but generate a secret random value,
+which you encrypt with your key using a simple \XOR\ operation.
+Your key is totally random and the secret random value you encrypt with it is also, well\ldots totally random.
+Mixing these random bits gives another totally random value.
+The website will receive this value and will try to decrypt this with the key that belongs to your account
+(we will keep you in the dark for now, about how this works).
+When it has decrypted the random login value,
+it will know which secret random value you generated.
+Instead of telling you the secret random number,
+the website sends a hash value of it,
+because otherwise someone able to see the network traffic will instantly know your key.
+\par
+If the website returns a hash value matching your secret random number, you know two things.
+First, you know that the website you are talking to can successfully decrypt your random value.
+It can only do this if it has a matching key.
+Second, you know you are talking to the same site that sent you your key when you applied for an account.
+This implies that if you trusted that site then, you can trust this site now, as it can only be the same site.
+
+\subsubsection{Part II}
+This is all great and very sophisticated, but the website wouldn't dare share your wonder about this,
+as you may well fake your enthusiasm, and flatly lie about the correctness of the hash it has sent you.
+To see if your claims hold,
+the website will do the same as you and send you an encrypted secret random value.
+This cryptogram can only be decrypted by someone owning the right key for the account.
+Using \XOR\ with the key you have originally selected from your keyring,
+you decrypt it.
+Then,
+using \XOR\ again,
+you combine the two random values you now have,
+and return this value to the website.
+\par
+When the website receives a value matching its secret random number, it knows two things.
+First, the user on the other side can successfully decrypt the secret random number.
+It can only do this if it has a matching key.
+Second, the website knows that this key is from the same keyring that was used when applying for an account.
+This implies that if you trusted this user then, you can trust this user now, as it can only be the same user.
+
+\subsection{Keys}
+\subsubsection{On site keys and user keys}
+Beware, the icky parts start here (a bit).
+\par
+When applying for an account, a site key is created by a random generator.
+The user key is then computed as the encryption of the site key with a Secret Key, with a block cypher like \AES.
+\par
+When the user encrypts its secret random value with its key,
+it uses \XOR.
+This is a very simple and reversable encryption method.
+But as both key and value are utterly random, no information is stored in the encrypted value.
+The website needs to decrypt the value, and this can only be done with the user key.
+But the website does not store user keys, only site keys\ldots
+\par
+The solution to this may be a bit of a dissappointment and a cheat:
+the user key is temporarily regenerated by encrypting it again with the Secret Key.
+Once the user key is available, the random value can easily be decrypted by \XOR-ing it.
+Also, the cryptogram that is sent to the user is a random value \XOR-red with this regenereated user key.
+\par
+The clever part,
+however,
+is that all the crpytographic functions the website is required to perform take place inside a Hardware Security Module,
+or HSM for short.
+Secret Keys can be put in the HSM and made to good use there,
+but can never be retrieved from it.
+The HSM computes all values needed for the login process,
+without ever revealing the keys that are used,
+not even to a hacker with full control of the HSM.
+\par
+In the end,
+only random bits enter the HSM,
+and only random bits leave it.
+
+\subsubsection{Key lifetime}
+Every key has its lifetime, so Secret Keys need changing every so often, as a good security measure.
+The same goes for keys on the user's keyring.
+\par
+The login protocol is capable of changing keys on the website and keys on the keyring,
+without any effort on the user side.
+Well\ldots, a little program will do it for you, without you noticing.
+\par
+Logins can be granted,
+but new keys may not be,
+which results in the expiration of an account.
+A website may deny a user new keys when payment is due,
+giving users limited login rights.
+At any time new keys can be provided again.
+\par\vspace{10mm}\noindent
+To learn how this all works,
+how keys are used,
+what a website can do with logins,
+and more,
+can all be read in the next chapters.

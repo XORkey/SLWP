@@ -1,0 +1,23 @@
+\subsubsection{Expired keys}
+The simplest mishap is when a key is used that has expired.
+The user has done nothing wrong, knows its way around its keyring, and even has a backup copy; but to no avail.
+It is the explicit policy of the website to revoke login rights after some time,
+so this is all in the game.
+\par
+Reinstating login rights can only be done by sending the user a new key.
+The only key the user has, it its old key $K_u$.
+
+New key:
+\[K_n=\XOR{K_x}{K_s}\]
+
+When deleting the oldest Secret key from memory,
+all accounts with a `last login' date older than the installation
+date of the second oldest Secret key should be marked `expired'.
+Removal of the oldest key renders all those keys unusable.
+
+
+the site key $K_s$ should be replaced with the user key $K_u$ in the accounts database,
+and that account
+The 
+When the user is allowed to login again, the website computes a new $K_s$
+

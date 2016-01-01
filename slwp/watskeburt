@@ -1,0 +1,236 @@
+Secure Passwords without Logins
+
+20140208 - Tagging and Branching
+cvs tag version6_branch_root
+cvs rtag -r version6_branch_root -b publications slwp/article.
+
+20140207(vr) - Paris
+20140206(do) - Paris
+
+20140203 - Volkskrant
+Artikel gelezen over Jean-Jacques Quisquater, uitvinder van Guillio-Quisquater autenticatieprotocol.
+Deze Belgische cryptografieprofessor is gehackt (zielig hoor), maar misschien is hij een uitgelezen
+kandidaat om mijn artikel voor CACM te reviewen.
+Verder ga ik proberen Angela Sasse (nogmaals) te strikken, en ga ik mijn contact bij Google ontdooien.
+De NDAs met Rob Bloemer en Anko Blokzijl pas "opheffen" als het artikel af is voor publicatie.
+
+20140201 - SLWP
+Versie 6 nu definitief gemaakt. Alles ingechecked en getagged.
+
+20140130 - Skype met Eduard en Koos
+Besproken wat onze taken zijn de komende tijd. Koos gaat 4-18 feb naar Amerika op vakantie.
+Eduard is 21 feb tot 1 maart vertrokken, naar Berlijn.
+We hebben nodig: persbericht, samenvatting zonder al te veel details, en professioneel artikel.
+We hebben Wired genoemd, en CACM. Eduard noemde SC magazine. Taak is uit te zoeken in welke
+magazines en webzines we gaan publiceren.
+Eduard gaat nog een stukje componeren voor LinkedIn.
+
+20140122 - Bezoek Elles
+Vergadering gehad met Eduard en Elles over de huisstijl, powerpoint, logos, briefpapier.
+Nadine gaf haar schetsen voor het logo; Elles fotografeerde.
+Favoriete kleur doorgegeven: PMS 803C. Nu maar zien wat Elles er van maakt.
+
+20140119 - Administratie
+Grote schoonmaak in mijn home directory.
+Patentaanvraag uitgeprint en opgeborgen.
+
+20140115(wo) - Patent ingediend
+
+20131227 - XORkey opgenomen in het handelsregister
+
+20131220(vr) - XORkey opgericht
+Bij EWB notarissen in Heerhugowaard.
+
+20131217(wo) - Dandorid Holding
+De holding B.V. is opgericht bij Ars Senta (voorheen Alsema Van Duin) notarissen te Hoorn.
+
+20131215 - SLWP versie 6 DRAFT opgeleverd
+Deze versie is de versie waarop het patent gebaseerd is.
+
+20131213 - Maken flowcharts
+Voor Koos de flowcharts bijgewerkt.
+
+20131309(ma) - Oplevering ITsec analyse
+Via drop box van ITsec.
+
+20131206(vr) - Jannes krijgt het niet af
+Oplevering wordt over het weekend getild.
+Jannes is er toch al met al bijna 4 dagen mee bezig geweest.
+
+20131205(do) - Aan de telefoon met Jannes
+Nog weer veel toelichting gegeven en problemen getackeld. Na een uur of zo was alles duidelijk
+en besproken.
+
+20131203(di) - Aan de telefoon met Jannes
+Ongeveer anderhalf uur (schatting) met Jannes aan de telefoon gehangen om de uitvinding toe te
+lichten. Enkele problemen werden direct opgelost.
+
+20131202(ma) - Op bezoek bij ITsec
+Ongeveer 2 uur gesproken met Jannes Smitskamp. Ik heb schema's gemaakt om het een en ander te
+verduidelijken, en deze worden in dank aangenomen. Jannes had al wat gelezen en ik heb mijn
+uitvinding beknopt toegelicht, en verduidelijkt met de schema's.
+
+20131129(vr) - Opdracht tot review
+Er is onderhandeld over de prijs per dag, en hoe de kosten zouden worden verdeeld.
+Er is overeengekomen dat de review 3, maximaal 4 dagen zou mogen duren.
+Na de eerste dag wordt vastgesteld of de review binnen de gestelde termijn kan worden afgerond.
+Bij een no-go zijn de kosten voor ITsec; bij een go voor XORkey.
+Mocht de uitkomst negatief zijn betaal ik een derde van de kosten, en eindigt de samenwerking.
+Bij positieve uitkomst gaan we door en worden de kosten door XORkey betaald.
+Op deze dag wordt de opdracht tot het starten van de review verstrekt.
+
+20131121(do) - SLWP v 5 gemaild aan ITsec
+Door een klein misverstand heeft het even geduurd voordat het artikel naar ITsec gestuurd is.
+Koos heeft het nu gestuurd.
+
+20131119(di) - Brief goedgekeurd.
+
+20131118(ma) - Gesprek met hoofd P&O Morpho
+Een gemoedelijk gesprekje gehad met Annemarie Burgers over de voorgenomen oprichting van een B.V.
+en patentering van mijn idee.
+
+20131113(wo) - NDA ITsec getekend
+Er is een NDA getekend met ITsec zodat het artikel gereviewd kan worden.
+
+20131112(di) - Brief
+Eerste versie brief voor Morpho opgesteld in de mail.
+
+20131106(wo) - Conference call
+Met Dick van Engelen om de strategie te bepalen ten aanzien van mijn werk.
+Ik gaf aan toch waarschijnlijk niet weg te gaan bij Morpho.
+Hele discussies gevoerd over of het een vrije of gebonden uitvinding is.
+We kwamen overeen om eerst mondeling te melden en dan een brief te sturen,
+maar dat we de brief eerst zouden schrijven om te weten wat ik zou gaan zeggen.
+
+20131104(ma) - Joost Boelaars valt af
+Cryptoloog Joost Boelaars ziet af van deelname. Christiaan Rooselaar schat in dat een van zijn
+security-assessors het artikel ook kan reviewen.
+
+20131029(di) - EWC, Parijs
+De zoektocht naar een reviewer begint. Dit loopt via ITsec.
+
+20131026(za) - SLWP v 5
+Oplevering van versie 5 van het artikel, ter review door een hacker.
+
+20131025(vr) - Conservatorium Hotel, Amsterdam
+Ontmoeting met Koos en Eduard.
+Inentieverklaring officieel getekend.
+Naam XORkey bedacht bij een kopje koffie.
+Potentieel probleem besproken van mijn werk en dat ik gesolliciteerd heb naar een andere baan.
+Nadine bedacht 's avonds het logo.
+
+20131024(do) - Solliciteren
+CV maken en sollicitatiebrief voor Achmea Amsterdam.
+Gebeld met Morpho voor het in de mail zetten van de aanvullende arbeidsvoorwaarden,
+maar het gaf problemen om dat naar buiten te sturen.
+Daarom zelf ingebeld en een deel van de voorwaarden (hoofdstuk 2) naar mezelf gemaild.
+
+20131020(zo)-20131023(wo) - Duitsland
+Bij Edwige en Holger
+Wat mails kort beantwoord.
+
+20131019(za) - Amsterdam
+Concertgebouw matineevoorstelling
+Chabrier - España
+Dutilleux - Tout un monde lointain
+Strawinski - Vuurvogel
+
+20131015-20131018 - EWC Rzeszów, Polen
+'s Middags om 17:30 vanuit Schiphol gebeld met het kantoor van Ventoux. Dirk van Engelen was niet meer aanwezig.
+
+
+Oude blog:
+
+Secure Login Without Passwords
+
+130713
+Lekkere blogger ben ik. Bijna een jaar niet geschreven. Nou ja.
+Implementatie werkt op "me mac". Wil niet meer octrooieren. Nu gaan we publiceren!
+Dat was het afgelopen jaar in het kort.
+Ik heb een mail gestuurd naar Koops (hoogleraar computerveiligheid aan de universiteit Tilburg) of hij mijn artikel wil reviewen.
+Contact gehad met ene Sven, die mijn artikel bij iemand van Google onder de aandacht kan brengen (ook ter review). Uiteindelijke
+doel is CACM, maar als bijvoorbeeld Koops een ander medium voorstelt, kan dat ook natuurlijk.
+
+121005
+Vandaag Rob Bloemer gesproken. Hij keek een beetje op van de vraag of hij mijn artikel wil beoordelen. Hij vermoedde een hoop werk,
+denk ik. Ik heb hem gerustgesteld en gezegd dat het heel simpel is, dus waarschijnlijk niet veel tijd kost.
+Waar hij direct over begon is of ik het al gepatenteerd heb. Ik kwam er bijna niet tussen om te zeggen wat ik allemaal al gedaan had.
+Aan het eind was hij overtuigd dat het wel snor zat (mijn interpretatie!) en kwam het gesprek op de NDA. Ik moest wel een goede hebben,
+anders had je er toch nog niets aan. En, trouwens, als ik een octrooiaanvraag ging schrijven moesten alle mogelijkheden erin staan,
+omdat als iemand een andere mogelijkheid zou vinden, hij er ongestraft mee vandoor kon gaan.
+Aan het einde van het korte gesprek (toch wel 20 minuten) heeft Rob zijn laptop doorgespit op bruikbare NDA's. Hij heeft er een paar
+naar me gemaild, zodat ik het weekend wat te doen heb.
+
+121004
+Eerste BLOG.
+Régine zei het net nog dat ze het vanaf dag een al aangevoeld had dat het een goed idee is en dat ik er ver mee zou komen.
+Ik denk ook dat het een goed idee is en dat ik er ver mee zal komen...
+Hoe ver en waarheen weet ik niet. In ieder geval weg van "hier".
+
+Dag één, wanneer was dat? Een paar maanden geleden. Alhoewel, misschien wel een flink aantal maanden geleden.
+Ik zoek het op. Ik zal zo nauwkeurig mogelijk vastleggen.
+
+De geschiedenis tot nu toe:
+4 okt:
+Vandaag geprobeerd Rob Bloemer te strikken om mijn artikel te reviewen. Hij was echter niet beschikbaar; morgen nog een poging.
+NDA van Morpho gemaild zodat ik deze om kan katten tot een bruikbare variant. Het is een wederzijdse NDA; ik heb een NDA nodig die
+alleen mijn gedeelte beschermt.
+2 okt:
+Eerste gesprek met Anko gehad in de Zoete Inval. Wat een bijzondere gebeurtenis.
+Onder het genot van een bol met zalm (Anko) en een boerenomelet (ik) spraken we anderhalf uur honderduit.
+We hebben gebrainstormd over waar de uitvinding toegepast kan worden, en vooral of daar een markt voor is.
+Als dat het geval is, kan een octrooiaanvraag nut hebben (als er geen markt is niet).
+Anko dacht aan Google en Microsoft om het idee misschien aan aan te bieden c.q. verkopen.
+Toen noemde ik Fox IT (zoals door een aantal mensen reeds genoemd), en dat bleek een schot in de roos.
+Blijkt Anko persoonlijk bevriend te zijn met Menno van der Marel en Ronald Prins!
+En Anko meende nog "iets" tegoed te hebben van Ronald Prins, dus er is een goede kans dat hij mijn artikel
+ook wil/gaat reviewen.
+Wel hebben we afgesproken dat Prins in beeld komt als mijn artikel de Bloemer-test heeft doorstaan, ha, ha!
+Anko was echt heel enthousiast, zelfs zonder de inhoud van mijn artikel te kennen (heb het aan het einde wel nog
+even met handen en voeten uitgelegd hoe het werkt). Nu is enthousiasme zijn sterke karaktertrek en valkuil, maar
+ik verwacht niet dat ik hem zal teleurstellen.
+Om de kansen op een octrooiaanvraag (mocht die er komen) niet bij voorbaat te torpederen dienen reviewers een
+NDA te tekenen. Dan weet je het nog niet 100% zeker, maar toch wel dicht bij 99% dat ze er niet mee aan de haal gaan.
+Voor de hand liggende marktpartijen zoals banken zullen volgens Anko zeer terughoudend zijn om hun systemen erop
+aan te passen.
+Het inloggen kan als een soort dienst aangeboden worden; de websites hoeven dan bijna niets aan te passen en kunnen
+dan toch veilige logins verkopen. De dienst is dan het rekenwerk met HSM's en zo; dit kan dan door vele websites afgenomen
+worden.
+
+1 okt:
+Een heel epistel komt er terug van de octrooigemachtigde, met allerhande nuttige tips en informatie.
+
+18-24 september:
+Op aangeven van Elbert van Zetten een Mail en telefoonwisseling met Haye van der Tak, een goede kennis van hem.
+Ik stuur hem mijn artikel (hij heeft geheimhoudingsplicht).
+Hij belt mij op om me te complimenteren met het artikel (helder) en mijn beide benen op de grond.
+Hij maakt het wel anders mee... Stelt dan voor om het door te sturen aan een octrooigemachtigde door te sturen zodat die er
+"voor de sport" eens naar kan kijken.
+
+16-18 september:
+Professor Angela Sasse gemaild. Ze is bereid naar mijn artikel te kijken. Ik mail haar echter dat ik toch nog heb besloten
+eerst naar mijn rechten te kijken. Ik vraag haar te wachten.
+
+15 september:
+Nogmaals gemaild met CWI en CACM omdat ik niets van ze gehoord heb. [[Ik heb van beide nog steeds niets vernomen (op 4 okt).
+Ik vermoed dat dit komt door het onderwerp van mijn mail. Zoiets krijgt automatisch een hoge spam-score, dus ik denk dat het
+weggefilterd is. Eigenlijk een zegen: het is allemaal veel te vroeg nog hiervoor.]]
+
+9 september:
+T. Lambert bij Communications of the ACM aangeschreven, met de vraag of ze geïnteresseerd zijn om een artikel te publiceren.
+Ook het CWI in Amsterdam een mailtje gestuurd.
+
+6,7 september:
+Gemaild met Leo Hordijk. Hij raadt Fox IT aan.
+
+16 augustus:
+Idee in depot genomen in Beverwijk bij Batenburg (E. Groenland). 's Avonds factuur betaald (EUR 220,15).
+
+8 augustus:
+Eerste contact (eerst telefonisch, dan via de mail) met Batenburg Notarissen (Bas Korver) over het laten vastleggen van het idee.
+
+Vakantie Florida:
+Flink aan mijn idee gewerkt.
+
+28 mei:
+Ik stuur mezelf een mailtje met daarin een redelijk compleet inlogalgoritme.

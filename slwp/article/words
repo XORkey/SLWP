@@ -1,0 +1,11 @@
+cat $* |
+	grep -vE "^%|^[\]\[|[\].*section|^[\]par" |
+		tr -d '&}().,;:?!' |
+			tr [[:upper:]] [[:lower:]] |
+				sed -e 's/[[:space:]][[:space:]]*/\
+/g' -e 's/---/\
+/g' |
+					grep -vE "^[$]|^[\]|^[$]|^[[:digit:]]" |
+						sort |
+							uniq -c |
+								sort -n

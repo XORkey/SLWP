@@ -1,0 +1,15 @@
+% $Header: /usr/local/src/slwp/article/tex/layout.tex,v 1.7 2013/10/26 17:47:14 timo Exp $
+%\setlength{\hoffset}{-1cm}
+\setlength{\textwidth}{13cm}
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{2}
+% latex book style
+\pagestyle{fancyplain}
+\addtolength{\headwidth}{\marginparsep}
+\addtolength{\headwidth}{\marginparwidth}
+%\newcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection\ #1}{}}
+\renewcommand{\subsectionmark}[1]{\markright{\thesubsection\ #1}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+\cfoot{Confidential | Intellectual property of T.M.C. Ruiter \large\XORkey\normalsize\ | Version 5 }

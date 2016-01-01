@@ -1,0 +1,114 @@
+%
+\Section{Secure login for dummies}
+This piece of text is intended as an introduction to the most basic part of the protocol.
+It does away with encryption of transmitted values, optional biometric values, key replacement, etcetera, to focus entirely on the core principle.
+\Subsection{Computer roles}
+We distinguish four computer roles, which may or may not be implemented on separate systems:
+the website
+(with the web content),
+an accounts server
+(with an accounts database),
+the user
+(with a browser),
+and a login server
+(with a Hardware Security Module (HSM) which stores secret keys safely).
+The account database holds the particulars of all users,
+and,
+instead of a userid and a password,
+it holds a User ID hash
+(called $U_h$)
+and a site key
+(called $K_s$).
+\Subsection{Notation}
+In the subsequent text and throughout the rest of the article the following notation will be used.
+\begin{itemize}
+\item The key ring will be considered an array $Z$.
+\item The Secret Keys in the HSM will be considered an array as well, called $S$.
+\item \(H_0=\HSHA{[Z[0]}\) means that $H_0$ will be the \SHA\ hash of $Z[0]$.
+\item \(U_h=\xor{H_0}{H_1}\) means that $U_h$ will be the \XOR\ of $H_0$ and $H_1$.
+\item \(A_u=\EAES{R_u + C_1}{K_u}\) means that $A_u$ will be the \AES\ encryption of a concatenation of $R_u$ with $C_1$,
+using $K_u$ as the encryption key.
+\item \(K_s=\DRSAm{K_y}{K_{LE}}\) means that $K_s$ will be the least $n$ significant bits of the \RSA\ decryption of $K_y$ with key $K_{LE}$.
+\item \(B_s=\SRSA{B_s}{K_{LS}}\) means signing the value $B_s$ with the \RSA\ key $K_{LS}$.
+\item \(\VRSA{B_u+\xor{B_s}{K_u}}{K_{ls}}\) means the verification operation of the value $B_u$ concatenated with the \XOR\ of $B_s$ and $K_u$, with the \RSA\ key $K_{ls}$.
+\end{itemize}
+\Subsection{Keys}
+There are four important keys:
+the site key
+(called $K_s$) which is held by the website,
+the user key
+(called $K_u$) held by the user on a key ring,
+and the Secret Key
+(called $S[0]$) held by the login server.
+The user key $K_u$ is the site key $K_s$ encrypted with the secret key $S[0]$:
+\[K_u=\EAESm{K_s}{S[0]}\]
+\par
+User keys are put on a digital key ring;
+the user selects one of those keys to act as $K_u$.
+This key ring can be seen as an array of keys,
+of which the first is the key ring identifier.
+This identifier is called $Z[0]$ henceforth and is the
+fourth important key.
+\par
+For this introduction we assume all keys are static.
+\Subsection{User ID hash}
+The login starts by the user sending the hash value $U_h$ to the website,
+which is used to lookup the corresponding site key $K_s$.
+If no match is found,
+the login process halts immediately.
+\par
+The $U_h$ value is compiled from several values:
+the key ring identifier $Z[0]$,
+the domain name of the URL,
+and a user id, freely chosen by the user.
+All these value together provide a 256-bit hash value,
+which is used to find the corresponding site key $K_s$ for this user.
+\SubsectionWithoutText{Logging in}
+\subsubsection{Step 1}
+To start the login sequence,
+the user first compiles the $U_h$ value.
+Then it calculates a second value, called $A_u$, as follows.
+Choose one of the user keys $K_u$ from the key ring.
+Generate a random number $R_u$ and encrypt with \AES\ and key $K_u$:
+\[A_u=\EAES{R_u}{K_u}\]
+We also need to calculate the value we want to hear back from the website:
+\[B_u=\xor{K_u}{\HSHAm{R_u}}\]
+which is the hash value of our random $R_u$.
+\subsubsection{Step 2}
+The website looks up $U_h$ and hopefully finds $K_s$.
+If it does, the website sends $K_s$ and $A_u$ to the login server.
+If not, we come to a full stop.
+\subsubsection{Step 3}
+The login server takes the $K_s$ value and temporarily turns this into $K_u$:
+\[K_u=\EAESm{K_s}{S[0]}\]
+It then recovers the random the user has sent ($R_u$) by:
+\[R_u=\DAES{A_u}{K_u}\]
+The user is expecting to get a hash of this random, so we calculate:
+\[B_s=\xor{K_u}{(\HSHAm{R_u})}\]
+Furthermore, we will introduce a value which the user must respond to.
+For this we generate a random value $R_s$.
+The user can prove it owns the right user key $K_u$ if it is able to decrypt this random number $R_s$.
+We therefore compute
+\[P_s=\xor{R_s}{K_u}\]
+so $R_s$ is easily recoverable by the user using XOR again.
+The website needs to verify the results of the user's calculation,
+so it is provided by the login server:
+\[Q_s=\xor{R_u}{(\HSHAm{R_s})}\]
+The values $B_s$, $P_s$, and $Q_s$ are returned to the webserver.
+\subsubsection{Step 4}
+The website sends $B_s$ and $P_s$ to the user, and keeps $Q_s$ in memory.
+The user first compares the value $B_s$ with its own value $B_u$.
+If they are the same,\footnote{They may differ in the full version, as more secret keys may be used there.}
+the website has the right key
+(which proves the website is genuine).
+\subsubsection{Step 5}
+The user recovers the site random $R_s$ by computing
+\[R_s=\xor{P_s}{K_u}\]
+and calculates the answer for the website:
+\[Q_u=\xor{R_u}{(\HSHAm{R_s})}\]
+which is returned to the website.
+\par
+The website compares values $Q_s$ and $Q_u$ to see if they are the same
+(which proves the user is genuine).
+If this is the case,\footnote{$Q_s$ and $Q_u$ may differ also, but in that case something fishy is going on.}
+the user is logged in.

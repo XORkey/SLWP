@@ -1,0 +1,113 @@
+\section{Introduction}
+Passwords should be kept in memory (human memory, that is) at all times.
+This article is about passwords for websites; the passwords many people use on a day to day basis.
+Passwords are an archaic type of security measure, compared to the scheme proposed here.
+\subsection{On human behavior}
+The rationale amongst security experts is that passwords should not be written down.
+Ever.
+And passwords should be unique for each and every website.
+Oh, and---I almost forgot---you have to change them as well.
+Each month or so will do nicely. 
+\par
+Yeah, right!
+I cannot remember all different passwords I am forced to use, although my memory is quite good.
+I \emph{have} to write them down, otherwise, I am lost.
+(Fortunately, I have some support for this \cite{Schneier:2005}.)
+I don't trust software that will "remember" my passwords for me, because their "memory banks" might be on a malicious server on the other side of the ocean.
+Therefore, I resort to a little black booklet, with all my account information.
+I don't remember passwords any more, I remember where my booklet is.
+And I confess that I am compelled to reuse passwords, and to keep the ones I am not forced to change, so I can actually remember some of them.
+So I believe nothing has fundamentally changed in more than 13 years\ldots\cite{Adams:1999:UE:322796.322806}
+\par
+I have given up on inventing a scheme for passwords that differ from each-other,
+can be changed individually at different times, 
+and are easy to remember, as not to be forced to write them down.
+I believe no such scheme exists, because websites have different requirements regarding passwords.
+Some don't allow spaces, some complain about length, some fuss about dictionary lookup.
+The interval at which you are forced to change passwords is different for websites;
+some changes are compulsory, some voluntarily, some just to stop annoying pop-ups.
+\par
+For the user, the bad thing with passwords is that you have to keep track of it all.
+Remembering difficult passwords is cumbersome for most, and impossible for some.
+Tracking things infalliably, and remembering different passwords for each and every site is not something people excel at.
+\subsection{The keyring system}
+Using 128 random bits as a key to gain access to a website is far more secure than letting people decide which password they would like to use to do so.
+\par
+Imagine a keyring, not unlike your own keyring on which you have keys for your car, your house, shed, or locker.
+This keyring has a label and 99 keys on it, numbered 1 through 99.
+Instead of brass or steel, these keys are made of 128 random bits each.
+The label is another 128 bits long, and as random as possible, like the keys.
+Instead of being on a steel ring, these keys, with the keyring label, are written to a file on disk; a blob of 100 strings of 128 bits.
+\par
+The use of keys on this keyring is not entirely different from using real physical keys.
+The bits in a key are comparable with the tooths or holes of a physical key you use to unlock your home.
+You do not need to remember exactly how far the tooths need to protrude or exactly where and how deep the holes in your key need to be, to be able to unlock the door;
+you just select the right key
+(the whole physical thing at once, with all the right tooths or holes)
+by recognising its form or its label.
+And with a physical key you cannot open a door; you can only unlock it.
+You still have to push\ldots
+\par
+The use of this proposed keyring has several advantages over the current practise of websites to use passwords for logging in.
+Instead of having to remember dozens of passwords for numerous sites,
+you only need to remember a key number for that site, in the range of 1 to 99.
+This key number stays the same for that website at all times, so you \emph{can} remember it.
+\subsection{Advantages}
+In the following cases a keyring is superior to the use of passwords.
+\begin{itemize}
+\item Websites have all login information stored centrally.
+If an hacker can obtain this data and decrypt it, it has access to all---possibly millions---accounts at once \cite{wiki:linkedin}.
+%(hack of www.linkedin.com in June 2012, where 6.5 million passwords were stolen).
+\par
+Using the keyring system there is no usable login information whatsoever at the server hosting the website.
+There is no way that the user information that \emph{is} present yield any usable login data.
+Hacking a website to obtain logins is useless.
+\par
+Other reasons to hack websites will remain, however, and using keyrings does not prevent hacking; it just eliminates one of the major attractions.
+\item Users tend to have the same password and the same login name for several websites.
+A hack of an insufficiently protected site could yield valid usernames and passwords of perfectly protected sites.
+(Hack of www.babydump.nl yields at least 500 valid logins for www.kpn.nl.)
+\par
+Even if all user keys for a website were obtained in a hack, these would be useless for any other website, since they differ by definition.
+\item Websites require the user to change passwords.
+As more websites do this, more and more passwords a user has to remember, change.
+Ideally, no password for a website should be the same as for another website, but that is impractical.
+This would mean that each and every password needs to be written down, because the number of passwords is too much to remember for most.
+This thwarts the principle that passwords need to be remembered and never written down.
+The requirements to change passwords frequently and that they should differ from any other password is an inhuman task.
+\par
+Using the keyring system, keys will differ for each website by definition and change regularly and automatically.
+Key numbers (the ordinal numbers in the keyring) don't change, so most of them can be remembered by the average human.
+\item Sometimes, getting unauthorized access to an account is as simple as just looking at the keyboard to see what the password is.
+The userid is always displayed when logging in, so shoulder surfing is very effective.
+\par
+Using a keyring, shoulder surfing cannot be used directly to login.
+Since a keyring is something you have to have, you cannot login using only the userid and the key number.
+You need to have access to the (unencrypted) keyring as well.
+Therefore, using a keyring is a basic form of 2-factor authentication.
+\item People tend to use weak passwords (unless a website specifically enforces the use of strong passwords) which can be guessed using specialized tools.
+If that yields no success, brute force attacks can be launched; to just try all possible passwords with limited length.
+\par
+Password guessing nor brute force attacks are an option when trying to login, since no passwords of any kind are exchanged.
+Even if the keys themselves would be used as an old-fashioned password, the search area would encompass $2^{128}$ or $3.4\cdot 10^{38}$ equally likely possibilities.
+Trying 1 million possibilities per second it would still take $10^{32}$ seconds to try every possibility.
+\item The validity of the connection to websites is built on trust.
+HTTPS connections are protected using certificates.
+Sometimes trust only goes so far, and bogus but valid website certificates are used (Dorifel virus) or even the Root CA certificates are forged (see the DigiNotar hack).
+In that case, the user's trust is betrayed and the user left helpless.
+\par
+With the keyring solution no standalone substitute websites can exist; login data must be redirected to the real website.
+A substitute website does not have the right Secret keys.
+A user will notice this by wrong answers from the website and the login will abort from the user side.
+\item Visitors of websites are lured to other, well built fraudulent websites, mimicking websites of banks and such (phishing).
+Here, a simple mail can give a lot of trouble, redirecting users to an unsecure copy of a website, without the user suspecting anything.
+\par
+All communication to and from the malicious website can be passed on to the real website, to give the user the sense it is talking to the real site.
+Obtaining valid login data this way (as a man in the middle) is useless, since no keys are sent over the line.
+The data that is used to validate a user is meaningless for the next login.
+\end{itemize}
+The use of a keyring with random numbers provides a basic two-factor authentication.
+The user has to have possession and access to its keyring.
+Furthermore, knowledge is required about which key is used for what
+(and which key is used to encrypt the keyring itself)
+to be able to use the keyring.

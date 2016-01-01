@@ -1,0 +1,9 @@
+function Min		{ [[ $1 -lt $2 ]] && echo $1 || echo $2; }
+function XOR		{ printf "0x%0.$(($3/4))x" $(($1 ^ $2)); }
+#function Random 	{ openssl rand -hex $((($1 + 7) / 8)) | cut -c $((1 + ($1 / 4) % 2)) ; }
+function Random 	{ printf "0x%0.$(($1/4))x" $((0x$(openssl rand -hex $((($1 + 7) / 8))) & $((2**$1 - 1)))) ; }
+function AES256 	{ printf "%s" "$1" | openssl enc  -aes256 -K "$2" -iv 0 | od -t xC | head -n 1 | cut -c 8- | tr -d  ' '; }
+function SHA256 	{ printf "%s" "$1" | openssl dgst -sha256 | cut -d ' ' -f 2; }
+function modN		{ awk "{ print substr(\$0, length(\$0) + 1 - $1 / 4, $1 / 4); }"; }
+function AES256modN	{ AES256 "$1" "$2" | modN $3; }
+function SHA256modN	{ SHA256 "$1"      | modN $2; }

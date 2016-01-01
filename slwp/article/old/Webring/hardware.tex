@@ -1,0 +1,42 @@
+\section{Required hardware}
+Apart from a server to host the website itself,
+you need a Secure Device Provisioning Server (SDPS)
+that contains a Hardware Security Module (HSM),
+which stores an array of Secret Keys and performs cryptographic functions.
+Yet another server should host the accounts database, linking at least userids with site keys.
+
+\subsection{Firewall}
+There should be a firewall between the webserver and the SDPS,
+to protect the SDPS from attack should the website be compromised.
+The SDPS should be placed in a DMZ.
+The other link from the firewall will be to the server that hosts the accounts database.
+
+\subsection{Accounts database}
+There should be a server for the database with account information.
+This database will probably be used for many other things that the website needs as well.
+
+\subsection{SDPS}
+\label{sec:SDPS}
+The Secure Device Provisioning Server (SDPS) has a Hardware Security Module (HSM)
+for storing cryptographic keys, performing cryptographic functions, and generating random numbers.
+It should be separated from the rest of the website's internal network by a firewall,
+and placed in a Demilitarized Zone (DMZ) to protect it from misuse or attack.
+\par
+The data that is sent to the SDPS, and the data that is received back from the SDPS are encrypted by design.
+Securing this channel with extra encryption is not really needed, as network sniffing yields only random values.
+\par
+As such, a single SDPS can be shared among websites or multiple hosts for one large website, and its data sent over the Internet.
+\par
+For redundancy, multiple SDPS systems should be employed, for if an SDPS fails, no one can login.
+When changing Secret keys in this scenario
+the keys need to be replaced simultaneously.
+When a user got a new key from an SDPS with the new key, and logs in again, an SDPS that misses the newest Secret key cannot verify the user any more.
+
+\subsection{HSM}
+The Hardware Security Module is a piece of tamper proof hardware.
+It stores cryptographic keys, certificates, and other data in a secure manner.
+It also has a whealth of cryptographic functions and can generate good quality random numbers.
+The HSM should be programmed in such a manner that even the SDPS, which hosts the HSM, is only able to use a small set of functions.
+\par
+Ideally, the set of functions the SDPS should provide should be programmed directly into the HSM.
+This way, the Secret keys can be kept secret, and the SDPS cannot be misused by a hacker to regenerate login data.

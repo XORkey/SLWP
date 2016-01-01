@@ -1,0 +1,41 @@
+DIV.keypad {
+	background-color: lightyellow;
+	margin: 20px;
+}
+DIV.keypad TABLE {
+	margin: 10px;
+	background-color: lightblue;
+	border-collapse: collapse;
+}
+TABLE.StartLogin {
+	border: 3px solid dodgerblue;
+}
+TABLE.NewAccount {
+	border: 3px solid red;
+}
+TABLE.keys TD
+{
+	padding: 0px;
+}
+INPUT.key {
+	width: 3em;
+	font-size: 12px;
+	color: midnightblue;
+}
+DIV.text {
+	margin: 0em;
+	padding-bottom: .2em;
+/*	padding: 0;
+	background-color: lightblue;
+	background-color: lightyellow; */
+}
+DIV.text LABEL {
+	padding-top: .3em;
+	padding-right: .25em;
+	width: 6em;
+	text-align: right;
+	float: left;
+}
+OUTPUT {
+/*	border: 1px solid red; */
+}

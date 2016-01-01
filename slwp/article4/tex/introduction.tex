@@ -1,0 +1,104 @@
+\section{Introduction}
+Passwords should be kept in memory%
+---human memory, that is---%
+at all times.
+This article is about passwords for websites; the passwords many people use on a day to day basis.
+Passwords are an archaic type of security measure
+(\cite{Honan2012}),
+compared to the scheme proposed here.
+\subsection{On human behavior}
+The rationale amongst security experts is that passwords should not be written down.
+Ever.
+And passwords should be unique for each and every website.
+Oh, and---I almost forgot---you have to change them as well.
+Each month or so will do nicely. 
+\par
+Yeah, right!
+I cannot remember all different passwords I am forced to use, although my memory is quite good.
+I \emph{have} to write them down, otherwise, I am lost.
+(Fortunately, I have some support for this \cite{Schneier:2005}.)
+I don't trust software that will "remember" my passwords for me, because their "memory banks" might be on a malicious server on the other side of the ocean.
+Therefore, I resort to a little black booklet, with all my account information.
+I don't remember passwords any more, I remember where my booklet is.
+And I confess that I am compelled to reuse passwords, and to keep the ones I am not forced to change, so I can actually remember some of them.
+So I believe nothing has fundamentally changed in more than 13 years\ldots\cite{Adams:1999:UE:322796.322806}
+\par
+I have given up on inventing a scheme for passwords that differ from each other,
+can be changed individually at different times, 
+and are easy to remember, as not to be forced to write them down.
+I believe no such scheme exists, because websites have different requirements regarding passwords.
+Some don't allow spaces, some complain about length, some fuss about dictionary lookup.
+The interval at which you are forced to change passwords is different for websites;
+some changes are compulsory, some voluntarily, some just to stop annoying pop-ups.
+To see what I mean, watch \cite{youtube:tobyturner}.
+\par
+For the user, the bad thing with passwords is that you have to keep track of it all.
+Remembering difficult passwords is cumbersome for most, and impossible for some.
+Tracking things infalliably, and remembering different passwords for each and every site is not something people excel at.
+\subsection{The keyring system}
+Using 128 random bits as a key to gain access to a website is far more secure than letting people decide which password they would like to use to do so.
+\par
+Imagine a keyring, not unlike your own keyring on which you have keys for your car, your house, shed, or locker.
+This keyring has a label and 99 keys on it, numbered 1 through 99.
+Instead of brass or steel, these keys are made of 128 random bits each.
+The label is another 128 bits long, and as random as possible, like the keys.
+Instead of being on a steel ring, these keys, with the keyring label, are written to a file on disk; a blob of 100 strings of 128 bits.
+\par
+The use of keys on this keyring is not entirely different from using real physical keys.
+The bits in a key are comparable with the tooths or holes of a physical key you use to unlock your home.
+You do not need to remember exactly how far the tooths need to protrude or exactly where and how deep the holes in your key need to be, to be able to unlock the door;
+you just select the right key
+(the whole physical thing at once, with all the right tooths or holes)
+by recognising its form or its label.
+\par
+The use of this proposed keyring has several advantages over the current practice of websites to use passwords for logging in.
+Instead of having to remember dozens of passwords for numerous sites,
+you only need to remember a key number for that site, in the range of 1 to 99.
+This key number stays the same for that website at all times, so you \emph{can} remember it.
+
+\subsection{Assumptions and requirements}
+The following assumptions are made.
+\begin{itemize}
+\item	The Secret keys (see section \ref{sec:secret_keys})
+need to be secret, inaccessible and unobtainable.
+Therefore, these keys are stored in an Hardware Security Module (HSM).
+\item	There are three server roles involved with the login procedure:
+	\begin{description}
+	\item[webserver]	This is the front-end server to which the user is communicating.
+	\item[accounts server]	This is the server that holds all account data.
+			It stores all kind of user related data, but no userid or passwords;
+			it stores hashes and site keys instead.
+	\item[login server]	This server uses an HSM which stores an array of secret keys per website it services.
+	\end{description}
+	Other systems may exist but are not relevant in this article.
+\item	The webserver is protected from the Internet by a firewall.
+	This is standard already and should be continued.
+	Having a firewall does not make a webserver impervious to attack,
+	however,
+	as many successful hacks have shown.
+\par	The accounts server is protected from the
+	(possibly hacked)
+	webserver by another firewall.
+\item	There is a secure channel
+	(like a SSL tunnel)
+	between the webserver and the accounts server.
+\item	There is a secure channel
+	(like a dedicated IPsec VPN)
+	between the webserver and the login server.
+	The login server may be anywhere on the Internet and may be owned by a different organisation than the webserver.
+\par	When the login server is using a network HSM
+	(not part of the physical hardware of the login server itself)
+	a secure channel between these two systems is required.
+\item	The user communicates with the webserver over a secure channel.
+	The most obvious choice for this would be a single sided SSL/TLS connection
+	(HTTPS)
+	with a server certificate signed by one of the many Root CAs.
+	This is current practice and need not be changed.
+\item	The webserver should take countermeasures against attempts to guess
+	login values by delaying each successive attempt with exponentially increasing waiting times.
+	Should some valid login values be supplied
+	(but wrong keys used)
+	the webserver should temporarily lock the account when guessing persist.
+	The user may be noticed by email when such locking has occurred.
+\end{itemize}
+\clearpage

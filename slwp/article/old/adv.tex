@@ -1,0 +1,61 @@
+\subsection{Advantages}
+In the following cases a keyring is superior to the use of passwords.
+\begin{itemize}
+\item Websites have all login information stored centrally.
+If an hacker can obtain this data and decrypt it, it has access to all---possibly millions---accounts at once \cite{wiki:linkedin}.
+\par
+\emph{Using the keyring system there is no usable login information whatsoever at the server hosting the website.
+There is no way that the user information that \emph{is} present yield any usable login data.
+Hacking a website to obtain logins is useless.
+\linebreak
+Other reasons to hack websites will remain, however, and using keyrings does not prevent hacking; it just eliminates one of the major attractions.}
+\item Users tend to have the same password and the same login name for several websites.
+A hack of an insufficiently protected site could yield valid usernames and passwords of perfectly protected sites.
+(Hack of www.babydump.nl yields at least 500 valid logins for www.kpn.nl.)
+\par
+\emph{Even if all user keys for a website were obtained in a hack, these would be useless for any other website, since they differ by definition.}
+\item Websites require the user to change passwords.
+As more websites do this, more and more passwords a user has to remember, change.
+Ideally, no password for a website should be the same as for another website, but that is impractical.
+This would mean that each and every password needs to be written down, because the number of passwords is too much to remember for most.
+This thwarts the principle that passwords need to be remembered and never written down.
+The requirements to change passwords frequently and that they should differ from any other password is an inhuman task.
+\par
+\emph{Using the keyring system, keys will differ for each website by definition and change regularly and automatically.
+Key numbers (the ordinal numbers in the keyring) don't change, so most of them can be remembered by the average human.}
+\item Sometimes, getting unauthorized access to an account is as simple as just looking at the keyboard to see what the password is.
+The userid is always displayed when logging in, so shoulder surfing is very effective.
+\par
+\emph{Using a keyring, shoulder surfing cannot be used directly to login.
+Since a keyring is something you have to have, you cannot login using only the userid and the key number.
+You need to have access to the (unencrypted) keyring as well.
+Therefore, using a keyring is a basic form of 2-factor authentication.}
+\item People tend to use weak passwords (unless a website specifically enforces the use of strong passwords) which can be guessed using specialized tools.
+If that yields no success, brute force attacks can be launched; to just try all possible passwords with limited length.
+\par
+\emph{Password guessing nor brute force attacks are an option when trying to login, since no passwords of any kind are exchanged.
+Even if the keys themselves would be used as an old-fashioned password, the search area would encompass $2^{128}$ or $3.4\cdot 10^{38}$ equally likely possibilities.
+Trying 1 million possibilities per second it would still take $10^{32}$ seconds to try them all.}
+\item The validity of the connection to websites is built on trust.
+HTTPS connections are protected using certificates.
+Sometimes trust only goes so far, and bogus but valid website certificates are used (Dorifel virus) or even the Root CA certificates are forged (see the DigiNotar hack).
+In that case, the user's trust is betrayed and the user left helpless.
+\par
+\emph{With the keyring solution no standalone substitute websites can exist; login data must be redirected to the real website.
+A substitute website does not have the right Secret keys.
+A user will notice this by wrong answers from the website and the login will abort from the user side.}
+\item Visitors of websites are lured to other, well built fraudulent websites, mimicking websites of banks and such (phishing).
+Here, a simple mail can give a lot of trouble, redirecting users to an unsecure copy of a website, without the user suspecting anything.
+\par
+\emph{All communication to and from the malicious website can be passed on to the real website, to give the user the sense it is talking to the real site.
+Obtaining valid login data this way (as a man in the middle) is useless, since no keys are sent over the line.
+The data that is used to validate a user is meaningless for the next login.}
+\item People are sometimes called by other people, claiming to be employees of banks.
+In order to ``help'' solve a problem, users are asked to give their login credentials.
+Some ignorent users are willing to oblige.
+\par
+\emph{With a keyring the only thing slightly usefull to a hacker would be the userid.
+The keynumber is of no use,
+since the hacker has no access to the keyring itself;
+telling him which key index is used to login has no value.}
+\end{itemize}

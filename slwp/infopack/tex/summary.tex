@@ -1,0 +1,158 @@
+\SectionWithoutText{The Perfect Login - Always}
+\Subsection{Why our passwords are vulnerable}
+We all know how we are supposed manage our login passwords.
+We must choose a password containing many characters that do not form any specific meaning so they are hard to guess.
+We should use different passwords for all our login protocols.
+And we should change our passwords on a regular basis, at least once a month but probably more often.
+\par
+Nobody is living by these rules, because it's impossible.
+In our daily lives we need passwords that make at least some sense, so we can remember at least the ones that we use frequently.
+And we don't want to change our passwords too often, or we'll start misremembering.
+And we like to use our favorite password for many, perhaps all, of the websites that we log into.
+When forced to change a password we like to dig up an old one that we have used in the past.
+We know our habits are bad, but we cannot help ourselves.
+Living by the rules is just too hard.
+\par
+The discouraging part is that even living by the rules does not provide full protection.
+Passwords can be intercepted as they are communicated to the target website during the login protocol.
+Phishing is used to steal passwords from unsuspecting Internet users.
+And the greatest vulnerability of all is the account server of the website host, which contains thousands, sometimes millions of User ID/password combinations.
+Hackers are increasingly capable of hacking into these servers.
+When this happens it makes no difference how sophisticated our passwords are.
+\par
+The ideal password is one that is at the same time impossible to guess and very easy to remember.
+It is used for only one website.
+It is not communicated online, so it cannot be intercepted.
+It is not stored anywhere, so it cannot be stolen.
+And it's something only the intended recipient is able to receive, so phishing becomes pointless.
+This probably looks like an impossible combination of requirements.
+But \TIMO has pulled it off.
+%
+\SubsectionWithoutText{The \TIMO solution - how it works}
+%
+\subsubsection{The different players.}
+There is some sophisticated cryptography behind it all, but the basic principles can be explained without going into all that.
+\par
+The players are the user, and a number of websites to which the user wants to login.
+The user holds a file containing a number of keys.
+We refer to this file as the Key Ring.
+The number of keys on the Key Ring is not critical.
+For the purpose of this explanation we'll put the number at 999.
+The user keeps the Key ring in a safe place on a laptop or tablet or smartphone.
+Many users will prefer to store the Key Ring in the cloud and have it accessible from any device.
+A determined hacker might be able to steal the Key Ring but, as will become clear in the following discussion, the Key Ring is of little use to anyone other than the user.
+This is because the Key Ring does not reveal which of the keys are active and which are inactive (or ``dummy'') keys, and which of the active keys belongs to what website.
+Someone finding a physical key ring will not waste his time going around the neighborhood trying to find a front door lock that matches one of the keys.
+For the same reason, the \TIMO Key Ring is of no value to a hacker.
+\par
+On the side of the website there are three roles, the Web Server, the Accounts Server, and the Login Server.
+These could be dedicated domains within one server, or separate servers located in one room or one building, or even separate servers in different geographic locations.
+The Web Server is separated from the Internet by a firewall, as is already standard practice.
+If the Web Server has no local accounts database, the Accounts Server may be located in the back-office, ideally behind a second firewall.
+Communication between the Web Server and the Accounts Server then proceeds via a secure channel, such as an SSL tunnel.
+This is pretty much common practice today.
+\par
+The role of the Login Server is unique to the \TIMO system.
+The Login Server contains an array of Secret Keys in a Hardware Security Module (HSM).
+There is a secure channel (such as a dedicated IPsec VPN) between the Web Server and the Login Server.
+The Login Server may be anywhere on the Internet, and may support one Web Server, or a number of different Web Servers.
+\par
+Finally, the user communicates with the Web Server over a secure channel.
+This can be a single-sided SSL/TLS connection (https), with a server certificate signed by one of the many available Root CAs.
+This is already common practice.
+%
+\subsubsection{1. Setting up an Account}
+As a first step the user must apply for an account with the website.
+As in current practice, the user chooses a UserID.
+This UserID may be the same for each website with which the user has an account, and may remain unchanged throughout the life of the Key Ring.
+Key number zero on the Key Ring is referred to as the Key Ring Identifier.
+A hash value is constructed using a combination of the UserID and the Key Ring Identifier.
+The UserID is further encrypted with (part of) the domain name of the Web Server, so that a user name is created that is unique for the specific website.
+\par
+In addition to the UserID, the user selects a key on the Key Ring that is not yet in use, i.e., one of the dummy keys.
+Selecting this key is a simple matter of identifying it using a simple number between 1 and 999.
+Key selection can be automated by the software that manages the Key Ring.
+The user presents this information to the Web Server, together with any other information required for setting up an account, such as e-mail address etc.
+\par
+The Web Server forwards the dummy key securely to the Login Server, which uses a Secret Key to create a new user key, which is encrypted with the user's dummy key.
+The encrypted user key is communicated back to the user.
+On the user's side the user key is decrypted with the dummy key, and stored on the Key Ring at the selected location, overwriting the dummy key.
+\par
+The Login Server also calculates a pseudo-random site key for the user.
+This value is communicated to the Web Server (in encrypted form), which forwards it to the Accounts Server.
+After decryption the Accounts Server stores this site key alongside the hash value representing the UserID.
+\par
+This may all sound pretty complicated.
+The two main things to remember are that (i) no UserID or password is communicated, only meaningless strings; and (ii) no password is used or stored anywhere.
+This makes for a high level of security.
+The other point is that the user only needs to remember the UserID, and even that task may be taken over by Key Ring management software.
+As we'll see later, the key itself is changed on a regular basis, but the user only needs to remember its number, which does not change.
+Remembering the key number belonging to a specific website can be taken over by Key Ring management software.
+%
+\subsubsection{2. Logging In}
+When logging in the user presents to the Web Server the hash value representing the UserID.
+The user does not send a password, but instead a pseudo-random number that has been encrypted with the appropriate user key.
+This encrypted number serves as a user-generated challenge
+\par
+The Web Server forwards the UserID hash to the Accounts Server, which looks up the corresponding site key, which it returns to the Web Server.
+The Web Server presents the Login Server with the site key and the user-generated challenge.
+\par
+The Login Server uses the Secret key (which is stored inside the Hardware Security Module) to temporarily regenerate the user key.
+The Login Server uses the user key to decrypt the user-generated challenge.
+The same user key is used to encrypt a pseudo-random number generated by the Login Server; this encrypted pseudo-random number is a server-generated challenge.
+The temporary user key is erased from memory immediately after use.
+A hash value of decrypted user-generated challenge and the server-generated challenge are returned to the Web Server, which passes them on to the user.
+The user verifies whether the decrypted user-generated challenge matches his pseudo-random number.
+If it does, the user knows he's dealing with the real website, and not some imposter (phishing thus excluded!).
+The user then uses his user key to decrypt the server-generated challenge.
+The decrypted value is returned to the Web Server in encrypted form as proof that the login attempt is being made by someone who has possession of the correct user key.
+This server-generated challenge makes it impossible to login using (intercepted) values from a previous successful login, and authenticates the user.
+The correct answer to the server-generated challenge completes the login procedure.
+\par
+Note that all the user needs to remember is the UserID, if that.
+Note also that nothing of value is being exchanged, only meaningless strings.
+%
+\subsubsection{3. Changing Secret Keys}
+The Secret Key plays a central role in the login procedure, making it desirable to change it on a regular basis.
+This is done at the Login Server end, by whatever frequency the Login Server administrator (or by company policy) has decided to use.
+A login attempt by a legitimate user may be unsuccessful, simply because the user key dates back from before the latest update to the Secret Key.
+Instead of aborting the login attempt, the Web Server instructs to repeat the process using the most recent old Secret Key, and so on, until an old Secret Key is found that leads to a successful login.
+The website administrator can put a limit on the number of old Secret Keys that will be tried.
+If the user key is too old, for example more than 6 or 12 generations of Secret keys, the user will need to set up a new account.
+\par
+A user being allowed access based on an old user key will need his user key refreshed.
+This is done in the same way as described for Setting up an Account.
+Having refreshed his user key, a Key Ring is kept up-to-date automatically.
+%
+\Subsection{Problem Solved}
+The \TIMO system requires the user to remember only a UserID.
+That is less of a burden than even the most careless use of the current system.
+And even this `burden' can be taken over by Key Ring management software.
+\par
+Everything that is communicated back-and-forth is in encrypted form.
+A Man-in-the-Middle (MitM) interception is not a major threat,
+because the MitM lacks the tools for decryption.
+\par
+The system provides two-sided authentication:
+the Web Server obtains proof that the user is who he claims to be,
+and the user obtains proof that the website is genuine.
+\par
+The user key, which replaces the conventional password, can be as complex as it needs to be, and can be replaced as often as is deemed desirable, without putting a burden on the user for remembering and entering complex passwords.
+\par
+No record is kept anywhere of UserID/Password combinations.
+The Accounts Server contains records of hash values of UserIDs and corresponding site keys.
+But the site keys are useless without the corresponding Secret Keys, which are safely stored in the HSM.
+In any event, the site keys are different from the user keys; possession of a site key does not enable anyone to pose as a legitimate user.
+\par
+The user's Key Ring may be the most promising target for a hacker.
+The Key Ring could be stored behind an unbreakable password, but for ease of use most users will opt for marginal protection.
+In theory a Key Ring could fall within the wrong hands.
+But the Key Ring is useless without the UserID.
+As the user will choose a UserID that is relatively easy to remember, the UserID must be presumed to be obtainable by brute force.
+The keys themselves do not reveal whether they are active keys or dummy keys, and the active keys do not reveal for which website they are being used.
+As there is a finite number of keys (999 in our example), trial and error could be worthwhile.
+But in combination with the iterations needed for guessing the UserID the number of iterations becomes very large.
+A Web Server could be set up to block a login attempt from a specific IP address after one or two attempts with an incorrect UserID hash.
+\par
+The system can be set up so that the user does not even need to remember the UserID.
+In this case it is advisable to protect the Key Ring with a biometric device.

@@ -1,0 +1,64 @@
+\Subsection{Computers and links}
+This proposed way of logging in concentrates on computing values and communication of the results.
+It is therefore appropriate at this point to elaborate a bit on who is communicating with whom and why.
+\subsubsection{Computer roles}
+Four computer roles can be distinguished when logging in.
+\begin{description}
+\item[Web server]
+	This is the front-end server to which the user is communicating.
+	From our point of view,
+	it is the central system,
+	acting as a hub.
+	It communicates with three other servers:
+	the accounts server, the login server, and of course the client computer.
+	We consider it the most vulnerable to `visits' with malicious intent,
+	so it has been appointed the simplests of tasks.
+	It does not compute anything remotely valuable,
+	it just compares values provided by others.
+\item[Accounts server]
+	This server is typically located in a network only accessible by the web server.
+	It stores all kind of user related account data, but no userid or passwords;
+	it stores hashes and site keys instead.
+	Like the web server it does not compute anything either.
+\item[Login server]
+	This server uses an HSM which stores an array of secret keys for each website it services.
+	This server computes nothing on its own,
+	it lets the HSM do all the work secretly,
+	using some of its finest cryptographic functions.
+	It receives login requests from the web server and returns values that the web server can compare or relay.
+\item[Client computer]
+	With this device the user communicates with the web server.
+	It generates random numbers and uses \XOR\ and \SHA\ to compute the values exchanged with the web server.
+\end{description}
+These roles can be played by as many computers as there are roles,
+but that need not always be the case.
+In fact,
+each and every role may be combined;
+a single computer may perform them all,
+for that matter
+(except that the client computer is generally separate from the web server).
+\par
+The accounts server and the login server may be combined in a single server in the back-office.
+The web server and the accounts server may be combined,
+with the login server somewhere on the Internet.
+The combination of web server, accounts server, and login server is also valid;
+although this concentration of roles is not highly preferred.
+\subsubsection{Secure links}
+Traditionally,
+the communication channel between the user and the web server is secured by means of TLS.
+The user sees the URL that starts with ``https://'',
+which means that the web server has authenticated itself using a digital certificate.
+The browser will validate the supplied certificate using other trusted certificates.
+This security measure is sufficient but required.
+\par
+The communication between the web server and the accounts server should be conducted over a secure channel as well.
+\par
+Finally,
+the communication between the web server and the login server needs to be encrypted.
+For this,
+TLS is a sufficient security measure,
+although in this case mutual authentication is a must.
+The web server needs to know it is talking to a legitimate and trusted login server,
+and the login server needs to know it is receiving valid requests.
+The certificate of the web sever is used to select which array of secret keys to use,
+as the login server may service more than one web server.

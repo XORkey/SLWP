@@ -1,0 +1,237 @@
+\section{Logging in}
+The user, wanting to login to a site, has to lookup or remember the keyring's PIN (if any), the key number, and the userid.
+Having unencrypted its keyring, selected a key number ($k$), and entered the userid, the login process can commence.
+For logging in, the user needs a little program to do some calculations and to operate on the keyring.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Applying for a userid}
+\label{sec:applying}
+When a new user applies for an account, it should choose a userid%
+---one that the website will accept as unique.
+Furthermore, it should select the index of a hitherto unused key
+(therefore, a dummy).
+The user will send its $\SHA$ hash of its userid,
+along with its dummy key $K_d$ to the website.
+\par
+The website will send the dummy key $K_d$ to an SDPS hosting an HSM (see section \ref{sec:SDPS}),
+which will do the following:
+\begin{enumerate}
+\item Generate a random
+\[K_s=\F{Random}{}\]
+which will be the new site key for this user.
+\item Then it will encrypt the $K_s$ with the current Secret key $S[0]$ to yield the new user key $K_u$
+\[K_u=\F{\AES}{K_s, S[0]}\]
+\item Finally, the new user key is encrypted with the user's dummy key $K_d$
+with an XOR operation:
+\[K_x=\XOR{K_u}{K_d}\]
+\end{enumerate}
+The SDPS will then send the new key $K_s$ and the $\SHA$ hash of the userid to the server hosting the accounts database.
+It will send $K_x$ in a mail to the new user (optionally with the index the user supplied).
+\par
+The user's keyring program can import the new key $K_x$ into the keyring by calculating
+\[K_u=\XOR{K_x}{K_d}\]
+using the index it has originally selected for the slot in the keyring.
+The dummy key $K_d$ is overwritten with the new key $K_u$.
+
+
+\subsection{Basic login scheme}
+The procedure described below to login is the basic login scheme.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Step 1: knock, knock\ldots}
+\label{sec:login_step1}
+The user's login program has to compute the folowing:
+\begin{enumerate}
+\item A random number ($R_u$) the website will need to appreciate by returning its hash later on:
+\[R_u=\F{Random}{}\]
+\item The user key ($K_u$) is taken from the keyring at index $k$ and the random number is encrypted with it to get the value $A_u$:
+\[A_u=\XOR{R_u}{K_u}\]
+\item The website will return a hash value of the user's random value.
+We need to be able to verify this hash, so we compute our own hash ($B_u$) to verify it with:
+\[B_u=\sha{R_u}\]
+\item Finally, we need the hash of the userid ($U$) to present to the website:
+\[U=\F{\SHA}{userid}\]
+\end{enumerate}
+The hashed userid $U$ and the encrypted random number $A_u$ are sent to the website.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Step 2: site key lookup}
+\label{sec:login_step2}
+After receiving $U$ from the user, the site key $K_s$ needs to be looked up.
+A query with $U$ is sent to the database with account information.
+If a match is found, $K_s$ is returned;
+otherwise, $K_s$ is set to zero, indicating that no such record exists.
+\par
+In the latter case, the values $B_s$ and $P_s$ are both set to zero as well, and returned to the user.
+The user needs to rethink its actions and start over.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Step 3: SDPS actions}
+\label{sec:login_step3}
+Now an iterative process starts, trying to find the right Secret key to log the user in (see also section \ref{sec:secret_keys}).
+The loop runs at most $min(m,\mathtt{MAX\_ACTIVE\_KEYS})$ times.
+The website will send three values to the SDPS (see section \ref{sec:SDPS}): $A_u$, $K_s$, and a Secret key index $i$, starting at 0.
+\par
+In case $i$ is less than $m$
+(the number of stored Secret keys, see section \ref{sec:secret_keys})
+the HSM calculates the following:
+\begin{enumerate}
+\item Temporarily, regenerate a user key, using the same algorithm as when the key was originally generated:
+\[K_u=\F{\AES}{K_s,S[i]}\]
+with $S[i]$ the $i$-th Secret key stored in the HSM.
+\item With the user key $K_u$, decrypt the random the user has sent:
+\[R_u=\XOR{A_u}{K_u}\]
+\item Calculate a hash with which the user can verify we own the site key $K_s$ and a corresponding Secret key $S[i]$:
+\[B_s=\sha{R_u}\]
+\item To be able to verify that the user ows and knows its user key $K_u$,
+is not sending a replay of some earlier succesfull login sequence,
+and will be unable to ly about the correctness of the hash of the random the site will send,
+we calculate a challenge for the user.
+\par
+If the index $i$ equals zero, generate a random value
+\[R_s=\F{Random}{}\]
+otherwise, compute
+\[R_s=\F{\AES}{K_s,S[0]}\]
+which will be the new key for the user.
+\par
+We then encrypt $R_s$ to a value $P_s$ the user can decrypt using its key:
+\[P_s=\XOR{R_s}{K_u}\]
+This value will be different for each time the loop is executed,
+even if the same new key is transmitted,
+since $K_u$ will change each time.
+\item Calculate the expected response also:
+\[Q_s=\sha{R_s}\]
+\end{enumerate}
+The HSM will produce the values $B_s$, $P_s$, and $Q_s$ as a result of the calculations and the SPDS will send them back to the site,
+as an answer to the three values it was given ($A_u$, $K_s$, and $i$).
+The HSM will delete all temporary values from memory directly afterwards, and remember only its Secret keys.
+\par
+Should index $i$ equal $m$, then the array of Secret keys is exhausted.
+If we reach this situation, we cannot log the user in since all possible attempts have failed.
+Return zero values for $B_s$, $P_s$, and $Q_s$ to indicate this.
+
+%------------------------------------------------------------------
+\subsubsection{Step 4: user verifies site key}
+\label{sec:login_step4}
+The site sends $B_s$ and $P_s$ to the user.
+If both are zero, the login has failed and the user should return to step 1.
+It is advisable for the user to choose different values for the next try.
+\par
+If $B_s$ contains a nonzero value, the user verifies if $B_s$ equals $B_u$.
+\par
+If the two values do not match, the user either has selected the wrong key or uses an old key.
+A key can be old if it comes from a keyring that was not used recently.
+Another possible reason for a key to be old is when the Secret key of the site has changed recently.
+\par
+To indicate that no match has been found, send
+\[Q_u=\mathtt{0x0}\]
+(128 zeroes) to the website.
+The SDPS will need to start over, now with values $A_u$, $K_s$, and $i+1$.
+So, back to step 3.
+
+%------------------------------------------------------------------
+\subsubsection{Step 5: site verifies user key}
+\label{sec:login_step5}
+If $B_s$ matches $B_u$, then the website has found a Secret key for the user.
+The user can now prove it has control over its user key by computing
+\[R_s=\XOR{P_s}{K_u}\]
+and
+\[Q_u=\sha{R_s}\]
+which is sent to the website as proof.
+If the website accepts $Q_u$ as correct it will log the user in.
+\par
+If the website receives a value $Q_u$ that does \emph{not} match,
+something fishy is going on.
+Further attempts for this userid, or from that IP address should be scrutinized.
+
+%------------------------------------------------------------------
+\subsubsection{Step 6: key replacement}
+\label{sec:login_step6}
+If this attempt to login was not the first with this key,
+the website has sent the user a new key in $R_s$ (instead of a random value).
+The user should store this new key in the keyring, overwriting the old key the user has just used.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Optimizations and alternatives}
+With the basic login scheme several optimizations and alternatives are available.
+Here are some obvious ones.
+%------------------------------------------------------------------
+\subsubsection{Aborting the login procedure}
+Logging in with an old key every now and then is inherent in this scheme,
+as most Secret keys will be changed at regular intervals.
+Therefore,
+it is likely to sometimes receive a hash value $B_s$ that does not match $B_u$.
+An unsuccessful second attempt may be the result of using a seldomly used key or a wrong key.
+So, after at least two unsuccesful attempts
+the user may be presented a question whether it likes to select a different key from the ring,
+or continue trying with this key.
+If the user opts to select a different key, the login procedure has to be aborted.
+This may be done by setting
+\[Q_u=\mathtt{0xffffffffffffffffffffffffffffffff}\]
+(128 ones) and send this to the website
+(instead of $0x0$).
+We return to step 1.
+
+%------------------------------------------------------------------
+\subsubsection{Detection of false logins}
+If someone has stolen a keyring it should be useless.
+Sequentially using all keys in the keyring to try to find the right key should not work.
+After each unsuccessful attempt the account should be blocked for exponentially increasing amounts of time.
+Starting from, say, a second, but after a second attempt a minute, then five minutes, an hour, a day, a week.
+
+%------------------------------------------------------------------
+\subsubsection{Using last login date}
+Instead of always starting with Secret key $S[0]$,
+the date of the last login of the user can be taken into account.
+If the query with $U$ as key that is sent to the accounts database would also return the last login date a starting key could be selected.
+It is no use trying new keys when you know beforehand that these keys were added after the last successful login.
+
+%------------------------------------------------------------------
+\subsubsection{Conditional key replacement}
+For most websites, restoring user keys that refer to the most recent Secret key $S[0]$ will be done without hesitation.
+For some,
+refreshing keys will be done only when certain conditions are met,
+like payment of monthly fees,
+a certain number of reviews written,
+or some amount of data uploaded.
+Until then,
+logging in with a valid
+(but in this context a typically `old')
+key is granted.
+But if, for instance, payment is overdue, the key will expire and logging in is no longer possible.
+\par
+To indicate that no new key is sent,
+use
+\[P_s = A_u\]
+and return this value to the user.
+In this case,
+no keys should be decrypted or overwritten.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Changing Secret keys}
+At regular intervals a new Secret key is introduced and,
+at the same time,
+an old Secret key may be sent to the Eternal Hunting Grounds.
+
+%------------------------------------------------------------------
+\subsubsection{Terminated accounts}
+When deleting the oldest Secret key from memory,
+all accounts with a `last login' date older than the installation
+date of the second oldest Secret key should be marked `terminated'.
+Removal of the oldest key renders all those keys unusable.
+Those accounts can be purged, as they cannot be used again.
+
+%------------------------------------------------------------------
+\subsubsection{Expired accounts}
+In some situations user access must be barred until some condition is met.
+Accounts can be made temporarily inaccessible for this purpose by letting keys expire.
+Expiration can happen automatically when users do not login in time to get their keys replaced,
+or intently by denying key updates.
+Expired user keys are associated with Secret keys with an index in the range $[\texttt{MAX\_ACTIVE\_KEYS},\texttt{MAX\_KEYS})$.
+\par
+Expired accounts can easily be made active again by using inactive Secret keys for the login process (and then renew the key).
+\par
+Expired accounts can be reinstated,
+but only before the associated Secret key is erased from memory.
+After that, there is no way to regenerate the user key for logging in.
+The user should apply for a new account if it wants to regain access.

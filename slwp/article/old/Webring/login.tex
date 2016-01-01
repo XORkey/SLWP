@@ -1,0 +1,168 @@
+\section{Logging in}
+The user, wanting to login to a site, has to lookup or remember the keyring's PIN (if any), the key number, and the userid.
+Having unencrypted its keyring, selected a key number ($k$), and entered the userid, the login process can commence.
+For logging in, the user needs a little program to do some calculations and to operate on the keyring.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Step 1: knock, knock\ldots}
+\label{sec:login_step1}
+The login program has to compute the folowing:
+\begin{enumerate}
+\item A random number ($R_u$) the website will need to appreciate by returning its hash later on:
+\[R_u = \mathtt{Random}()\]
+\item The user key ($K_u$) is taken from the keyring at index $k$ and the random number is encrypted with it to get the value $A_u$:
+\[A_u = R_u \oplus K_u\]
+\item The website will return a hash value of the user's random value.
+We need to be able to verify this hash, so we compute our own hash ($B_u$) to verify it with:
+\[B_u = \E{SHA}(R_u)\]
+\item Finally, we need the hash of the userid ($U$) to present to the website:
+\[U=\E{SHA}(userid)\]
+\end{enumerate}
+The hashed userid $U$ and the encrypted random number $A_u$ are sent to the website.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Step 2: site key lookup}
+\label{sec:login_step2}
+After receiving $U$ from the user, the site key $K_s$ needs to be looked up.
+A query with $U$ is sent to the database with account information.
+If a match is found, $K_s$ is returned;
+otherwise, $K_s$ is set to zero, indicating that no such record exists.
+\par
+In the latter case, the values $B_s$ and $P_s$ are both set to zero as well, and returned to the user.
+The user needs to rethink its actions and start over.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Step 3: SDPS actions}
+\label{sec:login_step3}
+Now an iterative process starts, trying to find the right Secret key to log the user in (see also section \ref{sec:secret_keys}).
+The loop runs at most $min(m,\mathtt{MAX\_KEYS})$ times.
+The website will send three values to the SDPS (see section \ref{sec:SDPS}): $A_u$, $K_s$, and a Secret key index $i$, starting at 0.
+\par
+In case $i$ is less than $m$
+(the number of stored Secret keys, see section \ref{sec:secret_keys})
+the HSM calculates the following:
+\begin{enumerate}
+\item Temporarily, regenerate a user key, using the same algorithm as when the key was originally generated:
+\[K_u=\E{AES}(K_s,S[i])\]
+with $S[i]$ the $i$-th Secret key stored in the HSM.
+\item With the user key $K_u$, decrypt the random the user has sent:
+\[R_u=A_u \oplus K_u\]
+\item Calculate a hash with which the user can verify we own the site key $K_s$ and a corresponding Secret key $S[i]$:
+\[B_s=\E{SHA}(R_u)\]
+\item To be able to verify that the user ows and knows its user key $K_u$,
+is not sending a replay of some earlier succesfull login sequence,
+and will be unable to ly about the correctness of the hash of the random the site will send,
+we calculate a challenge for the user.
+\par
+If the index $i$ equals zero, generate a random value
+\[R_s=\mathtt{Random}()\]
+otherwise, compute
+\[R_s=\E{AES}(K_s,S[0])\]
+which will be the new key for the user.
+\par
+We then encrypt $R_s$ to a value $P_s$ the user can decrypt using its key:
+\[P_s=R_s \oplus K_u\]
+This value will be different for each time the loop is executed,
+even if the same new key is transmitted,
+since $K_u$ will change each time.
+\item Calculate the expected response also:
+\[Q_s=\E{SHA}(R_s)\]
+\end{enumerate}
+The HSM will produce the values $B_s$, $P_s$, and $Q_s$ as a result of the calculations and the SPDS will send them back to the site,
+as an answer to the three values it was given ($A_u$, $K_s$, and $i$).
+The HSM will delete all temporary values from memory directly afterwards, and remember only its Secret keys.
+\par
+Should index $i$ equal $m$, then the array of Secret keys is exhausted.
+If we reach this situation, we cannot log the user in since all possible attempts have failed.
+Return zero values for $B_s$, $P_s$, and $Q_s$ to indicate this.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Step 4: user verifies site key}
+\label{sec:login_step4}
+The site sends $B_s$ and $P_s$ to the user.
+If both are zero, the login has failed and the user should return to step 1.
+It is advisable for the user to choose different values for the next try.
+\par
+If $B_s$ contains a nonzero value, the user verifies if $B_s$ equals $B_u$.
+\par
+If the two values do not match, the user either has selected the wrong key or uses an old key.
+A key can be old if it comes from a keyring that was not used recently.
+Another possible reason for a key to be old is when the Secret key of the site has changed recently.
+\par
+Therefore, only after at least two unsuccesful attempts
+the user may be presented a question whether it likes to select a different key from the ring, or continue trying with this key.
+If the user opts to select a different key, the login procedure has to be aborted.
+This may be done by setting
+\[Q_u=\mathtt{0xffffffffffffffffffffffffffffffff}\]
+(128 ones) and send this to the website.
+The website may present the user a new login screen, to start over, or accept this silently.
+At least, the Secret key index $i$ must be reset to \texttt{0}.
+We return to step 1.
+\par
+If further key matching should be attempted, indicate this by
+\[Q_u=\mathtt{0x0}\]
+(128 zeroes) and send this value to the website.
+This will need to be done at least once, when values don't match the first time.
+The SDPS will need to start over, now with values $A_u$, $K_s$, and $i+1$.
+So, back to step 3.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Step 5: site verifies user key}
+\label{sec:login_step5}
+If $B_s$ matches $B_u$, then the website has found a Secret key for the user.
+The user can now prove it has control over its user key by computing
+\[R_s=P_s \oplus K_u\]
+and
+\[Q_u=\E{SHA}(R_s)\]
+which is sent to the website as proof.
+\par
+If the website accepts $Q_u$ as correct it will log the user in.
+\par
+If the website receives a value $Q_u$ that does \emph{not} match,
+something fishy is going on.
+Further attempts for this userid, or from that IP address should be scrutinized.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Step 6: key replacement}
+\label{sec:login_step6}
+If this attempt to login was not the first with this key,
+the website has sent the user a new key in $R_s$ (instead of a random value).
+The user should store this new key in the keyring, overwriting the old key the user has just used.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Cryptographic considerations}
+\label{sec:crypto}
+The exchanged values used above are 128 bits long,
+but could be taken much smaller;
+say,
+16 bits each,
+without doing great injustice to the level of security.
+The use of 128 bits is only a convenient size,
+as \E{AES} and \E{SHA} work with these lengths naturally.
+This way,
+we take full advantage of their cryptographic power.
+\par
+The random values that are exchanged are encrypted using XOR.
+Since the key is also a random value,
+there is no way either values can be obtained using cryptoanalysis,
+guessing,
+or brute force attacks.
+The returned \E{SHA} hash,
+however,
+may be of more cryptographic concern.
+Although considered 'safe' at the moment of writing,
+it cannot be guaranteed that this will stay that way.
+Possibly, exchanging the full hash of a random value may be giving too much information.
+The random value might be calculated from the whole hash value, an thus $K_u$ or $K_s$.
+\par
+Instead of using the whole value of the \E{SHA} function,
+we could use only the least significant 64 bits of it.
+For example, calculating $B_u$ now changes to
+\[B_u = \E{SHA}(R_u)\  \mathbf{mod}\  \mathtt{0xffffffffffffffff}\]
+The same modulus should be applied to values $B_s$, $Q_u$, and $Q_s$.
+All four values are reduced to 64 bits.
+\par
+By only using the lower half of the hash, the random cannot be computed
+(it lies in a field of $2^{64}$ possible values)
+but this half value is ample proof that the right random value was used to create it.
+%%%

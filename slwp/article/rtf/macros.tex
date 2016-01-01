@@ -1,0 +1,18 @@
+\newcommand{\E}[2]{\ensuremath{\mathtt{#1_{#2}}}}
+\newcommand{\AES}{\E{AES}{256}}
+\newcommand{\SHA}{\E{SHA}{256}}
+\newcommand{\RSA}{\E{RSA}{2048}}
+\newcommand{\MDV}{\E{MD5}{}}
+\newcommand{\XOR}{\E{XOR}{}}
+\newcommand{\F}[2]{\texttt{#1}(#2)}
+\newcommand{\xor}[2]{#1\oplus#2}
+\newcommand{\mod}[2]{#1\ \textbf{mod}\ #2}
+\newcommand{\sha}[1]{\mod{\F{\SHA}{#1}}{2^{n}}}
+\newcommand{\aes}[2]{\mod{\F{\AES}{#1,#2}}{2^{n}}}
+\newcommand{\rsa}[2]{\mod{\F{\RSA}{#1,#2}}{2^{n}}}
+\newcommand{\XORkey}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern +.05em{\raisebox{-.3ex}{\em key}}}}}}
+\newcommand{\XORlogo}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern -1.01em{\raisebox{-1.12ex}{\em key}}}}}}
+\newcommand{\Enc}[2]{\ensuremath{\mathcal{\mathlarger{E}}_{\mathtt{RSA}}(#1,#2)}}
+\newcommand{\Dec}[2]{\ensuremath{\mathcal{\mathlarger{D}}_{\mathtt{RSA}}(#1,#2)}}
+\newcommand{\Ver}[2]{\ensuremath{\mathcal{\mathlarger{V}}_{\mathtt{RSA}}(#1,#2)}}
+\newcommand{\Sgn}[2]{\ensuremath{\mathcal{\mathlarger{S}}_{\mathtt{RSA}}(#1,#2)}}

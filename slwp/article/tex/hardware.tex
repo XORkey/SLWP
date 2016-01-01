@@ -1,0 +1,30 @@
+\section{Required hardware}
+Apart from a server to host the website itself,
+you need a Secure Device Provisioning Server (SDPS)
+that contains a Hardware Security Module (HSM),
+which stores an array of Secret Keys and performs cryptographic functions.
+Yet another server should host the accounts database, linking at least userids with site keys.
+
+\subsection{Firewall}
+There should be a firewall between the webserver and the SDPS,
+to protect the SDPS from attack should the website be compromised.
+The SDPS should be placed in a DMZ.
+The other link from the firewall will be to the server that hosts the accounts database.
+
+\subsection{Accounts database}
+There should be a server for the database with account information.
+This database will probably be used for many other things that the website needs as well.
+
+\subsection{Login server}
+\label{sec:login_server}
+The login server uses a Hardware Security Module (HSM)
+for storing cryptographic keys, performing cryptographic functions, and generating random numbers.
+
+\subsection{HSM}
+The Hardware Security Module is a piece of tamper proof hardware.
+It stores cryptographic keys, certificates, and other data in a secure manner.
+It also has a whealth of cryptographic functions and can generate good quality random numbers.
+The HSM should be programmed in such a manner that even the SDPS, which hosts the HSM, is only able to use a small set of functions.
+\par
+Ideally, the set of functions the SDPS should provide should be programmed directly into the HSM.
+This way, the Secret keys can be kept secret, and the SDPS cannot be misused by a hacker to regenerate login data.

@@ -1,0 +1,107 @@
+\section{Login for dummies}
+Not that you are one if you decide to read this section.
+It serves as a general description of the login process,
+without going into technical details too much.
+
+\subsection{What are we talking about?}
+Instead of choosing a userid and a password we let the computer work things out for us instead.
+Userids tend to be in short supply for people with surnames like John, Peter, and Chris,
+or last names like Jones or Smith.
+But the larger the site, the rarer free userids.
+\par
+Passwords tend to be weak,
+as people choose short, real-life words, like things or names.
+Not that people are not willing, but remembering too long, too difficult passwords is not easy.
+It is very frustrating when you cannot login because you have forgotten your password.
+\par
+As a radical measure, we do away with all this!
+We will let the computers
+(yours and the one running the website)
+do what they do best: compute.
+Give them some random bits to chew on and they are in heaven.
+\subsection{Random values}
+The website holds no userids, but hashes of keyring identifiers.
+\par
+The website holds no passwords, but one part of a key, of which you have the other part.
+Your key is different from the key the website has, but they are related to each ohter.
+It is not possible to login with keys that are stored on the website;
+you can only login with your key, which is verified with the key from the website.
+And oh..., keys are created using a random generator.
+Keys are just random bits with no information whatsoever.
+\par
+Keys are kept on a keyring and have ordinal key numbers from 1 to 99 for easy recollection.
+\subsection{Loging in part I}
+Before starting the login process you select a key from your keyring.
+To login you don't send your key to the server but a secret random value,
+which you encrypt with your key using a simple $E=mc^2$ operation.
+Your key is totally random and the secret random value you encrypt with it is also, well..., totally random.
+Mixing these random bits gives another totally random value.
+The website will receive this value and will try to decrypt this with the key that belongs to your account
+(we will keep you in the dark for now, about how this works).
+When it has decrypted the random login value, it will know which secret random value you generated and $E=mc^2$-red with your key.
+Instead of telling you the secret random number it sends a hash value of it,
+because otherwise someone able to see the network traffic will instantly know your key.
+\par
+If the website returns a hash value matching your secret random number, you know two things.
+First, you know that the website you are talking to can successfully decrypt your random value.
+It can only do this if it has a matching key.
+Second, you know you are talking to the same site that sent you your key when you applied for an account.
+This implies that if you trusted that site, you can trust this one also, as it can only be the same site.
+\par
+This is all great and very sophisticated, but the website cannot share your wonder about this,
+as you may fake your enthusiasm, and lie about the correctness of the hash it has sent you.
+\subsection{Loging in part II}
+To put your money where your mouth is,
+the website will do the same as you and send you an encrypted secret random value.
+This cryptogram can only be decrypted by someone owning the right key for the account.
+Using $E=mc^2$ with the key you have originally selected from your keyring,
+you decrypt it and return a hash of this value to the website.
+\par
+When the website receives a hash value matching its secret random number, it knows two things.
+First, the user on the other side can successfully decrypt the secret random number.
+It can only do this if it has a matching key.
+Second, you know that this key is from the same keyring that was used when applying for an account.
+This implies that if you trusted this user then, you can trust this user now, as it only can be the same user.
+\subsection{On site keys and user keys}
+Beware, the icky parts start here (a bit).
+\par
+When applying for an account, a site key is created by a random generator.
+The user key is then computed as the $E=mc^2$ encryption of the site key with a Secret Key.
+\par
+When the user encrypts its secret random value with its key it uses $E=mc^2$.
+This is a very simple and reversable encryption method.
+But as both key and value are random, no information is stored in the encrypted value.
+The websites needs to decrypt the value, and this can only be done with the user key.
+The website does not store user keys, only site keys.
+\par
+The next part may be a bit of a dissappointment:
+the website temporarily regenerates the user key by encrypting it again with the Secret Key.
+Once it has the user key, it can decrypt the random value easily by $E=mc^2$-ing it.
+Also, the cryptogram that is sent to the user is a random value $E=mc^2$-red with this regenereated user key.
+\par
+The clever part, however, is that this all takes place inside a very safe hardware device called an HSM.
+Secret Keys can be put in the HSM and made to good use there, but can never be retrieved from it.
+The HSM computes all values needed for the login process,
+without ever revealing the keys that are used.
+In the end,
+only random bits enter the HSM,
+and only random bits leave it.
+\subsection{More about keys}
+Every key has its lifetime, so Secret Keys need changing every so often.
+The same goes for keys on the user's keyring.
+The login protocol is capable of changing keys on the website and keys on the keyring,
+without any effort on the user side.
+\par
+Login can be granted,
+but new keys may not be,
+which results in the expiration of an account.
+A website may deny new keys when payment is due,
+giving users limited login rights.
+At any time new keys can be provided again.
+\par
+\par
+To learn how this all works,
+how keys are used,
+what a website can do with logins,
+and more,
+can all be read in the next chapters.

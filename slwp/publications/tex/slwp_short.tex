@@ -1,0 +1,44 @@
+% $Header: /usr/local/src/slwp/article/tex/slwp.tex,v 1.13 2014/02/01 13:39:44 timo Exp $
+\documentclass[a4paper,draft]{article}
+\usepackage[english]{babel}
+\usepackage{algorithm}
+\usepackage{listings}
+\usepackage[noend]{algpseudocode}
+\usepackage{url}
+\usepackage{fancyhdr}
+\usepackage{varioref}
+\usepackage{dialogue}
+%\usepackage{attrib}
+\input{tex/layout.tex}
+\input{tex/macros.tex}
+\title{Secure Login without Passwords}
+\author{T.M.C. Ruiter, \XORlogo}
+% \makeindex
+\begin{document}
+%\raggedbottom
+\maketitle
+%\begin{quote}
+%Any person can invent a security system so clever that he or she can't imagine a way of breaking it.
+%\footnote{Also known as Schneier's Law.}
+%\end{quote}
+\newcommand{\includesection}[1]{\input{tex/#1}\newpage}
+\newcommand{\includesectionnopagebreak}[1]{\input{tex/#1}}
+\includesection{abstract}
+%\tableofcontents
+\newpage
+\input{tex/introduction.tex}
+\input{tex/computers-and-links.subsec}
+\newpage
+%\includesection{general}
+\includesection{keys}
+\includesection{login}
+%\includesection{schema}
+%\includesection{security}
+%\includesection{implementation}
+\includesectionnopagebreak{conclusion}
+\bibliographystyle{plain}
+\bibliography{article,misc}
+% \printindex
+%\listoftables
+% \lstlistoflistings
+\end{document}

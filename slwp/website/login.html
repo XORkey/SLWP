@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Login 32-bit implementation</title>
+		<meta charset="utf-8">
+		<link href="style/login.css" type="text/css" rel="stylesheet" />
+		<script src="XORshift.js" type="text/javascript"></script>
+		<script src="sha256.js" type="text/javascript"></script>
+		<script src="keyring.js" type="text/javascript"></script>
+		<script>
+			function Uh(KeyringID, UID)
+			{
+				var H0 = SHA256(String(KeyringID));		// A 256 bit value represented as a 64 bytes string.
+				var H1 = SHA256(UID + window.top.location.hostname);
+														// Another 256 bit value represented as a 64 bytes string.
+				var Uh = "";
+				for (i=0; i < 8; i++)					// For each 8 bytes of H1 and H2: XOR both and add the result as string to Uh.
+					Uh += Hex32((parseInt(H0.substr(i * 8, 8), 16) ^ (parseInt(H1.substr(i * 8, 8), 16))) >>> 0);
+				return Uh;								// Also a 256 bit value represented as a 64 bytes string.
+			}
+			function StartLogin(keynum)
+			{
+				var random = Xorshift03().uint32;		// Generate 32-bit random numbers using Xorshift algorithm.
+				var Ru = random();
+				sessionStorage.k = keynum;
+				document.forms['login']['Au'].value = XorKu(Ru, keynum);
+				document.forms['login']['Uh'].value = Uh(Key(0), document.forms['login']['ID'].value);
+				sessionStorage.Ru = Ru >>> 0;
+				sessionStorage.Bu = parseInt(SHA256(sessionStorage.Ru).substr(-8), 16) >>> 0;
+				sessionStorage.j = Number(0);
+				document.forms['login'].action = 'login2.php'
+				document.forms['login'].submit();
+			}
+			function NewAccount(keynum)
+			{
+				sessionStorage.k = keynum;
+				document.forms['login']['Kd'].value = Key(keynum);
+				document.forms['login']['Uh'].value = Uh(Key(0), document.forms['login']['ID'].value);
+				document.forms['login'].action = 'new_account.php'
+				document.forms['login'].submit();
+			}
+		</script>
+		<script>
+			function ClearLocalStorage()
+			{
+				localStorage.clear()
+				document.forms['login']['ID'].value = '';
+				document.getElementById('keys').value = 'No keys in localStorage.';
+			}
+			function ClearDefaultUserID()
+			{
+				localStorage.slwp_default_userid = document.forms['login']['ID'].value = '';
+			}
+			function SetDefaultUserID()
+			{
+				localStorage.slwp_default_userid = document.forms['login']['ID'].value;
+			}
+			function ToggleHidden(field, button)
+			{
+				var f = document.getElementById(field);
+				var b = document.getElementById(button);
+				if (f.type == 'password')
+				{
+					f.type = 'text';
+					b.value = 'Hide';
+				}
+				else
+				{
+					f.type = 'password';
+					b.value = 'Unhide';
+				}
+			}
+			function ToggleKeys(button)
+			{
+				var b = document.getElementById(button);
+				if (b.value == 'Show')
+				{
+					document.getElementById('keys').value = localStorage.Z;
+					b.value = 'Hide';
+				}
+				else
+				{
+					document.getElementById('keys').value = 'Keys loaded in localStorage.';
+					b.value = 'Show';
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<img src="XORkey logo RGB.png" height=150px>
+		<h1>Secure Login without Passwords</h1>
+			<input id="k"  name="k"  type="password" hidden>
+		<form name="login" method="post">
+			<input id="Uh" name="Uh" type="password" hidden>
+			<input id="Au" name="Au" type="password" hidden>
+			<input id="Kd" name="Kd" type="password" hidden>
+			<div class=text>
+				<label for="ID">UserID</label><input id="ID" name="ID" type="password" placeholder='Give UserID' >
+				<input id=jeckal type=button value=Unhide onclick="ToggleHidden('ID', 'jeckal');">
+				<input id="default_userid" type=button value="Set as default" onClick="SetDefaultUserID();">
+				<input type=button value="Clear default UserID" onclick="ClearDefaultUserID(); ">
+			</div>
+		</form>
+		<div class=text>
+			<label for='keyring'>Key Ring</label><input id="keyring" type="file">
+		</div>
+		<div class=text>
+			<label for='keys'>Keys</label>
+			<input id='show' type=button value="Show" onClick="ToggleKeys('show');">
+			<output id="keys">No keys in localStorage.</output>
+		</div>
+		<script>
+			function handleFileSelect(evt) {
+				var files = evt.target.files; // FileList object
+
+				for (var i = 0, f; f = files[i]; i++) {
+					var reader = new FileReader();
+					reader.onload = (function(theFile) {
+						return function(e) {
+							var lines = reader.result.toString().split('\n');
+							var key_ring = new Array();
+							for (var l in lines)
+							{
+								if (lines[l].length > 0)
+									key_ring.push(lines[l]);
+							}
+							localStorage.setItem("Z", key_ring.join(";"));
+						};
+					})(f);
+					reader.readAsText(f);
+				}
+				document.getElementById("keys").value = "Keys loaded in localStorage.";
+			}
+			document.getElementById('keyring').addEventListener('change', handleFileSelect, false);
+		</script>
+		<br>
+		<input type=button value="Clear local Storage" onclick="ClearLocalStorage();">
+		<script>
+			if (localStorage.slwp_default_userid != undefined)
+				document.getElementById("ID").value = localStorage.slwp_default_userid;
+			if (localStorage.Z != undefined)
+				document.getElementById("keys").value = "Keys loaded in localStorage.";
+		</script>
+		<hr>
+		<input id=slwp type=button value="Login with Keypad" onClick="DisplayKeys(true, 'slwpkeypad', 'StartLogin')">
+		<input id=slwp type=button value="New Login" onClick="DisplayKeys(false, 'slwpkeypad', 'NewAccount')">
+		<div class=keypad>
+			<output id=slwpkeypad></output>
+		</div>
+	</body>
+</html>

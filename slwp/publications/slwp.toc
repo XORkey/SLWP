@@ -1,0 +1,92 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{4}
+\contentsline {subsection}{\numberline {1.1}On human behavior}{4}
+\contentsline {subsection}{\numberline {1.2}A new login approach}{4}
+\contentsline {section}{\numberline {2}General description}{5}
+\contentsline {subsection}{\numberline {2.1}A new login scheme}{5}
+\contentsline {subsection}{\numberline {2.2}Storing your keys}{5}
+\contentsline {subsection}{\numberline {2.3}Computers and links}{6}
+\contentsline {subsubsection}{\numberline {2.3.1}Computer roles}{6}
+\contentsline {subsubsection}{\numberline {2.3.2}Secure links}{6}
+\contentsline {subsection}{\numberline {2.4}Logging in}{7}
+\contentsline {subsubsection}{\numberline {2.4.1}Part I}{7}
+\contentsline {subsubsection}{\numberline {2.4.2}Part II}{7}
+\contentsline {subsection}{\numberline {2.5}Keys}{8}
+\contentsline {subsubsection}{\numberline {2.5.1}On site keys and user keys}{8}
+\contentsline {subsubsection}{\numberline {2.5.2}Key lifetime}{8}
+\contentsline {section}{\numberline {3}Keys}{9}
+\contentsline {subsection}{\numberline {3.1}Secret keys}{9}
+\contentsline {subsubsection}{\numberline {3.1.1}Array of Secret keys}{9}
+\contentsline {subsubsection}{\numberline {3.1.2}Terminated accounts}{10}
+\contentsline {subsubsection}{\numberline {3.1.3}Expired accounts}{10}
+\contentsline {subsection}{\numberline {3.2}Site keys}{10}
+\contentsline {subsection}{\numberline {3.3}User keys and key rings}{11}
+\contentsline {subsubsection}{\numberline {3.3.1}Storing user keys in a key ring}{11}
+\contentsline {subsubsection}{\numberline {3.3.2}Copying key rings}{11}
+\contentsline {subsubsection}{\numberline {3.3.3}Irretrievably lost keys and key rings}{11}
+\contentsline {subsection}{\numberline {3.4}Certificates and key pairs}{12}
+\contentsline {subsection}{\numberline {3.5}Key lengths}{12}
+\contentsline {subsubsection}{\numberline {3.5.1}Minimum key length}{12}
+\contentsline {subsubsection}{\numberline {3.5.2}Maximum key length}{13}
+\contentsline {section}{\numberline {4}Secure login for dummies}{14}
+\contentsline {subsection}{\numberline {4.1}Computer roles}{14}
+\contentsline {subsection}{\numberline {4.2}Keys}{14}
+\contentsline {subsection}{\numberline {4.3}User ID hash}{14}
+\contentsline {subsection}{\numberline {4.4}Logging in}{14}
+\contentsline {subsubsection}{\numberline {4.4.1}Step 1}{14}
+\contentsline {subsubsection}{\numberline {4.4.2}Step 2}{15}
+\contentsline {subsubsection}{\numberline {4.4.3}Step 3}{15}
+\contentsline {subsubsection}{\numberline {4.4.4}Step 4}{15}
+\contentsline {subsubsection}{\numberline {4.4.5}Step 5}{15}
+\contentsline {section}{\numberline {5}Logging in}{16}
+\contentsline {subsection}{\numberline {5.1}User Identification}{16}
+\contentsline {subsubsection}{\numberline {5.1.1}The identication value}{16}
+\contentsline {subsubsection}{\numberline {5.1.2}Basic construction}{16}
+\contentsline {subsubsection}{\numberline {5.1.3}Fortifying $U_h$}{17}
+\contentsline {subsubsection}{\numberline {5.1.4}Multiple $U_h$ values for an account}{17}
+\contentsline {subsubsection}{\numberline {5.1.5}$U_h$ security aspects}{18}
+\contentsline {subsection}{\numberline {5.2}Applying for an account}{18}
+\contentsline {subsubsection}{\numberline {5.2.1}Step 1: A new user makes an application}{18}
+\contentsline {subsubsection}{\numberline {5.2.2}Step 2: Response by the web server}{19}
+\contentsline {subsubsection}{\numberline {5.2.3}Step 3: What have we here?}{19}
+\contentsline {subsubsection}{\numberline {5.2.4}Step 4: Here are the results}{19}
+\contentsline {subsubsection}{\numberline {5.2.5}Step 5: New account confirmed to the user}{20}
+\contentsline {subsection}{\numberline {5.3}Login scheme}{20}
+\contentsline {subsubsection}{\numberline {5.3.1}Step 1: Starting a login procedure}{20}
+\contentsline {subsubsection}{\numberline {5.3.2}Step 2: Site key lookup and key matching attempts}{21}
+\contentsline {paragraph}{\numberline {5.3.2.1}Account status}{21}
+\contentsline {paragraph}{\numberline {5.3.2.2}Computing index starting value}{21}
+\contentsline {subsubsection}{\numberline {5.3.3}Step 3: Login server actions}{21}
+\contentsline {subsubsection}{\numberline {5.3.4}Step 4: User verifies site key}{23}
+\contentsline {subsubsection}{\numberline {5.3.5}Step 5: Site verifies user key}{23}
+\contentsline {subsubsection}{\numberline {5.3.6}Step 6: User key replacement}{23}
+\contentsline {section}{\numberline {6}Schemes}{25}
+\contentsline {subsection}{\numberline {6.1}Applying for an account}{25}
+\contentsline {subsection}{\numberline {6.2}Logging in}{25}
+\contentsline {subsubsection}{\numberline {6.2.1}Simplest login scheme}{26}
+\contentsline {subsubsection}{\numberline {6.2.2}Login scheme with old key}{27}
+\contentsline {subsubsection}{\numberline {6.2.3}Login scheme with wrong key}{28}
+\contentsline {section}{\numberline {7}Security proof}{29}
+\contentsline {subsection}{\numberline {7.1}On random numbers}{29}
+\contentsline {subsection}{\numberline {7.2}Eavesdropping the connections}{29}
+\contentsline {subsubsection}{\numberline {7.2.1}Applying for an account}{29}
+\contentsline {paragraph}{\numberline {7.2.1.1}Values passing the web server}{29}
+\contentsline {paragraph}{\numberline {7.2.1.2}Values passing the login server}{30}
+\contentsline {paragraph}{\numberline {7.2.1.3}Values passing the accounts server}{30}
+\contentsline {subsubsection}{\numberline {7.2.2}Logging in}{30}
+\contentsline {paragraph}{\numberline {7.2.2.1}Values passing the web server}{30}
+\contentsline {paragraph}{\numberline {7.2.2.2}Values passing the login server}{31}
+\contentsline {subsection}{\numberline {7.3}Manipulating values}{32}
+\contentsline {section}{\numberline {8}Implementation}{33}
+\contentsline {subsection}{\numberline {8.1}Algorithms}{33}
+\contentsline {subsubsection}{\numberline {8.1.1}Userid hashes}{33}
+\contentsline {subsubsection}{\numberline {8.1.2}New account}{33}
+\contentsline {subsubsection}{\numberline {8.1.3}User login program}{33}
+\contentsline {subsubsection}{\numberline {8.1.4}Web server program}{34}
+\contentsline {subsubsection}{\numberline {8.1.5}Login server program}{34}
+\contentsline {subsection}{\numberline {8.2}Login webpages}{36}
+\contentsline {subsubsection}{\numberline {8.2.1}First page}{36}
+\contentsline {subsubsection}{\numberline {8.2.2}Initial PHP page}{36}
+\contentsline {subsubsection}{\numberline {8.2.3}Second PHP page}{36}
+\contentsline {section}{\numberline {9}Conclusions}{37}
+\contentsline {subsection}{\numberline {9.1}Advantages}{37}

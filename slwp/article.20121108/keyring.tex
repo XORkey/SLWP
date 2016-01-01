@@ -1,0 +1,64 @@
+\section{Storing user keys in a keyring}
+\label{sec:keyring}
+Keys for the user are collected and stored in a keyring.
+The keyring is a block of at least 100 random numbers with 128 bits, most of them dummy keys.
+
+\subsection{Creating a keyring}
+A keyring is created by using a random generator of sufficient quality,
+which generates 100 random numbers of 128 bits.
+These random numbers are then written to a file on a storage device.
+Key number zero is used to identify the keyring and will never change after its creation.
+The other 99 keys are dummies (random bits with no meaning whatsoever).
+\par
+Nothing else is stored in a keyring, as to minimize the information stored there.
+Since all bits are entirely random%
+---for dummies and real keys---%
+a keyring stores no information whatsoever.
+
+\subsection{Encrypting a keyring}
+Optionally but preferably,
+the keyring on the storage device can be encrypted, to further enhance security.
+The unencrypted values should never be written to a storage device and only be kept in volatile memory.
+An encrypted keyring is of no value to a hacker without knowledge with which keys to decrypt it.
+It is up to the user to remember this.
+\par
+The keyring can be encrypted by using the keys in the keyring itself.
+The user may select any number of different random key numbers from its ring,
+which are numbered from 1 to 99.
+Suppose two keys are used.
+Then,
+prepending a zero for key numbers less than 10,
+this yields a 4 digit PIN code for the keyring.
+\par
+Using the keys (in selected order) to encrypt the keyring, the values of the keys are obscured.
+Select the first key from the keyring by specifying its index $j$.
+For each key $K[i]$ (with $i$ running from 0 to 99), except $K[j]$, use XOR:
+\[K[i]=\XOR{K[i]}{K[j]}\]
+\par
+To decrypt, reverse the order of the selected keys and do the same.
+This will render the original keyring.
+
+\subsection{Copying keys and keyrings}
+A keyring can be freely copied to other devices, so all keys are available there as well.
+The keys of one keyring can be copied to other keyrings, in different locations.
+It is up to the user to keep a registration of this.
+\par
+Encrypted keyrings can be stored in a public place, for easy access, and act as a backup.
+A dedicated webserver can be employed for storing encrypted keyrings,
+which can be used to restore lost keyrings.
+They can also be used to login when away from home with no access to your own keyring.
+These temporary keyrings should be discarded when logging out.
+
+\subsection{Irretrievably lost keys and keyrings}
+When a keynumber is forgotten and no record of it can be found,
+the key must be considered lost.
+\par
+As the user has supplied websites with personal information,
+it may be easy to regain login capabilities by just asking for a new key,
+provided a username and maybe some other information can be given.
+Selecting a free keynumber on the keyring and replacing that key with the new one should restore the ability to login.
+\par
+Keyrings can become unusable or lost in two situations:
+the device holding it is defective (like a harddisk crash) and no backup has been made,
+or the encryption cannot be reversed (PIN forgotten).
+In both cases, the user has to start over and create a new keyring, containing only dummy keys.

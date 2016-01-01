@@ -1,0 +1,460 @@
+%
+% $Header: /usr/local/src/slwp/article/tex/login.tex,v 1.9 2014/02/01 13:15:42 timo Exp $
+%
+% AUTHOR:	ing. T.M.C. Ruiter
+%
+\Section{Logging in}
+\label{logging_in}
+After the key ring is selected and a key number ($k$) chosen,
+and with the user's identification string,
+the login process can commence.
+\Subsection{User Identification}
+\label{sec:user_ids}
+When logging in,
+the user will need something as a means of identification.
+Instead of sending a traditional alphanumeric userid,
+we send a specially crafted user hash value,
+henceforth called $U_h$.
+This value will be used by the web server to identify the user,
+and the web server will only store hashes in its user database.
+It is chosen once per website and can remain the same as long as the key ring exists.
+\subsubsection{The identification value}
+The user identification value is the combination of several obligatory and optional values:
+the key ring identifier,
+the hostname of the URL,
+a user identification string
+(comparable with the traditional ``userid''),
+a biometric value,
+and the value supplied by a physical device like a hardware token.
+The first two ingredients are always used;
+the identification string is optional if a biometric value is used, but mandatory otherwise;
+the last two may be added for more flavor.
+If a biometric value is used,
+it may be used by itself to augment the hash value,
+or as a replacement of the user identification string.
+\par
+The most basic form of the user identification string is to give a name
+(real or imaginary);
+in this case in the form of a string of letters.
+There are no restrictions or constraints as to the contents of this value,
+except that it must not be empty.
+This means that it may be the same and conveniently reused for each and every website.
+Another form may include biometric features,
+like an iris scan,
+a fingerprint,
+or hand geometry.
+\subsubsection{Basic construction}
+The hash that is sent to the website to identify the user,
+is constructed as follows.
+Compute the \SHA\ hash of the key ring identifier $Z[0]$
+\[H_0=\HSHA{Z[0]}\]
+Then,
+compute the \SHA\ of a concatenation of the user identification string
+and the domain name part of the URL.
+\[H_1=\HSHA{\mathtt{ID+domain\_name}}\]
+Then, compute the final 256-bit value $U_h$ by means of an \XOR\ operation:
+\[U_h=\xor{H_0}{H_1}\]
+This is $U_h$ in its basic form.
+\subsubsection{Fortifying $U_h$}
+The $U_h$ value may be strengthened in several ways, always computing $H_0$ as before:
+\[H_0=\HSHA{Z[0]}\]
+\par
+If a biometric value is used it may replace the user identification string when calculating $H_1$:
+\[H_1=\HSHA{\mathtt{bio\_value+domain\_name}}\]
+\[U_h=\xor{H_0}{H_1}\]
+Instead of replacing the userid,
+it can also be added as a separate value:
+\[H_1=\HSHA{\mathtt{ID+domain\_name}}\]
+\[H_2=\HSHA{\mathtt{bio\_value}}\]
+\[U_h=\xor{\xor{H_0}{H_1}}{H_2}\]
+\par
+A value from a hardware token can be added as well:
+\[H_1=\HSHA{\mathtt{ID+domain\_name}}\]
+\[H_2=\HSHA{\mathtt{token\_value}}\]
+\[U_h=\xor{\xor{H_0}{H_1}}{H_2}\]
+\par
+Finally,
+things can be combined multiple times
+to physically bind an account to two people:
+\[H_1=\HSHA{\mathtt{ID+domain\_name}}\]
+\[H_2=\HSHA{\mathtt{bio\_value1+bio\_value2}}\]
+\[U_h=\xor{\xor{H_0}{H_1}}{H_2}\]
+Or strenghten it further by adding a hardware token also:
+\[H_1=\HSHA{\mathtt{ID+domain\_name}}\]
+\[H_2=\HSHA{\mathtt{bio\_value1+bio\_value2}}\]
+\[H_3=\HSHA{\mathtt{token\_value}}\]
+\[U_h=\xor{\xor{\xor{H_0}{H_1}}{H_2}}{H_3}\]
+\subsubsection{Multiple $U_h$ values for an account}
+Websites may be accessed from different devices like a tablet, a smart phone, or a PC.
+Each device may offer different means of collecting biometric values, if at all.
+Therefore, it may be convenient for a website to offer the user to have multiple $U_h$ values for his account.
+\par
+Most PCs are equipped with a USB port; a smart phone may have a fingerprint reader.
+A website may allow the user to either use a hardware token plugged into the PC,
+or to scan its fingerprint when using its mobile device.
+Each value yields a different $U_h$ value,
+but both may be linked to the same account.
+\subsubsection{$U_h$ security aspects}
+This hash value is a combination of something the user has,
+or has access to
+(the key ring)
+and something the user knows
+(the chosen userid)
+or is uniquely his
+(some biometric value)
+and optionally something the user physically possesses
+(a hardware token).
+\par
+Using the key ring identifier $Z[0]$ ties $U_h$ with the key ring.
+This way, you need the complete key ring for logging in, not just the right key for the website.
+Combining $H_0$ with other values makes it hard to match a stolen set of hashes from a web server
+with a set of key rings from a key ring server.
+\par
+The userid can be anything, but must not be empty; otherwise the key ring identifier is exposed.
+The value
+\[\xor{\xor{U_h}{\HSHA{\mathtt{domain\_name}}}}{\HSHA{\mathtt{other\_domain\_name}}}\]
+would be a valid $U_h$ for ${\mathtt{other\_domain\_name}}$.
+Although it is more convenient for the user to have no userid at all,
+and a stolen $U_h$ by itself is not enough for logging in,
+the possibility to infer other $U_h$ values from a given $U_h$ is not a desired feature.
+\par
+Combining a hash of the domain name from the URL with the user identification string
+(even if these are the same for both sites)
+ensures three things.
+\begin{itemize}
+\item It makes the resulting $U_h$ value unique for each website.
+A $U_h$ value obtained from one site is always invalid for another site.
+\item Accounts on different websites cannot be correlated and traced back to a single user,
+so colluding websites cannot link accounts.
+\item A $U_h$ value for a phishing site will be computed using \emph{that} site's URL,
+instead the URL of the site it mimics;
+the $U_h$ values will be useless,
+and therefore phishing itself.
+\end{itemize}
+\par
+If a hardware token is used there are two possibilities.
+If the value provided by the token is fixed by nature then the resulting hash is the same each time it is used.
+In that case the resulting $U_h$ may be used as a key of the user database.
+If the token value is different each time
+(e.g. time based)
+then the value $\xor{U_h}{H_2}$ should be used as the key,
+where $H_2$ is recomputed at the server side.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\SubsectionWithoutText{Applying for an account}
+\label{sec:applying}
+%See section~\vref{scheme:new_account} for an accompanying flow diagram.
+\subsubsection{Step 1: A new user makes an application}
+\label{sec:apply_step1}
+When a new user applies for an account,
+apart from any personal details the website is interested in,
+he presents the web server with its hash value $U_h$.
+Furthermore,
+the user should select the index ($d$) of a hitherto unused key.
+Then, the user generates a new dummy key
+\[K_d=\F{Random}{n}\]
+and remember it and the key index $d$ for later use.
+\par
+Although this is a dummy key that is not used for logins
+(it will even be replaced after a successful application for an account)
+it still needs to be secured,
+since it is used in the application process.
+Eventually,
+this key needs to find its way to the login server,
+so we will encrypt it with its public encryption key $K_{le}$:
+\[K_h=\ERSA{K_d}{K_{le}}\]
+The user will then send $U_h$, $K_h$, and its age, shoe size, and gender to the web server.
+
+\subsubsection{Step 2: Response by the web server}
+\label{sec:apply_step2}
+The user's particulars and his identification hash value $U_h$ are relayed to the accounts server,
+which will create the account.
+The web server will request values for a new user from the login server,
+by forwarding the dummy key ($K_h$),
+and indicating how long the keys should be
+($n$ bits long).
+
+\subsubsection{Step 3: What have we here?}
+\label{sec:apply_step3}
+The login server will do the following, all inside the HSM:
+\begin{enumerate}
+\item Generate a $n$-bit pseudo-random site key $K_s$ for the user.
+\[K_s=\F{Random}{n}\]
+This key is then prepaired for use by the accounts server.
+This server needs to send keys encrypted with $K_{le}$, the public encryption key of the login server,
+which we will do here beforehand:
+\[K_y=\ERSA{K_s}{K_{le}}\]
+\item Encrypt the $K_s$ with the current Secret key $S[0]$ to yield the new user key $K_u$.
+\[K_u=\EAESm{K_s}{S[0]}\]
+\item The (2048 bit) $K_h$ value is decrypted with the private key $K_{LE}$ to yield $K_d$:
+\[K_d=\DRSA{K_h}{K_{LE}}\]
+which is subsequently used to encrypt $K_u$:
+\[K_x=\xor{K_u}{K_d}\]
+\end{enumerate}
+Both values $K_x$ and $K_y$ are returned to the web server.
+\subsubsection{Step 4: Here are the results}
+\label{sec:apply_step4}
+The web server will then relay the new encrypted key $K_y$ and $U_h$ to the accounts server.
+The accounts server will take $K_y$
+and update the new account with it.
+These encrypted keys can be sent to the login server by the web server during logins,
+without further processing.
+
+\subsubsection{Step 5: New account confirmed to the user}
+\label{sec:apply_step5}
+The encrypted user key $K_x$ is presented to the user,
+so it can store it in its key ring.
+The user can decrypt its new key with by using $K_d$ it used originally:
+\[K_u=\xor{K_x}{K_d}\]
+Finally, $K_u$ is imported in the key ring with something like
+\[Z[d]=\xor{(\F{Random}{128-n}\ \mathbf{<<}\ n)}{K_u}\]
+The dummy key at $Z[d]$ is overwritten with 128 random bits,
+of which the last $n$ bits contain the new key $K_u$.
+
+\Subsection{Login scheme}
+\label{sec:full_login}
+The procedure described below to login is the full login scheme.
+\par
+Each website has its own key on the key ring.
+Selection of the right key can be done manually, by remembering or looking it up.
+It is likely, however, that this key selection process is automated by key ring management software.
+The key of a website can be linked to the hash of the website's certificate ($C_1$),
+which was used to setup the TLS session.
+The hash of $C_1$ can be used to find the right index $k$ for the key ring.
+%See sections~\vref{scheme:simplest_login},
+%\vref{scheme:login_with_old_key},
+%and \vref{scheme:login_with_wrong_key} for explanatory flow diagrams.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Step 1: Starting a login procedure}
+\label{sec:login_step1}
+The user's login program has to compute the following:
+\begin{enumerate}
+\item The userid hash $U_h$ (see section \ref{sec:user_ids}).
+\item An $n$-bit%
+\footnote{Here, $n$ is conveyed to the user through the login webpage.}
+pseudo-random number $R_u$:
+\[R_u=\F{Random}{n}\]
+\item The user key $K_u$ is taken from the key ring $Z$ at index $k$.
+As this is a 128-bit value,
+take the least significant $n$ bits of it.
+The pseudo-random number and the website's certificate are encrypted with it to get the value $A_u$:
+\[K_u=\mod{Z[k]}{2^n}\]
+\[A_u=\EAES{R_u + C_1}{K_u}\]
+\item The web server will return a hash value of the user's pseudo-random value.
+To be able to verify this hash,
+we compute our own hash $B_u$ to verify it with:
+\[B_u=\xor{K_u}{\HSHAm{R_u}}\]
+\end{enumerate}
+The special userid hash $U_h$ and the encrypted pseudo-random number $A_u$ are sent to the web server.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Step 2: Site key lookup and key matching attempts}
+\label{sec:login_step2}
+The web server runs a login procedure%
+%, see Algorithm~\vref{alg:web server_login}
+.
+\par
+After receiving $U_h$ from the user, the encrypted site key $K_y$ needs to be looked up.
+A query with $U_h$ is sent by the web server to the accounts server.
+If a match is found, $K_y$ is returned;
+otherwise, $K_y$ is set to zero, indicating that no such record exists.
+In the latter case, the values $B_s$ and $P_s$ are both set to zero as well, and returned to the user.
+The user needs to rethink his actions and start over.
+\par
+Now,
+an iterative process starts,
+trying to find the right Secret key to log the user in.
+The web server will send five values to the login server:
+\begin{itemize}
+\item The user's identification string $A_u$;
+\item The corresponding encrypted site key $K_y$;
+\item A boolean value indicating whether the user is capable of and willing to perform a verify operation using a public signing key ($v$);
+\item The number of bits in the user and site keys ($n$);
+\item A Secret key index $i$.
+\end{itemize}
+This will be repeated
+(increasing index $i$),
+until a match is found,
+or no more keys can or will be tried.
+\paragraph{Account status}
+Along with $K_y$ the account status $s$ may also be returned.
+This status may indicate whether we allow the user to login or not.
+If something is required from the user
+(payment, or otherwise)
+we might want to expire the account until the requirement is satisfied.
+We use the value $\mathtt{MAX\_ACTIVE\_KEYS}$ to limit the number of keys we want to try.
+\par
+If $\mathtt{MAX\_ACTIVE\_KEYS}$ is set to 1 then accounts will expire immediately when a new Secret key is inserted.
+When set to 3,
+there will be a grace period of 2 times the Secret keys replacement interval.
+This means that login is granted for this time,
+in which the user can pay his debts.
+If that does not happen,
+the account will expire.
+\par
+Users that have not logged in for a while,
+but have paid their monthly fees,
+can still login without problems because all Secret keys will be tried for such logins.
+\paragraph{Computing index starting value}
+Finally, we could consider reducing the number of login attempts.
+Instead of always starting with index $0$ for Secret key $S[0]$,
+the date of the last login of the user can be taken into account.
+If the query with $U_h$ as key,
+that is sent to the accounts database,
+would also return the last login date,
+a starting key index $i$ could be computed.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Step 3: Login server actions}
+\label{sec:login_step3}
+The login server is a processor of login values and calls a function of the HSM to compute them
+%(see Algorithm~\vref{alg:hsm})%
+.
+\par
+In case $i$ is less than $m$
+(the number of stored Secret keys, see section~\vref{sec:secret_keys})
+the login server calculates the following, all within the HSM:
+\begin{enumerate}
+\item Decrypt the site key, using the private encryption key $K_{LE}$:
+\[K_s=\mod{\DRSA{K_y}{K_{LE}}}{2^n}\]
+\item Temporarily, regenerate a user key, using the same algorithm as when the key was originally generated:
+\[K_u=\EAESm{K_s}{S[i]}\]
+with $S[i]$ the $i$-th Secret key stored in the HSM.
+\item With the user key $K_u$, decrypt the pseudo-random and the certificate the user has sent:
+\[R_u + C_1=\DAES{A_u}{K_u}\]
+and compare certificate $C_1$ with the website's own certificate $C_2$
+(stored earlier, in a separate process).
+If these two match,
+it is a legitimate login request;
+otherwise, the website is relaying---willingly or unwillingly---requests for other websites.
+\item Calculate a hash with which the user can verify we own the site key $K_s$ and a corresponding Secret key $S[i]$.
+Hide this value behind $K_u$:
+\[B_s=\xor{K_u}{\HSHAm{R_u}}\]
+If the user is able to verify the signature of the login server,
+then the value $B_s$ will be replaced with a signature thereof with the signing key $K_{LS}$:
+\[B_s=\SRSA{B_s}{K_{LS}}\]
+We use and send only the signature, not the $B_s$ value also.
+Finally, we encrypt this value using the user random $R_u$ as key:
+\[B_x=\EAES{B_s}{R_u}\]
+\item To be able to verify that the user owns and knows his user key $K_u$,
+that he is not just sending a replay of some earlier successfull login sequence,
+and will be unable to lie about the correctness of the hash of the pseudo-random the web server will send,
+we calculate a challenge for the user.
+\par
+If the index $i$ equals zero, generate a pseudo-random value
+\[R_s=\F{Random}{n}\]
+otherwise, compute
+\[R_s=\EAES{K_s}{S[0]}\]
+which will be the new key for the user.
+\par
+We then encrypt $R_s$ to a value $P_s$ the user can decrypt using its key:
+\[P_s=\xor{K_u}{R_s}\]
+This value will be different for each time the loop is executed,
+even if the same new key is transmitted.
+This is because $K_u$ will change each time,
+as it is the encryption of $K_s$ with a different secret key $S[i]$.
+\par
+Then encrypt $P_s$ to $P_x$ with the user random:
+\[P_x=\EAES{P_s}{R_u}\]
+\item We now know both random values.
+If the user knows them also
+(by successfully decrypting $P_x$)
+he can prove this by sending the \XOR\ of $R_u$ and the hash of $R_s$.
+\[Q_s=\xor{R_u}{\sha{R_s}}\]
+This is the value that the web server should compare.
+\end{enumerate}
+The HSM will produce the values $B_x$,
+$P_x$,
+and $Q_s$ as a result of the calculations and the login server will send them back to the web server,
+as an answer to the five values it was given ($A_u$, $K_y$, $n$, $v$, and $i$).
+The HSM will delete all temporary values from memory immediately afterwards,
+and remember only its Secret keys.
+\par
+Should index $i$ equal $m$, then the array of Secret keys is exhausted.
+If we reach this situation, we cannot log the user in since all possible attempts have failed.
+Return zero values for $B_s$, $P_s$, and $Q_s$ to indicate this.
+
+%------------------------------------------------------------------
+\subsubsection{Step 4: User verifies site key}
+\label{sec:login_step4}
+The web server sends $B_x$ and $P_x$ to the user.
+If both are zero, the login has failed and the user should return to step 1.
+It is advisable for the user to choose different values for the next try.
+\par
+If $B_x$ is nonzero,
+decrypt it to the value $B_s$ with
+\[B_s=\DAES{B_x}{R_u}\]
+\par
+If the user is not able to verify a digital signature,
+just compare values $B_u$ and $B_s$.
+Otherwise,
+it should try to verify the combination of $B_u$
+(the hash over $R_u$)
+and the signature thereof,
+which is in $B_s$:
+\[\VRSA{B_u+\xor{B_s}{K_u}}{K_{ls}}\]
+\par
+If the two values do not match,
+the user either has selected the wrong key or is using an old key.
+Logging in with an old key every now and then is inherent to this scheme,
+as most Secret keys will be changed at regular intervals.
+\par
+To indicate that no match has been found, we send
+\[Q_u=\mathtt{0x0}\]
+($n$ zeroes) to the web server.
+The web server will need to start over, and send values $A_u$, $K_y$, $n$, $v$, and $i+1$ to the login server.
+So, back to step 3.
+\par
+After two unsuccessful attempts the user may be asked
+whether he likes to abort the login procedure or continue trying with this key.
+To abort, use:
+\[Q_u=\mathtt{0x1}\]
+and send this to the web server
+(instead of $\mathtt{0x0}$).
+We return to step 1.
+
+%------------------------------------------------------------------
+\subsubsection{Step 5: Site verifies user key}
+\label{sec:login_step5}
+If $B_s$ matches $B_u$, then the web server has found a Secret key for the user.
+The user can now prove it has control over its user key by computing $R_s$ and $Q_u$:
+\[P_s=\DAES{P_x}{R_u}\]
+\[R_s=\xor{P_s}{K_u}\]
+\[Q_u=\xor{R_u}{\HSHAm{R_s}}\]
+which is sent to the web server as proof.
+If the web server accepts $Q_u$ as correct it will log the user in.
+\par
+If the web server receives a value $Q_u$ that does \emph{not} match,
+something fishy is going on.
+Further attempts for this account, or from that source should be scrutinized.
+
+%------------------------------------------------------------------
+\subsubsection{Step 6: User key replacement}
+\label{sec:login_step6}
+\label{sec:conditional_key_replacement}
+If this attempt to login was not the first with this key,
+the web server may have sent the user a new key in $R_s$ (instead of a pseudo-random value).
+The user should store this new key in the key ring, overwriting the old key the user has just used:
+\[Z[k]=\xor{(\F{Random}{128-n}\ \mathbf{<<}\ n)}{R_s}\]
+where all bits of $Z[k]$ are replaced.
+\par
+For most websites,
+restoring user keys that refer to the most recent Secret key $S[0]$ will be done without hesitation.
+For some,
+refreshing keys will be done only when certain conditions are met,
+like payment of monthly fees,
+a certain number of reviews written,
+or some amount of data uploaded.
+Until then,
+logging in with a valid
+(but in this context a typically `old')
+key is granted.
+But if, for instance, payment is overdue, the key will expire and logging in is no longer possible.
+\par
+To deny a user a new key, and to indicate to the user that no new key is sent,
+the website will replace the new key in $P_s$ with $A_u$
+\[P_s = A_u\]
+and return this value to the user.
+In this case,
+no keys should be decrypted or overwritten.

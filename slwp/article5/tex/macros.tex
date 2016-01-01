@@ -1,0 +1,12 @@
+\newcommand{\E}[2]{\ensuremath{\mathtt{#1_{#2}}}}
+\newcommand{\AES}{\E{AES}{256}}
+\newcommand{\SHA}{\E{SHA}{256}}
+\newcommand{\RSA}{\E{RSA}{1024}}
+\newcommand{\MDV}{\E{MD5}{}}
+\newcommand{\XOR}{\E{XOR}{}}
+\newcommand{\F}[2]{\texttt{#1}(#2)}
+\newcommand{\xor}[2]{#1\oplus#2}
+\newcommand{\mod}[2]{#1\ \textbf{mod}\ #2}
+\newcommand{\sha}[1]{\mod{\F{\SHA}{#1}}{2^{n}}}
+\newcommand{\XORkey}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern +.05em{\raisebox{-.3ex}{\em key}}}}}}
+\newcommand{\XORlogo}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern -1.01em{\raisebox{-1.12ex}{\em key}}}}}}

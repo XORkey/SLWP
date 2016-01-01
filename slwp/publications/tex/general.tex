@@ -1,0 +1,170 @@
+%\section{Login for dummies}
+%Not that you are one if you decide to read this section.
+\Section{General description}
+It serves as a general description of the login process,
+without going into technical details too much.
+
+\Subsection{A new login scheme}
+Userids tend to be in short supply for people with first names like John, Peter, and Chris,
+or surnames like Jones or Smith.
+This is true for people in almost any country.
+And the larger the site, the rarer available userids.
+\par
+Passwords tend to be weak,
+as people choose short, real-life words, like things or names.
+Not that people are not willing, but remembering passwords that are too long or too difficult is not easy.
+It is very frustrating when you cannot login because you have forgotten your password,
+or,
+just when you are starting to remember it,
+you need to change it again.
+\par
+As a radical measure, we do away with all this!
+\par
+Instead of userids, the website holds hashes based on key ring identifiers.
+Instead of a password for an account, the website holds one part of a key, of which you have the other part,
+like the broken locket Annie clings to in the musical that bears her name.
+Your key is different from the key the website has, but they are related to each other.
+It is not possible to login with the key that is stored on the website;
+you can only login with your personal key, which is verified with the key from the website.
+\par
+We will let the computers
+(yours, the one running the website, and another one dedicated for logins)
+do what they do best: compute.
+Give them some random bits to chew on, and they are in heaven.
+We will let humans (you, your neighbor and your fellow earthlings) do what they do best:
+remembering small ordinal numbers.
+
+\Subsection{Storing your keys}
+Keys are just long strings of random bits with no information whatsoever.
+Your keys are personal and are stored locally.
+\par
+Imagine a key ring,
+	not unlike your own key ring on which you have keys for your car,
+		your house,
+			shed,
+				or locker.
+This key ring has a label and 99 keys on it,
+	numbered 1 through 99.
+Instead of brass or steel,
+	these keys are made of 128 random bits each.
+The label is another 128 bits long,
+	and as random as possible,
+		like the keys.
+Instead of being on a steel ring,
+	these keys,
+		with the key ring label,
+			are written to a file on disk;
+				a blob of 100 strings of 128 bits.
+\par
+The use of keys on this key ring is not all that different from using real physical keys.
+The bits in a key are comparable with the teeth or holes of a physical key you use to unlock your home.
+You do not need to remember exactly how far the teeth need to protrude or exactly where and how deep the holes in your key need to be,
+	to be able to unlock the door;
+		you just select the right key
+			(the whole physical thing at once, with all the right teeth or holes)
+				by recognizing its form or its label.
+
+\input{tex/computers-and-links.subsec}
+
+\SubsectionWithoutText{Logging in}
+\subsubsection{Part I}
+Before starting the login process you select a key from your key ring;
+the one you know to belong to the website you are trying to login to.
+\par
+To login you don't send your key to the server.
+Instead, you generate a secret random value,
+which you encrypt with your key using a simple \XOR\ operation.
+Your key is totally random and the secret random value you encrypt with it is also, well\ldots totally random.
+Mixing these random bits gives another totally random value.
+The website will receive this value and will try to decrypt this with the key that belongs to your account
+%(we will keep you in the dark for now, about how this works).
+(as explained in detail below).
+When it has decrypted the random login value,
+it will know which secret random value you generated.
+Instead of telling you the secret random number,
+the website sends a hash value of it,
+because otherwise someone able to see the network traffic will instantly know your key.
+\par
+If the website returns a hash value matching your secret random number, you know two things.
+First, you know that the website you are talking to can successfully decrypt your random value.
+It can only do this if it has a matching key.
+Second, you know you are talking to the same site that sent you your key when you applied for an account.
+This implies that if you trusted that site then, you can trust this site now, as it can only be the same site.
+
+\subsubsection{Part II}
+%This is all great and very sophisticated, but the website wouldn't dare share your wonder about this,
+%as you may well fake your enthusiasm, and flatly lie about the correctness of the hash it has sent you.
+%To see if your claims hold,
+To confirm that you are who you claim to be,
+the website will do the same as you and send you an encrypted secret random value.
+This cryptogram can only be decrypted by someone owning the right key for the account.
+Using \XOR\ with the key you have originally selected from your key ring,
+you decrypt it.
+Then,
+using \XOR\ again,
+you combine the two random values you now have,
+and return this value to the website.
+\par
+When the website receives a value matching its secret random number, it knows two things.
+First, the user on the other side can successfully decrypt the secret random number.
+It can only do this if it has a matching key.
+Second, the website knows that this key is from the same key ring that was used when applying for an account.
+This implies that if it trusted this user then, it can trust this user now, as it can only be the same user.
+
+\SubsectionWithoutText{Keys}
+\subsubsection{On site keys and user keys}
+Beware, the icky parts start here (a bit).
+\par
+When applying for an account, a site key is created by a random generator.
+The user key is then computed as the encryption of the site key with a Secret Key, with a block cypher like \AES.
+\par
+When the user encrypts its secret random value with its key,
+it uses \XOR.
+This is a very simple and reversible encryption method.
+But as both key and value are utterly random, no information is stored in the encrypted value.
+The website needs to decrypt the value, and this can only be done with the user key.
+But the website does not store user keys,
+it stores only site keys\ldots
+\par
+%The solution to this may be a bit of a dissappointment and a cheat:
+The user key is temporarily regenerated by encrypting it again with the Secret Key.
+Once the user key is available, the random value can easily be decrypted by \XOR-ing it.
+Also, the cryptogram that is sent to the user is a random value \XOR-red with this regenerated user key.
+\par
+%The clever part,
+Importantly,
+however,
+is that all the cryptographic functions the website is required to perform take place inside a Hardware Security Module,
+or HSM for short.
+%Secret Keys can be put in the HSM and made to good use there,
+Secret Keys are stored and used in the HSM,
+but can never be retrieved from it.
+The HSM computes all values needed for the login process,
+without ever revealing the keys that are used,
+not even to a hacker with full control of the HSM.
+\par
+In the end,
+only random bits enter the HSM,
+and only random bits leave it.
+
+\subsubsection{Key lifetime}
+%Every key has its lifetime, so Secret Keys need changing every so often, as a good security measure.
+As a good security measure, Secret Keys need changing every so often.
+The same goes for keys on the user's key ring.
+\par
+The login protocol is capable of changing keys on the website and keys on the key ring,
+without any effort on the user's side.
+%Well\ldots, a little program will do it for you, without you noticing.
+\par
+Logins can be granted,
+but new keys may not be,
+which results in the expiration of an account.
+A website may deny a user new keys when payment is due,
+giving users limited login rights.
+At any time new keys can be provided again.
+\par\vspace{10mm}\noindent
+How this all works,
+how keys are used,
+what a website can do with logins,
+and more,
+can all be read in the next chapters.

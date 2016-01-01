@@ -1,0 +1,250 @@
+\section{Schemes}
+\label{sec:schemes}
+Here are some example flows for logins with $n=13$
+(random values from 0 to 8191).
+Values between parentheses are calculated but not sent.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Applying for an account}
+\label{scheme:new_account}
+Table~\vref{table:applying} shows what happens when applying for a new account
+(see section~\vref{sec:applying}).
+\begin{table}[hb]
+\label{table:applying}
+\caption{Applying for a new account}
+\begin{tabular}{|l|r|c|l|c|l|}
+\hline
+Step & User & Value & Webserver & Value & Login server\\
+\hline
+1 & & $\Longleftarrow n$ & $n=13$ & & \\
+\hline
+2 & ($K_d=4444$) & & & & \\
+  & $K_h=7707$ & $K_h \Longrightarrow$ & & & \\
+\hline
+3 & & & Create  & & \\
+  & & & account & $K_h;n \Longrightarrow$ & \\
+\hline
+4 & & & & & ($K_s=4289$) \\
+  & & & & & $K_y=1299$ \\
+  & & & & & ($K_u=1093$) \\
+  & & & & & ($K_d=4444$) \\
+  & & & & $\Longleftarrow K_x;K_y$ & $K_x=5401$ \\
+\hline
+5 & & $\Longleftarrow K_x$ & $K_s=4289$ & & \\
+\hline
+6 & $K_u=1093$ & & & & \\
+%  & & & & & \\
+\hline
+\end{tabular}
+\end{table}
+\par
+Steps:
+\begin{enumerate}
+\item	The website indicates how many bits are used for keys.
+\item	The user selects a dummy key $K_d$.
+		This value is encrypted with public key $K_{le}$
+		(a block of 2048 bits).
+\item	The webserver creates a new account.
+		It forwards $K_h$ unaltered to the login server,
+		along with $n$.
+\item	The login server calculates a new site key $K_s$,
+		and encrypts this with private key $K_{LE}$ to get $K_y$
+		(a block of 2048 bits).
+		It decrypts $K_h$ to get $K_d$.
+		Finally, it calculates $K_x$ from $K_d$ and $K_u$.
+		Values $K_y$ and $K_x$ are sent to the website.
+\item	The website decrypts $K_y$ to get $K_s$,
+		which it stores as key for the new account.
+		Value $K_x$ is sent to the user.
+\item	The user decrypts $K_x$ with $K_d$ and stores it in $Z[d]$.
+\end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Logging in}
+These are flow diagrams for successful and unsuccessful logins,
+as described in section~\vref{sec:full_login}.
+\subsubsection{Simplest login scheme}
+\label{scheme:simplest_login}
+Table~\vref{table:simplest_login} shows a login sequence with a valid and new key.
+\begin{table}[H]
+\label{table:simplest_login}
+\caption{Login with a new key}
+\begin{tabular}{|l|r|c|l|c|l|}
+\hline
+Step & User & Value & Webserver & Value & Login server\\
+\hline
+1 & & $\Longleftarrow n$ & $n=13$ & & \\
+\hline
+2 &$U_h=xyz$ && $i=-1$&&\\
+  & $(R_u=8021)$ & && & \\
+  & $A_u=1234$ & & & & \\
+  &($B_u=5432$) & $A_u ; U_h \Longrightarrow$ & $U_h\Rightarrow K_s$ & & \\
+\hline
+\hline
+3 & & & $i=i+1$ & $A_u;K_s;i;n \Longrightarrow$ & $i<m$ \\
+\hline
+4 & & & & & $B_s=5432$\\
+  & & & & & ($R_u=8021$) \\
+  & & & & & $P_s=8172$\\
+  & & & & & ($R_s=2776$) \\
+  & & & $Q_s\neq 0$& $\Longleftarrow B_s;P_s;Q_s$ & $Q_s=5517$ \\
+\hline
+5 & & & $B_s=5432$& & \\
+  & & & $P_s=8172$ & & \\
+  & $B_s \neq 0$ & $\Longleftarrow B_s ; P_s $ & ($Q_s=5517$) & & \\
+\hline
+6 & $B_u=B_s\Rightarrow$ & & & & \\
+  & ($R_s=2776$) & & & & \\
+  & $Q_u=5517$ & $Q_u \Longrightarrow$ & $Q_u=Q_s$ & & \\
+\hline
+\hline
+7 & & & $B_s=0$ & & \\
+  & $B_s=0$ & $\Longleftarrow B_s ; P_s$ & $P_s=Q_s$ & & \\
+  & Login OK & & & & \\
+\hline
+\end{tabular}
+\end{table}
+\par
+Steps:
+\begin{enumerate}
+\item	The website indicates how many bits are used for keys.
+\item	Calculate $A_u$ from $R_u$.
+		Send $A_u$ and $U_h$ to the webserver.
+		Webserver has entry for $U_h$ and finds $K_s$.
+\item	Start with $i=0$ and send $A_u$, $K_s$, and $i$ to the login server.
+\item	Login server calculates $B_s$, $P_s$, and $Q_s$,
+		and sends them back to the webserver.
+		The webserver finds that values are valid for a login.
+\item	The webserver takes $B_s$ and $P_s$ and sends them to the user.
+		The user sees a nonzero value for $B_s$.
+\item	Since $B_u=B_s$ the user calculates $R_s$ and from this $Q_u$.
+		This value is sent to the webserver, which concludes that $Q_u=Q_s$.
+\item	To indicate that login is granted, the webserver returns $B_s=0$.
+\end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Login scheme with old key}
+\label{scheme:login_with_old_key}
+The login depicted in table~\vref{table:login_with_old_key} succeeds but takes some more steps because an old key is used.
+\begin{table}[H]
+\label{table:login_with_old_key}
+\caption{Login with old key}
+\begin{tabular}{|l|r|c|l|c|l|}
+\hline
+Step & User & Value & Webserver & Value & Login server\\
+\hline
+1 & & $\Longleftarrow n$ & $n=13$ & & \\
+\hline
+2 &$U_h=xyz$ &&$n=13$&&\\
+  & $(R_u=8021)$ & &$i=-1$& & \\
+  & $A_u=1234$ & & & & \\
+  &($B_u=5432$) & $A_u ; U_h \Longrightarrow$ & $U_h\Rightarrow K_s$ & & \\
+\hline
+\hline
+3'& & & $i=i+1$ & $A_u;K_s;i;n \Longrightarrow$ & $i<m$ \\
+\hline
+4'& & & & & $B_s=1902$\\
+  & & & & & ($R_u=922$) \\
+  & & & & & $P_s=6300$ \\
+  & & & & & ($R_s=4994$) \\
+  & & & $Q_s\neq 0$& $\Longleftarrow B_s;P_s;Q_s$ & $Q_s=4120$ \\
+\hline
+5' & & & $B_s=1902$& & \\
+  & & & $P_s=6300$ & & \\
+  & $B_s \neq 0$ & $\Longleftarrow B_s ; P_s $ & ($Q_s=4120$) & & \\
+\hline
+6' & $B_u \neq B_s$ & & & & \\
+  & $Q_u=0$ & $Q_u \Longrightarrow$ & $Q_u \neq Q_s$ & & \\
+\hline
+\hline
+3'-6'*& \vdots & \vdots & \vdots & \vdots & \vdots \\
+\hline
+\hline
+3 & & & $i=i+1$ & $A_u;K_s;i;n \Longrightarrow$ & $i<m$ \\
+\hline
+4 & & & & & $B_s=5432$\\
+  & & & & & ($R_u=8021$) \\
+  & & & & & $P_s=8172$\\
+  & & & & & ($R_s=2776$) \\
+  & & & $Q_s\neq 0$& $\Longleftarrow B_s;P_s;Q_s$ & $Q_s=5517$ \\
+\hline
+5 & & & $B_s=5432$ & & \\
+  & & & $P_s=8712$ & & \\
+  & $B_s\neq0$ & $\Longleftarrow B_s ; P_s $ & ($Q_s=5517$) & & \\
+\hline
+6 & $B_u=B_s\Rightarrow$ & & & & \\
+  & ($R_s=5678$) & & & & \\
+  & $Q_u=5517$ & $Q_u \Longrightarrow$ & $Q_u=Q_s$ & & \\
+\hline
+\hline
+7 & & & $B_s=0$ & & \\
+  & $B_s=0$ & $\Longleftarrow B_s ; P_s$ & $P_s=Q_s$ & & \\
+  & Login OK & & & & \\
+\hline
+8 & $P_s\neq A_u$ &  & & & \\
+  & Update keyring & & & & \\
+\hline
+\end{tabular}
+\end{table}
+\par
+Steps 1 and 2 are the same as in the diagram in section~\vref{scheme:simplest_login}.
+Steps 3' through 6' are repeated one or more times, but result in ``wrong'' answers from the webserver.
+\par
+When the webserver has found the right index,
+the login server calculates values with the ``right'' Secret key.
+Steps 3 through 7 are then identical to those in section~\vref{scheme:simplest_login}.
+\par
+Finally,
+we know it took multiple attempts and additionally find that $P_s\neq A_u$,
+so we need to update the keyring in step 8.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Login scheme with wrong key}
+\label{scheme:login_with_wrong_key}
+Using a wrong key won't get you in\ldots
+\begin{table}[H]
+\label{table:login_with_wrong_key}
+\caption{Login with wrong key}
+\begin{tabular}{|l|r|c|l|c|l|}
+\hline
+Step & User & Value & Webserver & Value & Login server\\
+\hline
+1 & & $\Longleftarrow n$ & $n=13$ & & \\
+\hline
+2 &$U_h=xyz$ &&$n=13$&&\\
+  & $(R_u=8021)$ & &$i=-1$& & \\
+  & $A_u=1234$ & & & & \\
+  &($B_u=5432$) & $A_u ; U_h \Longrightarrow$ & $U_h\Rightarrow K_s$ & & \\
+\hline
+\hline
+3'& & & $i=i+1$ & $A_u;K_s;i;n \Longrightarrow$ & $i<m$ \\
+\hline
+4'& & & & & $B_s=1902$\\
+  & & & & & ($R_u=922$) \\
+  & & & & & $P_s=6300$ \\
+  & & & & & ($R_s=4994$) \\
+  & & & $Q_s\neq 0$& $\Longleftarrow B_s;P_s;Q_s$ & $Q_s=4120$ \\
+\hline
+5' & & & $B_s=1902$& & \\
+  & & & $P_s=6300$ & & \\
+  & $B_s \neq 0$ & $\Longleftarrow B_s ; P_s $ & ($Q_s=4120$) & & \\
+\hline
+6' & $B_u \neq B_s$ & & & & \\
+  & $Q_u=0$ & $Q_u \Longrightarrow$ & $Q_u \neq Q_s$ & & \\
+\hline
+\hline
+3'-6'*& \vdots & \vdots & \vdots & \vdots & \vdots \\
+\hline
+\hline
+3 & & & $i=i+1$ & $A_u;K_s;i;n \Longrightarrow$ & $i\geq m$ \\
+\hline
+4 & & & & & $B_s=0$ \\
+  & & & & & $P_s=0$ \\
+  & & & $Q_s=0$& $\Longleftarrow B_s;P_s;Q_s$ & $Q_s=0$ \\
+\hline
+5 & & & $B_s=0$ & & \\
+  & & & $P_s=0$ & & \\
+& $B_s = 0$ & $\Longleftarrow B_s ; P_s $ & ($Q_s=0$) & & \\
+\hline
+6 & $P_s=Q_s=0\Rightarrow$ & & & & \\
+  & Login Failed & & & & \\
+\hline
+\end{tabular}
+\end{table}
+\par\noindent The loop $3'-6'*$ is repeated so many times that eventually $i\geq m$ (the number of keys in $S$).

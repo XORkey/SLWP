@@ -1,0 +1,29 @@
+\subsection{Applying for a userid}
+\label{sec:applying}
+When a new user applies for an account, it should choose a userid%
+---one that the website will accept as unique.
+Furthermore, it should select the index of a hitherto unused key
+(therefore, a dummy).
+The user will send its $\E{SHA}$ hash of its userid,
+along with its dummy key $K_d$ to the website.
+\par
+The website will send the dummy key $K_d$ to an SDPS hosting an HSM (see section \ref{sec:SDPS}),
+which will do the following:
+\begin{enumerate}
+\item Generate a random
+\[K_s=\mathtt{Random}()\]
+which will be the new site key for this user.
+\item Then it will encrypt the $K_s$ with the current Secret key $S[0]$ to yield the new user key $K_u$
+\[K_u=\E{AES}(K_s, S[0])\]
+\item Finally, the new user key is encrypted with the user's dummy key $K_d$
+with an XOR operation:
+\[K_x=K_u \oplus K_d\]
+\end{enumerate}
+The SDPS will then send the new key $K_s$ and the $\E{SHA}$ hash of the userid to the server hosting the accounts database.
+It will send $K_x$ in a mail to the new user (optionally with the index the user supplied).
+\par
+The user's keyring program can import the new key $K_x$ into the keyring by calculating
+\[K_u=K_x \oplus K_d\]
+using the index it has originally selected for the slot in the keyring.
+The dummy key $K_d$ is overwritten with the new key $K_u$.
+

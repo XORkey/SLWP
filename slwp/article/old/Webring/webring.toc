@@ -1,0 +1,36 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{2}
+\contentsline {subsection}{\numberline {1.1}On human behavior}{3}
+\contentsline {subsection}{\numberline {1.2}The keyring system}{3}
+\contentsline {subsection}{\numberline {1.3}Advantages}{4}
+\contentsline {section}{\numberline {2}Keys}{5}
+\contentsline {subsection}{\numberline {2.1}Secret keys}{5}
+\contentsline {subsection}{\numberline {2.2}Site keys}{6}
+\contentsline {subsection}{\numberline {2.3}User keys}{6}
+\contentsline {subsection}{\numberline {2.4}Key lifetime and old keys}{6}
+\contentsline {subsection}{\numberline {2.5}Compromised keys}{7}
+\contentsline {section}{\numberline {3}Storing user keys in a keyring}{7}
+\contentsline {subsection}{\numberline {3.1}Creating a keyring}{7}
+\contentsline {subsection}{\numberline {3.2}Applying for a userid}{8}
+\contentsline {subsection}{\numberline {3.3}Encrypting a keyring}{8}
+\contentsline {subsection}{\numberline {3.4}Copying keys and keyrings}{9}
+\contentsline {section}{\numberline {4}Logging in}{9}
+\contentsline {subsection}{\numberline {4.1}Step 1: knock, knock\dots }{9}
+\contentsline {subsection}{\numberline {4.2}Step 2: site key lookup}{10}
+\contentsline {subsection}{\numberline {4.3}Step 3: SDPS actions}{10}
+\contentsline {subsection}{\numberline {4.4}Step 4: user verifies site key}{11}
+\contentsline {subsection}{\numberline {4.5}Step 5: site verifies user key}{11}
+\contentsline {subsection}{\numberline {4.6}Step 6: key replacement}{12}
+\contentsline {subsection}{\numberline {4.7}Cryptographic considerations}{12}
+\contentsline {section}{\numberline {5}Required hardware}{12}
+\contentsline {subsection}{\numberline {5.1}Firewall}{12}
+\contentsline {subsection}{\numberline {5.2}Accounts database}{12}
+\contentsline {subsection}{\numberline {5.3}SDPS}{13}
+\contentsline {subsection}{\numberline {5.4}HSM}{13}
+\contentsline {section}{\numberline {6}Software}{13}
+\contentsline {subsection}{\numberline {6.1}SDPS functions}{13}
+\contentsline {subsection}{\numberline {6.2}HSM}{14}
+\contentsline {subsection}{\numberline {6.3}Accounts Database}{14}
+\contentsline {subsection}{\numberline {6.4}Website}{14}
+\contentsline {subsection}{\numberline {6.5}Browser}{14}
+\contentsline {section}{\numberline {7}Conclusion}{15}

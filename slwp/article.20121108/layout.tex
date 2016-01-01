@@ -1,0 +1,13 @@
+\usepackage{fancyhdr}
+% latex book style
+\pagestyle{fancyplain}
+\addtolength{\headwidth}{\marginparsep}
+\addtolength{\headwidth}{\marginparwidth}
+\newcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}
+\cfoot{Confidential | Intellectual property of T.M.C. Ruiter}
+\setlength{\textwidth}{13cm}
+\setlength{\hoffset}{-1cm}
+\setcounter{tocdepth}{2}

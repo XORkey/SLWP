@@ -1,0 +1,18 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{3}
+\contentsline {subsection}{\numberline {1.1}On human behavior}{3}
+\contentsline {subsection}{\numberline {1.2}A new login approach}{3}
+\contentsline {section}{\numberline {2}Login for dummies}{4}
+\contentsline {subsection}{\numberline {2.1}A new login scheme}{4}
+\contentsline {subsection}{\numberline {2.2}Storing your keys}{4}
+\contentsline {subsection}{\numberline {2.3}Computers and links}{4}
+\contentsline {subsubsection}{\numberline {2.3.1}Computer roles}{5}
+\contentsline {subsubsection}{\numberline {2.3.2}Secure links}{5}
+\contentsline {subsection}{\numberline {2.4}Logging in}{6}
+\contentsline {subsubsection}{\numberline {2.4.1}Part I}{6}
+\contentsline {subsubsection}{\numberline {2.4.2}Part II}{6}
+\contentsline {subsection}{\numberline {2.5}Keys}{6}
+\contentsline {subsubsection}{\numberline {2.5.1}On site keys and user keys}{6}
+\contentsline {subsubsection}{\numberline {2.5.2}Key lifetime}{7}
+\contentsline {section}{\numberline {3}Conclusions}{8}
+\contentsline {subsection}{\numberline {3.1}Advantages}{8}

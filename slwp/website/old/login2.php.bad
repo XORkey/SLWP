@@ -1,0 +1,71 @@
+<?php
+	session_start();
+	require 'hsm.php';					// HSM(). Includes crypto.php.
+	function getAccountInfo($Uh)
+	{
+		return "98304899";				// Return site key for default user.
+	}
+?>
+
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Login step 2</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+
+<?php
+	$Bs = $Qs = $Ps = 0;				// Global variables that HSM() operates on.
+	$Ks = getAccountInfo($_POST["Uh"]);
+	if ($Ks != 0)
+	{
+		HSM($_POST["Au"], $Ks, $_SESSION["i"]);
+	//	$_SESSION["Qu"] = $Qu;
+		if ($Qs != 0)
+		{
+		?>
+			<script>
+				function AskToContinue(attempt)
+				{
+					return 0;			// Always continue for now.
+				}
+				var j = 0;
+				while (<?php echo $Bs ?> != 0)
+				{
+					if (<?php echo "\"" .$Bs . "\""?> == sessionStorage.Bu)
+					{
+						var Rs = <?php echo $Ps ?> ^ Ku;
+						Qu = sha256_digest(String(Rs).substr(-8));
+					}
+					else
+						Qu = AskToContinue(j);
+					//AJAX voor Bs, Ps
+					j += 1;
+				}
+			</script>
+			<h1>Login step <?php echo $_SESSION["i"] ?></h1>
+				<h2><?php echo "Bs: " .$Bs . " Ps: " . $Ps ?></h2>
+					<form method=post action=login2.php onsubmit=loginStep2()>
+						<input type=submit action=loginStep2() value=LOGIN2>
+					</form>
+		<?php
+		}
+		else
+			$Qu = $Qs;					// No point going on: terminate loop.
+		if ($Qu == 1)
+			$Qs = $Qu;					// Terminate loop on user's request.
+		$_SESSION["i"] += 1;
+	}
+?>
+
+<!--
+		<?php echo "<p>Au: " . $_POST["Au"] . "</p>" ?>
+		<p>Bu: <output id=Bu>xxx</output>
+		<script> document.getElementById("Bu").innerHTML = sessionStorage.Bu; </script>
+		-->
+
+
+
+	</body>
+</html>

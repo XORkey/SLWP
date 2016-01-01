@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+<meta charset="utf-8">
+<script>
+function displayKeyring(filename)
+{
+	var FileReader = new FileReader();
+}
+
+</script>
+</head>
+<body>
+<H1>LOGIN</h1>
+<script>
+document.write(Ru);
+</script>
+<p id="keyring">Keyring</p>
+
+<input type="file" id="files" name="files[]"/>
+<output id="list"></output>
+
+<output id="keyring_file"></output>
+
+<script>
+  function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+	for (var i=0, f; f = files[i]; i++)
+	{
+		var reader = new FileReader();
+		  // Closure to capture the file information.
+		reader.onload = (function(theFile) {
+			return function(e) {
+				var Ku = e.target.result;
+				var Ru=Math.floor(Math.random() * Math.pow(2,32));
+				var Au = Ku ^ Ru;
+				var p = document.createElement('p');
+				p.innerHTML = [escape(theFile.name), "<br>Ku: ", Ku, "<br>Ru: ", Ru, "<br>Au: ", Au].join('');
+				document.getElementById('keyring_file').insertBefore(p, null);
+			};
+		})(f);
+		var index = 4
+		var key = f.slice(11*index,11*index+10);
+		reader.readAsText(key);
+	}
+  }
+  function readBlob(opt_startByte, opt_stopByte) {
+
+    var files = document.getElementById('files').files;
+    if (!files.length) {
+      alert('Please select a file!');
+      return;
+    }
+
+    var file = files[0];
+    var start = parseInt(opt_startByte) || 0;
+    var stop = parseInt(opt_stopByte) || file.size - 1;
+
+    var reader = new FileReader();
+
+    // If we use onloadend, we need to check the readyState.
+    reader.onloadend = function(evt) {
+      if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+        document.getElementById('byte_content').textContent = evt.target.result;
+        document.getElementById('byte_range').textContent = 
+            ['Read bytes: ', start + 1, ' - ', stop + 1,
+             ' of ', file.size, ' byte file'].join('');
+      }
+    };
+
+    var blob = file.slice(start, stop + 1);
+    reader.readAsBinaryString(blob);
+  }
+  
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+%\newcommand{\E}[2]{\ensuremath{\mathtt{#1_{#2}}}}
+\newcommand{\EM}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\EMsub}[2]{\ensuremath{\mathtt{#1_{#2}}}}
+\newcommand{\AES}{\EMsub{AES}{256}}
+\newcommand{\RSA}{\EMsub{RSA}{2048}}
+\newcommand{\SHA}{\EMsub{SHA}{256}}
+\newcommand{\MDV}{\EM{MD5}}
+\newcommand{\XOR}{\EM{XOR}}
+\newcommand{\F}[2]{\texttt{#1}(#2)}
+\newcommand{\xor}[2]{#1\oplus#2}
+\newcommand{\mod}[2]{#1\ \textbf{mod}\ #2}
+\newcommand{\sha}[1]{\mod{\HSHA{#1}}{2^{n}}}
+\newcommand{\aes}[2]{\mod{\F{\AES}{#1,#2}}{2^{n}}}
+\newcommand{\rsa}[2]{\mod{\F{\RSA}{#1,#2}}{2^{n}}}
+
+\newcommand{\TIMO}{TIMO\textsuperscript{\texttrademark}}
+\newcommand{\XORkey}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern +.05em{\raisebox{-.3ex}{\em key}}}}}}
+\newcommand{\XORlogo}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern -1.01em{\raisebox{-1.12ex}{\em key}}}}}}
+%\newcommand{\Encr}[2]{\ensuremath{\mathcal{\mathlarger{E}}_{\mathtt{RSA}}(#1,#2)}}
+%\newcommand{\Decr}[2]{\ensuremath{\mathcal{\mathlarger{D}}_{\mathtt{RSA}}(#1,#2)}}
+%\newcommand{\Veri}[2]{\ensuremath{\mathcal{\mathlarger{V}}_{\mathtt{RSA}}(#1,#2)}}
+%\newcommand{\Sign}[2]{\ensuremath{\mathcal{\mathlarger{S}}_{\mathtt{RSA}}(#1,#2)}}
+
+\newcommand{\Hsh}[2]{\ensuremath{\mathcal{\mathlarger{H}}_{\mathtt{#1}}(#2)}}
+\newcommand{\Enc}[3]{\ensuremath{\mathcal{\mathlarger{E}}_{\mathtt{#1}}(#2,#3)}}
+\newcommand{\Dec}[3]{\ensuremath{\mathcal{\mathlarger{D}}_{\mathtt{#1}}(#2,#3)}}
+\newcommand{\Ver}[3]{\ensuremath{\mathcal{\mathlarger{V}}_{\mathtt{#1}}(#2,#3)}}
+\newcommand{\Sgn}[3]{\ensuremath{\mathcal{\mathlarger{S}}_{\mathtt{#1}}(#2,#3)}}
+
+\newcommand{\HSHA}[1]{\Hsh{SHA}{#1}}
+\newcommand{\ERSA}[2]{\Enc{RSA}{#1}{#2}}
+\newcommand{\DRSA}[2]{\Dec{RSA}{#1}{#2}}
+\newcommand{\SRSA}[2]{\Sgn{RSA}{#1}{#2}}
+\newcommand{\VRSA}[2]{\Ver{RSA}{#1}{#2}}
+\newcommand{\EAES}[2]{\Enc{AES}{#1}{#2}}
+\newcommand{\DAES}[2]{\Dec{AES}{#1}{#2}}
+\newcommand{\HSHAm}[1]{\mod{\Hsh{SHA}{#1}}{2^{n}}}
+\newcommand{\EAESm}[2]{\mod{\Enc{AES}{#1}{#2}}{2^{n}}}
+\newcommand{\DRSAm}[2]{\mod{\Dec{RSA}{#1}{#2}}{2^{n}}}

@@ -1,0 +1,43 @@
+\section{Conclusion}
+The security of the login process for websites can be greatly improved by using a keyring at the user side and an HSM at the website's side.
+Instead of sending relatively short, easy to guess strings (passwords) over the line,
+the use of encrypted random values,
+of 128 bits each,
+is a big improvement.
+No keys are sent,
+just random values,
+which will be different each time a user logs in.
+\par
+For hackers,
+getting login data in huge numbers will be very difficult,
+since this data is no longer stored centrally,
+but split between website and user.
+Each part alone has no value,
+and all values stored at the website render no valid login data without Secret keys.
+These keys are kept in very secure hardware: an HSM.
+Each and every user key is encrypted with different other keys on keyrings.
+Sniffing network traffic
+(even on links without SSL/TLS encryption),
+or collecting keystrokes with Trojans will not help.
+Keyrings are encrypted,
+so to no direct use to hackers as well;
+they may be stored on the web for easy access and backup.
+\par
+Several important security measures are automatically implemented:
+keys are changed frequently
+(as frequent as Secret keys are changed),
+they differ for each website,
+and keys on a keyring and the knowledge which key is used for what site constitutes two-factor authentication.
+\par
+For the user,
+the way to logon to websites will change,
+but it will be an improvement over the burden of keeping track of all passwords.
+A single key number for a website is all you have to remember.
+\par
+The software to make it all happen is easy to write,
+since the algorithm for logging in,
+and to handle keyrings is not difficult.
+No hardware on the user's side is necessary.
+The hardware to implement this on the website's side is relatively cheap,
+compared to all other security measures a website (still) needs to have
+(Firewalls, Intrusion Prevention Systems, etcetera).

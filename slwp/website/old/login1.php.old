@@ -1,0 +1,31 @@
+<?php
+	session_start();
+?>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Login 32-bit implementation</title>
+		<meta charset="utf-8">
+		<script src="http://localhost:8888/sha256.js"></script>
+		<script src="http://localhost:8888/keyring.js"></script>
+		<script>
+			function StartLogin()
+			{
+				var Ru = Math.floor(Math.random() * Math.pow(2, 31));
+				var H0 = sha256_digest(Z[0]);
+				document.getElementById("Au").value = XorKu(Ru, document.getElementById("k").value);
+				document.getElementById("Uh").value = Number("0x" + sha256_digest(UserId + H0.substr(UserId.length - 1)).substr(-8));
+				sessionStorage.Bu = Number("0x" + sha256_digest(String(Ru)).substr(-8));
+				sessionStorage.j = Number(0);
+			}
+		</script>
+	</head>
+	<body>
+		<form id="login1" method="post" action="login2.php" onsubmit="StartLogin()">
+			<label for="k">Keyring index</label><input id="k" name="k" type="text" value="3">
+			<input id="Uh" name="Uh" type="password" value="uninitialized" hidden>
+			<input id="Au" name="Au" type="password" value="uninitialized" hidden>
+			<input type="submit" value="Login Step 1">
+		</form>
+	</body>
+</html>
