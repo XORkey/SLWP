@@ -43,5 +43,4 @@ then
 	typeset -i Bs=0x$(SHA256modN $Ru $n) Ps=$(XOR $Rs $Ku $n) Qs=$(XOR $Rs $Ru $n)
 fi
 printf "0x%0.$((n/4))x,0x%0.$((n/4))x,%d,%d,%d -> " $Au $Ks $n $v $i >> $logfile
-printf "0x%0.$((n/4))x,0x%0.$((n/4))x,0x%0.$((n/4))x\n" $Bs $Ps $Qs >> $logfile
-printf "0x%0.$((n/4))x,0x%0.$((n/4))x,0x%0.$((n/4))x\n" $Bs $Ps $Qs
+printf "0x%0.$((n/4))x,0x%0.$((n/4))x,0x%0.$((n/4))x\n" $Bs $Ps $Qs | tee -a $logfile
