@@ -1,0 +1,16 @@
+{
+  "title": "TIMO",
+  "name": "timo",
+  "version": "0.0.1",
+  "description": "Login support for TIMO enabled websites.",
+  "main": "index.js",
+  "author": "T.M.C. Ruiter",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "license": "MIT",
+  "keywords": [
+    "jetpack"
+  ]
+}
