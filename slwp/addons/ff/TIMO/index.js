@@ -1,4 +1,5 @@
 var self = require("sdk/self");
+var data_dir = self.data;
 
 // a dummy function, to show how tests work.
 // to see how to test this function, look at test/test-index.js
@@ -13,16 +14,12 @@ var buttons = require('sdk/ui/button/action');
 var tabs = require("sdk/tabs");
 
 tabs.on("ready", runScript);
- 
-function logURL(tab) {
-	console.log(tab.url);
-}
 
 function runScript(tab) {
-	console.log(tab.url);
 	tab.attach({
-		contentScript: "if (document.body) document.body.style.border = '25px solid red';"
+		contentScriptFile: data_dir.url("popup.js")
 	});
+//		contentScript: "if (document.body) document.body.style.border = '25px solid red';"
 }
 var button = buttons.ActionButton({
   id: "mozilla-link",
