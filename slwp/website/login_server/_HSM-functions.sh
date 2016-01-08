@@ -2,7 +2,12 @@ function _rand
 {
 	typeset -i bits=$1
 	typeset -i bytes=$(((bits + 7) / 8))
-	openssl rand $bytes | od -tx1 --width=$bytes | head -n 1 | cut -c 9- | tr -d ' '
+	if [[ $(uname) -eq Darwin ]]
+	then
+		openssl rand $bytes | od -tx1 | head -n 1 | cut -c 9- | tr -d ' '
+	else
+		openssl rand $bytes | od -tx1 --width=$bytes | head -n 1 | cut -c 9- | tr -d ' '
+	fi
 }
 function Random
 {
