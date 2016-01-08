@@ -1,6 +1,6 @@
 {
   "title": "TIMO",
-  "name": "timo",
+  "name": "TIMO",
   "version": "0.0.1",
   "description": "Login support for TIMO enabled websites.",
   "main": "index.js",
