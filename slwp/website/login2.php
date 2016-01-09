@@ -19,7 +19,7 @@
 			$result->close();
 		}
 		$accounts->close();
-		return $Ks;
+		return hexdec('0x'.$Ks);				// Keys are stored as text.
 	}
 	$_SESSION["Ks"] = getAccountInfo($_POST["Uh"]);
 	$_SESSION["Au"] = $_POST["Au"];

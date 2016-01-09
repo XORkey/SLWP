@@ -2,7 +2,7 @@
 	function SLWP($Au, $Ks, $n, $v, $i)
 	{
 		global $Bs, $Ps, $Qs;
-		$shell_script = '/Applications/MAMP/htdocs/slwp/call_hsm.sh ' . $Au . " " . $Ks . " " . $n . " " . $v . " " . $i;
+		$shell_script = '/Applications/MAMP/htdocs/slwp/call_hsm.sh 0x' . $Au . " 0x" . $Ks . " " . $n . " " . $v . " " . $i;
 		$output = shell_exec($shell_script);
 		echo "<!-- SLWP: ".$output."-->".PHP_EOL;
 		list($Bs, $Ps, $Qs) = explode(',', trim($output));
@@ -24,6 +24,7 @@
 		<h1>LOGIN SUCCESS!!!</h1>
 		<a href="<?php echo $ref ?>">Go to the welcome page</a>
 		<a href="logout.php">Logout</a>
+		<input type='text' id='logout_url' value='logout.php' hidden>
 		<script>
 			<?php
 			if ($F != $_SESSION["Au"])
@@ -66,28 +67,13 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<script src="sha256.js"></script>
-		<script src="keyring.js"></script>
 		<title>Login step</title>
-		<script>
-			function LoginStep()
-			{
-				var Rs = XorKu(<?php echo $Ps ?>, sessionStorage.k) >>> 0;
-				sessionStorage.Rs = Rs >>> 0;
-				if (<?php echo $Bs ?> == sessionStorage.Bu)
-				{
-					document.getElementById("Qu").value = (Rs ^ (Number(sessionStorage.Ru) >>> 0)) >>> 0;
-				}
-				else
-					document.getElementById("Qu").value = AskToContinue(sessionStorage.j);
-				sessionStorage.j = Number(sessionStorage.j) + 1;
-				document.login_step.submit();
-			}
-		</script>
 	</head>
-	<body onload=LoginStep()>
+	<body xonload=LoginStep()>
+		<input type='text' id='Bs' name='Bs' value='<?php echo $Bs ?>' hidden>
+		<input type='text' id='Ps' name='Ps' value='<?php echo $Ps ?>' hidden>
 		<form name="login_step" method=post action=login3.php>
-			<input type=text id=Qu name=Qu hidden>
+			<input type='text' id='Qu' name='Qu' hidden>
 		</form>
 	</body>
 </html>
