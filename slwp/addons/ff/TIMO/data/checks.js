@@ -15,7 +15,7 @@ self.port.on('enabled',	function(color) {
 							else
 							{
 								console.log('...no. Bummer.');
-								alert('Sorry, this website does not seem to be TIMO™ enabled yet.');
+//								alert('Sorry, this website does not seem to be TIMO™ enabled yet.');
 							}
 						});
 self.port.on('get_logout_url',	function() {
