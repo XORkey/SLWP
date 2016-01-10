@@ -1,10 +1,10 @@
 <?php
-	function SLWP($Au, $Ks, $n, $v, $i)
+	function TIMO($Au, $Ks, $n, $v, $i)
 	{
 		global $Bs, $Ps, $Qs;
 		$shell_script = '/Applications/MAMP/htdocs/slwp/call_hsm.sh 0x' . $Au . " 0x" . $Ks . " " . $n . " " . $v . " " . $i;
 		$output = shell_exec($shell_script);
-		echo "<!-- SLWP: ".$output."-->".PHP_EOL;
+		echo "<!-- TIMO: ".$output."-->".PHP_EOL;
 		list($Bs, $Ps, $Qs) = explode(',', trim($output));
 		echo "Bs = " . $Bs . " Ps = " . $Ps . " Qs = " . $Qs . PHP_EOL;
 	}
@@ -58,7 +58,7 @@
 	function send_bs_ps($n)
 	{
 		global $Qs, $Bs, $Ps;
-		SLWP(sprintf("%08x", $_SESSION["Au"]), sprintf("%08x", $_SESSION["Ks"]), $n, 0, $_SESSION["i"]);
+		TIMO(sprintf("%08x", $_SESSION["Au"]), sprintf("%08x", $_SESSION["Ks"]), $n, 0, $_SESSION["i"]);
 		if ($Qs != 0)					// Found something to test.
 		{
 			$_SESSION["Qs"] = $Qs;      // Save Qs.
@@ -69,7 +69,7 @@
 		<meta charset="utf-8">
 		<title>Login step</title>
 	</head>
-	<body xonload=LoginStep()>
+	<body>
 		<input type='text' id='Bs' name='Bs' value='<?php echo $Bs ?>' hidden>
 		<input type='text' id='Ps' name='Ps' value='<?php echo $Ps ?>' hidden>
 		<form name="login_step" method=post action=login3.php>
