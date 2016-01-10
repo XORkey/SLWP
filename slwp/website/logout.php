@@ -20,7 +20,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Logged out</title>
-	<head>
+	</head>
 	<body>
 		<img src="XORkey logo RGB.png" height=100px>
 		<h1>You are logged out.</h1>
