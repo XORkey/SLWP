@@ -1,3 +1,4 @@
+'use strict';
 
 // a dummy function, to show how tests work.
 // to see how to test this function, look at test/test-index.js
@@ -28,15 +29,14 @@ function Hex32(n)
 }
 function Uh(KeyRingID, UID, host)
 {
-	var H0 = SHA256(String(KeyRingID));     // A 256 bit value represented as a 64
-											//                             bytes string.
+	var H0 = SHA256(String(KeyRingID));		// 256 bits represented in 64 bytes.
 	var H1 = SHA256(UID + host);			// Another 256 bit value represented as a
 											//                          64 bytes string.
 	var Uh = "";
-	for (i = 0; i < 8; i++)                 // For each 8 bytes of H0 and H1: XOR both
+	for (var i = 0; i < 8; i++)				// For each 8 bytes of H0 and H1: XOR both
 											//       and add the result as string to Uh.
 		Uh += Hex32((parseInt(H0.substr(i * 8, 8), 16) ^ (parseInt(H1.substr(i * 8, 8), 16))) >>> 0);
-	return Uh;                              // Also a 256 bit value represented as a 64
+	return Uh;								// Also a 256 bit value represented as a 64
 											//                             bytes string.
 }
 function Au(Ru, host)
@@ -54,7 +54,7 @@ var buttons = require('sdk/ui/button/action');
 var tabs = require('sdk/tabs');
 
 var state = 'unknown';
-var logout;
+var logout_url;
 
 tabs.on('ready', loginStep);
 tabs.on('close', logout);
@@ -66,8 +66,15 @@ function loginStep(tab) {
 							data.url('login.js')]
  	});
 	console.log('New worker on this tab. state: ' + state);
-	if (state == 'enabled')
-	{
+	switch (state) {
+	case 'unknown':
+		worker.port.emit('enabled', 'green');
+		worker.port.on('enabled',	function() {
+										console.log('State: enabled.');
+										state = 'enabled';
+									});
+		break;
+	case 'enabled':
 		console.log('starting step2...');
 		worker.port.emit('step2');
 		worker.port.on('getRs',		function(url_host, Ps) {
@@ -75,44 +82,50 @@ function loginStep(tab) {
 										worker.port.emit('Rs', Rs(Ps, url_host));
 										state = 'step2';
 									});
-	}
-	if (state == 'step2')
-	{
+		break;
+	case 'step2':
 		worker.port.emit('get_logout_url');
-		worker.port.on('success',	function(logout_url) { logout = logout_url; state = 'loggedin'; });
+		worker.port.on('success',	function(url) {
+										console.log('Found URL for logout: ' + url + '; State: loggedin.');
+										logout_url = url;
+										state = 'loggedin';
+									});
+		break;
 	}
 }
+
 function logout(tab) {
 	console.log('Logging out...');
-	tab.open(logout);
-	return 0;
+	var worker = tab.attach({ contentScriptFile: data.url('logout.js') });
+	worker.port.emit('logout', logout_url);
+	worker.port.on('loggedout',	function () {
+									console.log('Logged out. State: unknown.');
+									state = 'unknown';
+								});
 }
 
 function doLogin()
 {
-	if (state == 'loggedin')
-	{
+	switch (state) {
+	case 'loggedin':
 		console.log('Logging out by user request.');
-		tabs.activeTab.open(logout);
-	}
-	else
-	{
+		logout(tabs.activeTab);
+		break;
+	case 'enabled':
 		var worker = tabs.activeTab.attach({
 			contentScriptFile: [data.url('sha256.js'),
 								data.url('XORshift.js'),
-								data.url('checks.js'),
 								data.url('login.js')]
 		});
-		worker.port.emit('enabled', 'green');
-		worker.port.on('enabled',	function() {
-										state = 'enabled';
-										worker.port.emit('login');
-									});
-
+		worker.port.emit('login');
 		worker.port.on('getUhAu',	function(url_host, Ru) {
 										console.log('url: ' + url_host + '; Ru: ' + Ru);
 										worker.port.emit('UhAu', Uh(Key(0), UserId, url_host), Au(Ru, url_host));
 									});
+		break;
+	default:
+		console.log('State: ' + state + '; no action.');
+		break;
 	}
 }
 
@@ -124,7 +137,7 @@ var button = buttons.ActionButton({
     '32': './XORkey-32.png',
     '64': './XORkey-64.png'
   },
-  onClick: function() { doLogin() }
+  onClick: doLogin
 });
 
 /**
