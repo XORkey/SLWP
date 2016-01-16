@@ -1,6 +1,6 @@
 {
-  "title": "TIMO",
-  "name": "TIMO",
+  "title": "TIMO login add-on for FireFox",
+  "name": "timo",
   "version": "0.0.1",
   "description": "Login support for TIMO enabled websites.",
   "main": "index.js",
