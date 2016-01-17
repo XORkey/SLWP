@@ -4,13 +4,14 @@ function colored_border(pixels, color)
 		document.body.style.border = pixels + 'px solid ' + color;
 }
 
+self.port.on('state',	function(color) {
+							colored_border(20, color);
+						});
 self.port.on('enabled',	function(color) {
 							console.log('Checking if enabled...');
 							if (document.getElementById('Uh') && document.getElementById('Au'))
 							{
-								console.log('...we are!');
-								colored_border(20, color);
-								self.port.emit('enabled');
+								self.port.emit('havekey', window.top.location.host);
 							}
 							else
 							{

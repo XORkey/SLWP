@@ -1,3 +1,8 @@
+//
+// DESCRIPTION:		This is code that runs in the worker.
+//					It is attached to each Tab.
+// COPYRIGHT(c):	2015-2016 by ing. T.M.C. Ruiter, XORkey B.V.
+//
 function AskToContinue(attempt)
 {
 	var c = true;
@@ -6,27 +11,14 @@ function AskToContinue(attempt)
 	return c == true ? 0 : 1;
 }
 
-
 self.port.on('login',	function() {
-							if (window.location.protocol == 'http:' ||
+							if (window.location.protocol == 'http:' ||	// This is not safe...
 								window.location.protocol == 'https:' ||
 								window.location.protocol == 'file:')
 										// Only allow safe channels.
-							{
-								//StartLogin(window.top.location.host);
-										// Start a login for the host and port
+							{			// Start a login for the host and port
 										//                              combination.
-								if (typeof window.crypto.getRandomValues === "function")
-								{		// We're running a browser with a good PRG.
-									var array = new Uint32Array(10);
-									window.crypto.getRandomValues(array);
-									var Ru = array[6];
-								}
-								else	// No good native PRG available.
-								{		// Generate a 32-bit random with XORshift.
-									var random = Xorshift03().uint32;
-									var Ru = random();
-								}
+								var Ru = uRandom32();
 								sessionStorage.Ru = Ru >>> 0;
 								self.port.emit('getUhAu', window.top.location.host, Ru);
 							}

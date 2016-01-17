@@ -42,7 +42,7 @@ function Rs(Ps, host)
 
 var data = require('sdk/self').data;
 var buttons = require('sdk/ui/button/action');
-var hash = require('./lib/sha2.js');
+var hash = require('lib/sha2.js');
 var tabs = require('sdk/tabs');
 
 var state = 'unknown';
@@ -61,12 +61,26 @@ function loginStep(tab) {
 	switch (state) {
 	case 'unknown':
 		worker.port.emit('enabled', 'green');
-		worker.port.on('enabled',	function() {
-										console.log('State: enabled.');
-										state = 'enabled';
+		worker.port.on('havekey',	function(host) {
+										console.log('Checking for a key for URL: ' + host);
+										if (keyring.Key(host) != null)
+										{
+											console.log('State: havekey.');
+											worker.port.emit('state', 'green');
+											state = 'havekey';
+										}
+										else
+										{
+											console.log('State: enabled.');
+											worker.port.emit('state', 'blue');
+											state = 'enabled';
+										}
 									});
 		break;
 	case 'enabled':
+		console.log('Sorry, we cannot continue... No key available.');
+		break;
+	case 'havekey':
 		console.log('starting step2...');
 		worker.port.emit('step2');
 		worker.port.on('getRs',		function(url_host, Ps) {
@@ -103,10 +117,11 @@ function doLogin()
 		console.log('Logging out by user request.');
 		logout(tabs.activeTab);
 		break;
-	case 'enabled':
+	case 'havekey':
 		var worker = tabs.activeTab.attach({
 			contentScriptFile: [data.url('sha256.js'),
 								data.url('XORshift.js'),
+								data.url('random.js'),
 								data.url('login.js')]
 		});
 		worker.port.emit('login');
