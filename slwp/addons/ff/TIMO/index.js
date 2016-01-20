@@ -1,7 +1,7 @@
 'use strict';
 
 var UserId = String("Joepietralala");       // The UserID is fixed in this demo.
-var keyring = require('./lib/keyring.js');
+var keyring = require('data/keyring.js');
 
 // a dummy function, to show how tests work.
 // to see how to test this function, look at test/test-index.js
@@ -33,16 +33,16 @@ function Uh(KeyRingID, UID, host)
 }
 function Au(Ru, host)
 {
-	return (Ru ^ keyring.Key(host)) >>> 0;
+	return (Ru ^ keyring.GetKey(host)) >>> 0;
 }
 function Rs(Ps, host)
 {
-	return (Ps ^ keyring.Key(host)) >>> 0;
+	return (Ps ^ keyring.GetKey(host)) >>> 0;
 }
 
 var data = require('sdk/self').data;
 var buttons = require('sdk/ui/button/action');
-var hash = require('lib/sha2.js');
+var hash = require('data/sha256.js');
 var tabs = require('sdk/tabs');
 
 var state = 'unknown';
@@ -63,7 +63,7 @@ function loginStep(tab) {
 		worker.port.emit('enabled', 'green');
 		worker.port.on('havekey',	function(host) {
 										console.log('Checking for a key for URL: ' + host);
-										if (keyring.Key(host) != null)
+										if (keyring.GetKey(host) != null)
 										{
 											console.log('State: havekey.');
 											worker.port.emit('state', 'green');
@@ -127,7 +127,7 @@ function doLogin()
 		worker.port.emit('login');
 		worker.port.on('getUhAu',	function(url_host, Ru) {
 										console.log('url: ' + url_host + '; Ru: ' + Ru);
-										worker.port.emit('UhAu', Uh(keyring.Key(''), UserId, url_host), Au(Ru, url_host));
+										worker.port.emit('UhAu', Uh(keyring.GetKey(''), UserId, url_host), Au(Ru, url_host));
 									});
 		break;
 	default:

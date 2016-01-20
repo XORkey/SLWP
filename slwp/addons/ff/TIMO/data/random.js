@@ -1,6 +1,6 @@
 function uRandom32()
 {
-	if (typeof window.crypto.getRandomValues === "function")
+	if (typeof window !== 'undefined' && typeof window.crypto.getRandomValues === 'function')
 	{									// We're running a browser with a good PRG.
 		var array = new Uint32Array(10);
 		window.crypto.getRandomValues(array);
@@ -11,4 +11,9 @@ function uRandom32()
 		var random = Xorshift03().uint32;
 		return random();
 	}
+}
+
+if (typeof exports !== 'undefined')
+{
+	exports.uRandom32 = uRandom32;
 }
