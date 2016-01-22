@@ -8,7 +8,7 @@ function uRandom32()
 	}
 	else								// No good native PRG available.
 	{									// Generate a 32-bit random with XORshift.
-		var random = Xorshift03().uint32;
+		var random = require('data/XORshift.js').Xorshift03().uint32;
 		return random();
 	}
 }

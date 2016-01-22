@@ -3,6 +3,14 @@
 //					It is attached to each Tab.
 // COPYRIGHT(c):	2015-2016 by ing. T.M.C. Ruiter, XORkey B.V.
 //
+function Hex32(n)
+{
+    var prefix = ""; 
+    for (var j = 7; j > 0; j--)
+        if (n >> (j * 4) == 0)
+            prefix += "0";
+    return prefix + n.toString(16);
+}
 function AskToContinue(attempt)
 {
 	var c = true;
@@ -26,24 +34,18 @@ self.port.on('login',	function() {
 								alert('Will not log you in over an unencrypted line.');
 						});
 self.port.on('UhAu',	function (Uh, Au) {
-	console.log('Uh: ' + Uh + '; Au: ' + Au);
 							document.forms['login']['Uh'].value = Uh;
 							document.forms['login']['Au'].value = Au >>> 0;
 							sessionStorage.Bu = parseInt(SHA256(sessionStorage.Ru).substr(-8), 16) >>> 0;
-							console.log('Bu: ' + sessionStorage.Bu);
 							sessionStorage.j = Number(0);
-							document.getElementById('keys').innerHTML = sessionStorage.Ru + ' ' + sessionStorage.Bu;
-							document.forms['login'].action = 'login2.php'
 							document.forms['login'].submit();
 						});
 self.port.on('step2',	function () {
-	console.log('Performing login calculations...');
 							var Bs = document.getElementById('Bs');
 							var Ps = document.getElementById('Ps');
 							if (Bs && Ps)
 							{
-								console.log('Bs: ' + Bs.value + '; Ps: ' + Ps.value + '; now getting Rs...');
-								self.port.emit('getRs', window.top.location.host, Ps.value);
+								self.port.emit('getRs', window.top.location.host, Ps.value >>> 0);
 							}
 							else
 							{
@@ -51,10 +53,8 @@ self.port.on('step2',	function () {
 							}
 						});
 self.port.on('Rs',		function(Rs) {
-	console.log('Rs: ' + Rs);
 							sessionStorage.Rs = Rs >>> 0;
 							var Bs = parseInt(document.getElementById('Bs').value, 16) >>> 0;
-	console.log('Bs: ' + Bs);
 							if (Bs == sessionStorage.Bu)
 								document.forms['login_step']['Qu'].value = (Rs ^ (Number(sessionStorage.Ru) >>> 0)) >>> 0;
 							else

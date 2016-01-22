@@ -72,3 +72,6 @@ function Xorshift03() {
 
   } (Array.prototype.slice.call(arguments)));
 };
+
+if (typeof exports !== 'undefined')
+	exports.Xorshift03 = Xorshift03;

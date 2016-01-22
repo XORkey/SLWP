@@ -3,14 +3,6 @@
 var UserId = String("Joepietralala");       // The UserID is fixed in this demo.
 var keyring = require('data/keyring.js');
 
-// a dummy function, to show how tests work.
-// to see how to test this function, look at test/test-index.js
-function dummy(text, callback) {
-  callback(text);
-}
-
-exports.dummy = dummy;
-
 function Hex32(n)
 {
     var prefix = ""; 
@@ -33,11 +25,11 @@ function Uh(KeyRingID, UID, host)
 }
 function Au(Ru, host)
 {
-	return (Ru ^ keyring.GetKey(host)) >>> 0;
+	return (Ru >>> 0 ^ keyring.GetKey(host)) >>> 0;
 }
 function Rs(Ps, host)
 {
-	return (Ps ^ keyring.GetKey(host)) >>> 0;
+	return (Ps >>> 0 ^ keyring.GetKey(host)) >>> 0;
 }
 
 var data = require('sdk/self').data;
@@ -53,6 +45,7 @@ tabs.on('close', logout);
 
 
 function loginStep(tab) {
+//	console.log(tab.url);
  	var worker = tab.attach({
  		contentScriptFile: [data.url('checks.js'),
 							data.url('login.js')]
@@ -80,18 +73,40 @@ function loginStep(tab) {
 	case 'enabled':
 		console.log('Sorry, we cannot continue... No key available.');
 		break;
+	case 'creating':
+		console.log('checking if account is made...');
+		worker.port.emit('haveKx');
+		worker.port.on('created',	function(url_host, Kx)
+									{
+										var Kd = keyring.GetKey(url_host);
+										var Ku = ((parseInt('0x' + Kx) >>> 0) ^ Kd) >>> 0;
+										keyring.Update(url_host, Ku);
+										console.log('account is created');
+										state = 'havekey';
+									});
+		break;
 	case 'havekey':
 		console.log('starting step2...');
 		worker.port.emit('step2');
-		worker.port.on('getRs',		function(url_host, Ps) {
-										console.log('url: ' + url_host + '; Ps: ' + Ps);
+		worker.port.on('getRs',		function(url_host, Ps)
+									{
 										worker.port.emit('Rs', Rs(Ps, url_host));
 										state = 'step2';
 									});
 		break;
 	case 'step2':
 		worker.port.emit('get_logout_url');
-		worker.port.on('success',	function(url) {
+		worker.port.on('failure',	function()
+									{
+										worker.port.emit('step2');
+									});
+		worker.port.on('getRs',		function(url_host, Ps)
+									{
+										worker.port.emit('Rs', Rs(Ps, url_host));
+										state = 'step2';
+									});
+		worker.port.on('success',	function(url)
+									{
 										console.log('Found URL for logout: ' + url + '; State: loggedin.');
 										logout_url = url;
 										state = 'loggedin';
@@ -117,6 +132,20 @@ function doLogin()
 		console.log('Logging out by user request.');
 		logout(tabs.activeTab);
 		break;
+	case 'enabled':
+		var worker = tabs.activeTab.attach({
+			contentScriptFile:	data.url('new_account.js')
+		});
+		worker.port.emit('get_url');
+		worker.port.on('url_host', function(url_host)
+									{
+										state = 'creating';
+										worker.port.emit('create_account',
+															Uh(keyring.GetKey(''), UserId, url_host),
+															keyring.DummyKey(url_host));
+									});
+		worker.port.on('created', function() { state = 'havekey'; });
+		break;
 	case 'havekey':
 		var worker = tabs.activeTab.attach({
 			contentScriptFile: [data.url('sha256.js'),
@@ -126,7 +155,6 @@ function doLogin()
 		});
 		worker.port.emit('login');
 		worker.port.on('getUhAu',	function(url_host, Ru) {
-										console.log('url: ' + url_host + '; Ru: ' + Ru);
 										worker.port.emit('UhAu', Uh(keyring.GetKey(''), UserId, url_host), Au(Ru, url_host));
 									});
 		break;

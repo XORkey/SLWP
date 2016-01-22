@@ -38,9 +38,10 @@ then
 	then
 		typeset -i Rs=$(Random $n)
 	else
-		typeset -i Rs=$(AES256modN $Ks ${S[0]} $n)
+		typeset -i Rs=0x$(AES256modN $Ks ${S[0]} $n)
 	fi
 	typeset -i Bs=0x$(SHA256modN $Ru $n) Ps=$(XOR $Rs $Ku $n) Qs=$(XOR $Rs $Ru $n)
 fi
-printf "0x%0.$((n/4))x,0x%0.$((n/4))x,%d,%d,%d -> " $Au $Ks $n $v $i >> $logfile
+
+printf "Au: 0x%0.$((n/4))x; Ks: 0x%0.$((n/4))x; Ku: 0x%0.$((n/4))x; Rs: 0x%0.$((n/4))x; n: %d; v: %d; i: %d -> " $Au $Ks $Ku $Rs $n $v $i >> $logfile
 printf "0x%0.$((n/4))x,0x%0.$((n/4))x,0x%0.$((n/4))x\n" $Bs $Ps $Qs | tee -a $logfile

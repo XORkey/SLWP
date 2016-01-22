@@ -4,9 +4,9 @@
 		global $Bs, $Ps, $Qs;
 		$shell_script = '/Applications/MAMP/htdocs/slwp/call_hsm.sh 0x' . $Au . " 0x" . $Ks . " " . $n . " " . $v . " " . $i;
 		$output = shell_exec($shell_script);
-		echo "<!-- TIMO: ".$output."-->".PHP_EOL;
+//		echo "<!-- TIMO: ".$output."-->".PHP_EOL;
 		list($Bs, $Ps, $Qs) = explode(',', trim($output));
-		echo "Bs = " . $Bs . " Ps = " . $Ps . " Qs = " . $Qs . PHP_EOL;
+//		echo "Bs = " . $Bs . " Ps = " . $Ps . " Qs = " . $Qs . PHP_EOL;
 	}
 	function login_succeeded($ref)
 	{
@@ -72,7 +72,7 @@
 	<body>
 		<input type='text' id='Bs' name='Bs' value='<?php echo $Bs ?>' hidden>
 		<input type='text' id='Ps' name='Ps' value='<?php echo $Ps ?>' hidden>
-		<form name="login_step" method=post action=login3.php>
+		<form name='login_step' method='post' action='login3.php'>
 			<input type='text' id='Qu' name='Qu' hidden>
 		</form>
 	</body>

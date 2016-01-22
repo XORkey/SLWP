@@ -19,12 +19,23 @@ self.port.on('enabled',	function(color) {
 //								alert('Sorry, this website does not seem to be TIMO™ enabled yet.');
 							}
 						});
+self.port.on('haveKx',	function()
+						{
+							var Kx = document.getElementById('Kx');
+							if (Kx)
+								self.port.emit('created', window.top.location.host, Kx.value);
+						});
 self.port.on('get_logout_url',	function() {
-									console.log('Checking for a way out...');
+									console.log('Checking for a logout URL...');
 									var logout_url = document.getElementById('logout_url');
 									if (logout_url)
 									{
 										self.port.emit('success', logout_url.value);
 										console.log('...found one!');
+									}
+									else
+									{
+										self.port.emit('failure');
+										console.log('no luck yet...');
 									}
 								});

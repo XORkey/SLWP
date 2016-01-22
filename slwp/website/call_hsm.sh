@@ -1,4 +1,4 @@
-printf "0x%x 0x%x %d %d %d\n" $* >> /tmp/tmcr
+printf "call_hsm: 0x%x 0x%x %d %d %d\n" $* >> /tmp/slwp.log
 #ssh timor@login252.xorkey.com ./HSM.sh $1 $2 $3 $4 $5 | grep ",.*,"
 cd /Users/timo/src/slwp/website/login_server
 ./HSM.sh $1 $2 $3 $4 $5 | grep ",.*,"
