@@ -22,6 +22,10 @@
 		<title>Logged out</title>
 	</head>
 	<body>
+		<form name='login' method='post' action='login2.php'>
+			<input id='Uh' name='Uh' hidden>
+			<input id='Au' name='Au' hidden>
+		</form>
 		<img src="XORkey logo RGB.png" height=100px>
 		<h1>You are logged out.</h1>
 		<p>	<a href="login.html">Log back in</a></p>
