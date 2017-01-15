@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>T.M.C Ruiter</string>
+	<key>Builder Version</key>
+	<string>11601.4.4</string>
+	<key>CFBundleDisplayName</key>
+	<string>slwp</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.xorkey.slwp</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Global Page</key>
+		<string>TIMO.html</string>
+		<key>Toolbar Items</key>
+		<array>
+			<dict>
+				<key>Command</key>
+				<string>StartLogin</string>
+				<key>Identifier</key>
+				<string>XORkeyLogo</string>
+				<key>Image</key>
+				<string>XORkeyLogo32.png</string>
+				<key>Include By Default</key>
+				<true/>
+				<key>Label</key>
+				<string>XORkeyLogo</string>
+				<key>Palette Label</key>
+				<string>LOGIN!</string>
+				<key>Tool Tip</key>
+				<string>Press to start login process</string>
+			</dict>
+		</array>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict>
+			<key>End</key>
+			<array>
+				<string>checks.js</string>
+			</array>
+			<key>Start</key>
+			<array>
+				<string>slwp_functions.js</string>
+				<string>XORshift.js</string>
+			</array>
+		</dict>
+		<key>Stylesheets</key>
+		<array>
+			<string>TIMO.css</string>
+		</array>
+	</dict>
+	<key>Description</key>
+	<string>Extension for TIMO Logins</string>
+	<key>DeveloperIdentifier</key>
+	<string>0000000000</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Include Secure Pages</key>
+			<true/>
+			<key>Level</key>
+			<string>All</string>
+		</dict>
+	</dict>
+	<key>Website</key>
+	<string>http://www.xorkey.com</string>
+</dict>
+</plist>
