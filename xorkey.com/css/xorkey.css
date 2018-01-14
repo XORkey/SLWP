@@ -134,7 +134,7 @@ DIV#top li.dropdown-right
 }
 DIV#top LI.dropdown-right:last-child    /* This contains the logo. */
 {
-    padding: 4px 10px 0px 5px;
+    padding: 4px 0px 0px 5px;
 }
 DIV#top .dropdown-content
 {
@@ -220,8 +220,8 @@ DIV P
 }
 SECTION
 {
-/*    margin: 0px 0px 10px 0px;
-    padding: 0px 5px 5px 10px; */
+    margin: 0px 0px 10px 0px;
+    padding: 0px 5px 5px 10px;
     position: relative;
     z-index: 10;
 	border: 1px solid green;

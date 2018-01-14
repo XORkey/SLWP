@@ -2,8 +2,8 @@ BODY
 {
     font-size: 100%;
     font-family: DroidSans, sans-serif;
-    background-color: papayawhip;
-    color: #132020;         /* A darker shade of darkslategrey. */
+    background-color: azure;
+	color: rgb(7,78,108);
 }
 H1, H2, H3
 {
@@ -24,12 +24,13 @@ H3
 }
 DIV#wrapper
 {
-	background: papayawhip;
+	background: azure;
 }
 DIV#bottom
 {
-    background: wheat;  /* IE9- */
-    background: linear-gradient(wheat, transparent);
+    background: azure;  /* IE9- */
+    background: linear-gradient(rgb(7,78,108), rgb(124,181,207));
+	color: rgb(124,181,207);
 }
 DIV#siteinfo
 {
@@ -41,7 +42,7 @@ DIV.companygroup, DIV.rightside
     font-size: 1.5em;
     font-family: Junction, serif;
     font-weight: bold;
-    color: hsla(210, 100%, 56%, 0.35);  /* opaque dodgerblue; */
+	color: rgb(124,181,207);
 }
 DIV#top UL
 {
@@ -52,7 +53,7 @@ DIV#top LI:first-child
     font-size: 1.5em;
     font-family: Junction, serif;
     font-weight: bold;
-    color: hsla(210, 100%, 56%, 0.65);  /* opaque dodgerblue; */
+	color: rgb(124,181,207);
 }
 DIV#top LI A:hover, DIV#top .dropdown:hover .dropbtn
 {
@@ -76,4 +77,8 @@ DIV#top .dropdown-content A:hover
 {
     background-color: orange;
 }
-T
+SECTION
+{
+	background-color: skyblue;
+	color: #004c4c;
+}

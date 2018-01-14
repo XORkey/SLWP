@@ -23,7 +23,7 @@ $Theme = 1;
 					<header>
 						<h1>Secure Login Without Passwords (SLWP)</h1>
 					</header>
-					<p>	XORkey introduces: Secure Login Without Passwords, a authentication method that does away with passwords.</p>
+					<p>	XORkey introduces: Secure Login Without Passwords, an authentication method that does away with passwords.</p>
 				</section>
 			</div>	<!-- #content -->
 		</div>	<!-- #wrapper -->
