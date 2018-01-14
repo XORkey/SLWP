@@ -1,0 +1,79 @@
+BODY
+{
+    font-size: 100%;
+    font-family: DroidSans, sans-serif;
+    background-color: papayawhip;
+    color: #132020;         /* A darker shade of darkslategrey. */
+}
+H1, H2, H3
+{
+    font-family: Junction, serif;
+}
+H1
+{
+    font-size: 1.500em;
+    font-variant: small-caps;
+}
+H2
+{
+    font-size: 1.3125em;
+}
+H3
+{
+    font-size: 0.9375em;
+}
+DIV#wrapper
+{
+	background: papayawhip;
+}
+DIV#bottom
+{
+    background: wheat;  /* IE9- */
+    background: linear-gradient(wheat, transparent);
+}
+DIV#siteinfo
+{
+    font-family: Junction, serif;
+    font-size: 0.7em;
+}
+DIV.companygroup, DIV.rightside
+{
+    font-size: 1.5em;
+    font-family: Junction, serif;
+    font-weight: bold;
+    color: hsla(210, 100%, 56%, 0.35);  /* opaque dodgerblue; */
+}
+DIV#top UL
+{
+    font-family: Junction, serif;
+}
+DIV#top LI:first-child
+{
+    font-size: 1.5em;
+    font-family: Junction, serif;
+    font-weight: bold;
+    color: hsla(210, 100%, 56%, 0.65);  /* opaque dodgerblue; */
+}
+DIV#top LI A:hover, DIV#top .dropdown:hover .dropbtn
+{
+    background-color: lightblue;
+}
+DIV#top A:visited, UL.menu A
+{
+    color: darkslategrey;
+}
+DIV#top .dropdown-content
+{
+    background-color: lightgrey;
+    box-shadow: 0px 5px 10px 0px rgba(0,0,0,0.2);
+}
+DIV#top .dropdown-content A
+{
+    color: black;
+    text-decoration: none;
+}
+DIV#top .dropdown-content A:hover
+{
+    background-color: orange;
+}
+T
