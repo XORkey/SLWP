@@ -71,8 +71,24 @@
 					</article>
 					<article>
 						<header>
-							<h2>The authentication procedure</h2>
+							<h2>The login server</h2>
 						</header>
+						<p>	The login server is at the core of the implementation of SLWP.
+							It performs the main calculations of the protocol,
+							and safely stores the keys that are used to compute the values.</p>
+						<p>	Although the webserver itself may be also configured to be its own login server,
+							this server is typically located elsewhere.
+							Either a different server in the back-office network,
+							but most likely a server on the Internet.
+							A typical setup would have more than one login server,
+							for redundancy and scalability reasons.</p>
+						<p>	Webservers are connected to login servers through dedicated IPsec VPNs.
+							A small website may have as few as two login servers;
+							large sites may require a lot more,
+							located accross the globe to increase robustness.
+							Then again,
+							login servers may serve many webservers,
+							in a mesh fashion.
 					</article>
 				</section>
 			</div>	<!-- #content -->

@@ -41,7 +41,7 @@
 					<li>The website needs to prove it can decrypt your encrypted random number.<br>
 						<i>A phishing site is unable to do so, thus eliminating this threat.</i>
 					<li>It is a two-factor authentication method by design and easily upgraded to multi-factor authentication.<br>
-						<i>A combination of something you know, and/or something you have, and/or something you are. Just add hardware tokens and biometrics for one or more persons to make it multi-factor.</i>
+						<i>A combination of something you know, and/or something you have, and/or something you are.<br>Just add hardware tokens and biometrics for one or more persons to make it multi-factor.</i>
 					<li>Logging in can be fully automated.<br>
 						<i>Just hit the login button on the website and you're in.</i>
 					<li>You can pick just any username you want for any and all accounts you have; no clashes with other people's accounts.<br>
