@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+<!--#include virtual='inc/head.html' -->
+		<noscript>
+			<style>
+				DIV#content { display: none; }
+			</style>
+		</noscript>
+		<title>XORkey</title>
+	</head>
+	<body>
+		<div id='wrapper'>
+			<div id='top'>
+<!--#include virtual='inc/top.html' -->
+			</div>	<!-- #top -->
+			<div id='left'>
+<!--#include virtual='inc/left.html' -->
+			</div>	<!-- #left -->
+			<div id='right'>
+<!--#include virtual='inc/right.html' -->
+			</div>	<!-- #right -->
+			<div id='content'>
+				<section>
+					<header>
+						<h1>Constructing U<sub>h</sub></h1>
+					</header>
+					<p>	Instead of giving a traditional username,
+						a more elaborate identifier,
+						named <i>U<sub>h</sub></i> in the article,
+						is used to indicate which account you want to access.
+						This identifier is a 256 bits hash which the websites uses to find the requested account.
+						It is constructed by combining several values in a deterministic way.</p>
+					<p>	The reason a simple username is abandoned is twofold:
+						usernames tend to be 'in use' rather a lot,
+						which is annoying to most people,
+						and,
+						more importantly,
+						it is a security risk because it is the only thing needed to launch an attack on the account.</p>
+					<p>	In its most basic form,
+						this protocol still uses a username,
+						but this is something only the user is aware of.
+						The website has no knowledge of the username,
+						which allows the user to select any name,
+						without the risk of being taken already.</p>
+					<p>	The components of <i>U<sub>h</sub></i> are:
+						the keyring identifier (key zero),
+						the hostname part of the URL,
+						and the username.
+						In an advanced scenario,
+						the username is replaced by one or more values obtained through biometrics or something supplied by a hardware token,
+						or both.</p>
+					<p>	The calculation of <i>U<sub>h</sub></i> is straightforward.
+						Hash <i>K<sub>0</sub></i>,
+						hash the combination of username and URL,
+						and XOR the two values.
+						If biometric values are used,
+						then hash these values individually and XOR them along with the first values.
+						The same applies for values from hardware tokens:
+					hash and XOR liberally.</p>
+				</section>
+			</div>	<!-- #content -->
+		</div>	<!-- #wrapper -->
+		<div id='bottom'>
+<!--#include virtual='inc/bottom.html' -->
+		</div>	<!-- #bottom -->
+	</body>
+</html>

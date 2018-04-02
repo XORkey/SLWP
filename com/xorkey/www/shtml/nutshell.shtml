@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+<!--#include virtual="inc/head.html" -->
+		<noscript>
+			<style>
+				DIV#content { display: none; }
+			</style>
+		</noscript>
+		<title>XORkey</title>
+	</head>
+	<body>
+		<div id='wrapper'>
+			<div id='top'>
+<!--#include virtual="inc/top.html" -->
+			</div>	<!-- #top -->
+			<div id='left'>
+<!--#include virtual="inc/left.html" -->
+			</div>	<!-- #left -->
+			<div id='right'>
+<!--#include virtual="inc/right.html" -->
+			</div>	<!-- #right -->
+			<div id='content'>
+				<section>
+					<header>
+						<h1>SLWP in a nutshell</h1>
+					</header>
+					<article>
+						<header>
+							<h2>Indicating which account you want to login to</h2>
+						</header>
+						<p>	Instead of a simple username, a hash value is computed to indicate which account you want to use.
+							This value consists of a combination of the hashes of the primary key of your keyring
+							(<i>K<sub>0</sub></i>)
+							and the combination of the username and URL of the website.
+							This value is sent to the website to lookup your site key;
+							the key that is used by the website to try to log you in.</p>
+					</article>
+					<article>
+						<header>
+							<h2>The keyring</h2>
+						</header>
+						<p>	The keyring is the thing you have to have with you, otherwise you cannot login.
+							It is the storage of all your personal login keys,
+							with which you can authenticate yourself.</p>
+						<p>	Each key is stored on the keyring as a 128-bit number,
+							although keys themselves might be actually be constructed of fewer bits;
+							the remaining bits are random in that case.
+							The first key
+							(<i>K<sub>0</sub></i>)
+							is the keyring identifier and used to construct the initial identifying hash value.</p>
+					</article>
+					<article>
+						<header>
+							<h2>The authentication procedure</h2>
+						</header>
+						<p>	The login protocol is a two-way authentication procedure,
+							by which the user proves to the website that it has access to the user key that was issued to him,
+							and the website proves to the user that its key is the same as the key when applying for this account...</p>
+						<p>	The user generates a random value (nonce 1) and (automatically) selects a key from the keyring.
+							With XOR the two values give the first authentication value <i>R<sub>u</sub></i>,
+							which the website needs to decrypt.
+							The website will do likewise and generate a different random value (nonce 2),
+							which it will encrypt with the key found in its database by selecting it with <i>U<sub>h</sub></i>.
+							This is the second authentication value <i>R<sub>s</sub></i>,
+							which the user must decrypt.</p>
+						<p>	The user can decrypt <i>R<sub>s</sub></i> with the selected key from the keyring, using XOR;
+							the website can decrypt <i>R<sub>u</sub></i> with the found key from the database.
+							If both can return the right hash value from the found nonces,
+							both have proof the other is who or what he claims to be.</p>
+					</article>
+					<article>
+						<header>
+							<h2>The authentication procedure</h2>
+						</header>
+					</article>
+				</section>
+			</div>	<!-- #content -->
+		</div>	<!-- #wrapper -->
+		<div id='bottom'>
+<!--#include virtual="inc/bottom.html" -->
+		</div>	<!-- #bottom -->
+	</body>
+</html>

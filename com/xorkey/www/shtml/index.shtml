@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>XORkey SLWP</title>
-		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
-		<meta charset='utf-8'>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<link rel='stylesheet' type='text/css' href='css/xorkey.css'>
-		<link rel='stylesheet' type='text/css' href='css/webfonts/junction.css'>
-		<link rel='stylesheet' type='text/css' href='css/webfonts/droid-sans.css'>
-		<link rel='stylesheet' type='text/css' href='css/theme1.css'>
-<!--		<link rel='icon' href='img/icon/xorkey.ico'> -->
+<!--#include virtual="inc/head.html" -->
 		<noscript>
 			<style>
 				DIV#content { display: none; }
@@ -20,24 +12,13 @@
 	<body>
 		<div id='wrapper'>
 			<div id='top'>
-				<ul>
-					<li>SLWP</li>
-					<li><a href='index.html'>Home</a></li>
-					<div class='centered' style='z-index: -1;'><h1>Title</h1></div>
-					<li class='dropdown-right'><img class='companylogo' src='img/logo/XORkeyLogo32.png'>
-				</ul>
+<!--#include virtual="inc/top.html" -->
 			</div>	<!-- #top -->
 			<div id='left'>
-				<div id='companygroup'>
-					<div class='companygroup'>XORkey</div>
-				</div>	<!-- #companygroup -->
+<!--#include virtual="inc/left.html" -->
 			</div>	<!-- #left -->
 			<div id='right'>
-				<div id='rightside'>
-					<div class='rightside'>
-						The key to the Internet
-					</div>
-				</div>	<!-- #rightside -->
+<!--#include virtual="inc/right.html" -->
 			</div>	<!-- #right -->
 			<div id='content'>
 				<section>
@@ -83,20 +64,7 @@
 			</div>	<!-- #content -->
 		</div>	<!-- #wrapper -->
 		<div id='bottom'>
-			<div id='siteinfo'>
-				<div class='cmdbversion'>
-					<p>v0.4</p>
-				</div>
-				<div class='centered'>
-					<p class='copyright'>Copyright &copy; 2017-2018 by XORkey B.V.<br>Winterkoning 5, 1722 CA<br>ZUID-SCHARWOUDE<br>The Netherlands</p>
-				</div>
-				<div class='right'>
-					<table class='quicklinks'>
-					<tr><td>Quick links</td></tr>
-					<tr><td><a href='documents/white-papers/timo.pdf'>TIMO™ protocol (pdf)</a></td></tr>
-					</table>
-				</div>
-			</div>  <!-- #siteinfo -->
+<!--#include virtual="inc/bottom.html" -->
 		</div>	<!-- #bottom -->
 	</body>
 </html>
