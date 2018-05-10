@@ -56,18 +56,26 @@
 						</header>
 						<p>	The login protocol is a two-way authentication procedure,
 							by which the user proves to the website that it has access to the user key that was issued to him,
-							and the website proves to the user that its key is the same as the key when applying for this account...</p>
-						<p>	The user generates a random value (nonce 1) and (automatically) selects a key from the keyring.
-							With XOR the two values give the first authentication value <i>R<sub>u</sub></i>,
-							which the website needs to decrypt.
-							The website will do likewise and generate a different random value (nonce 2),
-							which it will encrypt with the key found in its database by selecting it with <i>U<sub>h</sub></i>.
-							This is the second authentication value <i>R<sub>s</sub></i>,
+							and the website proves to the user that its key is the same as the key when applying for this account...
+							The protocol uses random values (nonces) and several keys, so it may dazzle you at first sight.</p>
+						<p>	The user generates a random value (nonce 1 or <i>R<sub>u</sub></i>) and (automatically) selects a key from the keyring that uniquely belongs to the website.
+							The encryption of <i>R<sub>u</sub></i> with the selected key gives the first authentication value <i>A<sub>u</sub></i>,
+							which the website needs to decrypt,
+							with the help of a login server.</p>
+						<p>
+							The web server will try to find a key for the user (<i>K<sub>s</sub></i>),
+							by selecting it with  <i>U<sub>h</sub></i>,
+							and relay this key and <i>A<sub>u</sub></i> to the login server.
+							The login server will generate a different random value (nonce 2 or <i>R<sub>s</sub></i>) on behalf of the webserver,
+							which it will encrypt with key <i>K<sub>s</sub></i> by first transforming it into <i>K<sub>u</sub></i>, that is, the key the user has.
+							The login server is the only place the secret keys live that encrypt keys like <i>K<sub>s</sub></i> into <i>K<sub>u</sub></i>.
+							The encryption of <i>R<sub>s</sub></i> with <i>K<sub>u</sub></i> is the second authentication value <i>B<sub>s</sub></i>,
 							which the user must decrypt.</p>
-						<p>	The user can decrypt <i>R<sub>s</sub></i> with the selected key from the keyring, using XOR;
-							the website can decrypt <i>R<sub>u</sub></i> with the found key from the database.
-							If both can return the right hash value from the found nonces,
-							both have proof the other is who or what he claims to be.</p>
+						<p>	The user can decrypt <i>B<sub>s</sub></i> with the selected key from the keyring.
+							It now knows both nonces, and will send the XOR of both values to the webserver.
+							The webserver got this value from the login server beforehand, so all it needs is compare the two values and see if they match.
+							The login server can decrypt <i>A<sub>u</sub></i> with the found key from the database.
+							The login server returns the hash of the random value <i>R<sub>u</sub></i> to the website, which is relayed to the user and proves that the website is legitimate.</p>
 					</article>
 					<article>
 						<header>
