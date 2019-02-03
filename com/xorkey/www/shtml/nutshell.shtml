@@ -27,6 +27,27 @@
 					</header>
 					<article>
 						<header>
+							<h2>User experience</h2>
+						</header>
+						<p>	Websites that support SLWP will give the user a smooth experience as far as logging in is concerned.
+							The login is highly automated, except for a single 'login' button that will log you in the moment you click it.</p>
+						<p>	You may want to log in with your default username as remembered by your browser, in which case a simple click on the login button will do.
+							That default username can be anything you want, apart from an empty string.
+							Name clashes are a thing from the past, you can use any name you want; for all websites, if that is convenient.
+							Should you have used a different username to register to a particular website,
+							then you have to supply it before hitting 'login' (if your browser did not remember it for you).</p>
+						<p>	The keys you carry around
+							(on a memory stick, but most likely in your inaptly named 'password' manager)
+							are bound to the websites you visit.
+							Conversely, if you are visiting a website that did not issue a key to you, you cannot login, even if you wanted to.
+							Phishing sites lure you with familiar looking URLs to almost identical looking pages as the real thing,
+							but your browser and set of keys prevent any logging in, simply because URL and keys have no match.</p>
+						<p>	Recognition of a site you have a key for is instanteneous and the login button lights up.
+							This is a sure tell-tale of a secure site, apart from the encryption that is managed by the site's certificate.
+							This way, a second layer of trust is added to a website.</p>
+					</article>
+					<article>
+						<header>
 							<h2>Indicating which account you want to login to</h2>
 						</header>
 						<p>	Instead of a simple username, a hash value is computed to indicate which account you want to use.
