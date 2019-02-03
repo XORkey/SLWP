@@ -1,4 +1,4 @@
-\select@language {english}
+\babel@toc {english}{}
 \contentsline {section}{\numberline {1}The Perfect Login - Always}{5}
 \contentsline {subsection}{\numberline {1.1}Why our passwords are vulnerable}{5}
 \contentsline {subsection}{\numberline {1.2}The TIMO\textsuperscript {\texttrademark }solution - how it works}{5}
@@ -56,7 +56,7 @@
 \contentsline {paragraph}{\numberline {5.3.2.2}Computing index starting value}{26}
 \contentsline {subsubsection}{\numberline {5.3.3}Step 3: Login server actions}{26}
 \contentsline {subsubsection}{\numberline {5.3.4}Step 4: User verifies site key}{28}
-\contentsline {subsubsection}{\numberline {5.3.5}Step 5: Site verifies user key}{29}
+\contentsline {subsubsection}{\numberline {5.3.5}Step 5: Site verifies user key}{28}
 \contentsline {subsubsection}{\numberline {5.3.6}Step 6: User key replacement}{29}
 \contentsline {section}{\numberline {6}Keys}{31}
 \contentsline {subsection}{\numberline {6.1}Secret keys}{31}
