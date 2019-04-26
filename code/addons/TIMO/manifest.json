@@ -1,0 +1,26 @@
+{
+	"manifest_version": 2,
+	"name": "TIMO",
+	"version": "2.0.1",
+	"author": "XORkey",
+	"description": "Login support for TIMO enabled websites.",
+	"homepage_url": "https://timor.home.xs4all.nl",
+	"icons": {
+		"32": "data/XORkey-32.png"
+	},
+	"permissions": ["activeTab" ],
+	"browser_action": {
+		"default_icon": "data/XORkey-32.png",
+		"default_title": "Login with TIMO"
+	},
+	"background": {
+		"scripts": ["background.js", "data/sha256.js" ]
+	},
+	"content_scripts": [
+		{
+			"matches": [ "<all_urls>" ],
+			"js": ["content.js", "data/sha256.js"],
+			"run_at":	"document_end"
+		}
+	]
+}
