@@ -1,5 +1,5 @@
-.aux
-.dvi
-.log
-.lot
-.toc
+*.aux
+*.dvi
+*.log
+*.lot
+*.toc
