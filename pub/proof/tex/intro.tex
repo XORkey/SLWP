@@ -1,0 +1,53 @@
+\section{Introduction}
+This piece of text tries to proof that the \TIMO protocol is secure.
+\subsection{Applicability of the protocol}
+The applicabitily of this protocol cannot be inferred directly from wether this proof holds or not.
+If it does,
+it would be implemented in an environment with many other things that influence the overall security.
+A safe protocol does not mean that its use prevents the user from any other harm.
+\par
+If the proof is flawed in some way,
+or flawed in some case,
+it may still be implemented.
+Simply because it is an improvement over the current situation.
+\subsection{Assumptions}
+The field of application of this protocol can be defined by the extent the assumptions made here hold true.
+\subsubsection{Encryption Standards}
+The \TIMO protocol uses several standard encryption and hashing functions,%
+\footnote{For the record,
+we do not assume XOR to be among them.}
+and only in ways they are designed for.
+A weakness in any of them will cause great problems throughout the world,
+given the ubiquity of their use.
+We assume that it is quite irrelevant wether or not this weakness will impact this protocol,
+since everybody would be panicking about bigger things.
+\par
+The upshot of this is that,
+since in reality it is of course devastating if your foundations crumble,
+when the dust settles down this protocol is fixed with the rest,
+or as permanently flawed as the rest.
+\subsubsection{Hardware Security Modules}
+By design,
+an HSM is something to operate on data in a secure way.
+Typically,
+it stores cryptographic keys and computes hashes and encrypts data with them,
+all the while keeping those keys to itself.
+In other words,
+it is assumed that any key residing in an HSM will never leave it in plain text.
+There is of course a method of duplicating keys over several HSMs,
+but we assume
+(again)
+that these methods are unbreakable.
+\subsubsection{Human factors}
+The login servers are quite important,
+as they hold the secret keys that make it all work securely.
+In theory,%
+\footnote{Well,
+this is how I demoed it.}
+the whole service they offer can be replaced by a single bash script that calls some openssl commands,
+with all keys in a flat file on disk.
+We assume,
+however,
+that such a login service would not pass any audit that we also assume will be imposed on such key%
+\footnote{Pun intended.}
+element of the infrastructure.

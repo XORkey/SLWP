@@ -1,0 +1,24 @@
+%
+% AUTHOR:		ing. T.M.C. Ruiter
+% COPYRIGHT(c)	2020 by XORkey B.V.
+%
+\documentclass[a4paper,twoside,draft]{article}
+\usepackage[header,page,titletoc,title]{appendix}
+\usepackage[english]{babel}
+\usepackage{amsthm,dashrule,relsize,varioref,xcolor}
+% Includes
+\newcommand{\includesection}[1]{\input{tex/#1}\newpage}
+\newcommand{\includesectionnopagebreak}[1]{\input{tex/#1}}
+% Color definitions
+\definecolor{darkxor}{RGB}{0,77,109}
+\definecolor{lightxor}{RGB}{118,180,207}
+% Sections
+\newcommand{\dashes}{\vspace*{-0.8em}\textcolor{lightxor}{\hdashrule[0.5ex][x]{\textwidth}{.4mm}{2.48mm}}}
+\newcommand{\tinydashes}{\vspace*{-0.8em}\textcolor{lightxor}{\hdashrule[0.5ex][x]{\textwidth}{.3mm}{1mm 2mm}}}
+\newcommand{\Section}[1]{\cleardoublepage\section{#1}\dashes\newline}
+\newcommand{\SectionWithoutText}[1]{\cleardoublepage\section{#1}\dashes\vspace*{-0.8em}}
+\newcommand{\SectionWithoutNumber}[1]{\cleardoublepage\section*{#1}\dashes\newline}
+\newcommand{\Subsection}[1]{\subsection{#1}\tinydashes\newline}
+\newcommand{\SubsectionWithoutText}[1]{\subsection{#1}\tinydashes\vspace*{-0.8em}}
+
+\theoremstyle{remark} \newtheorem{comp}{Computation}

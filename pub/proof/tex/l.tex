@@ -1,0 +1,72 @@
+%
+% AUTHOR:		ing. T.M.C. Ruiter
+% COPYRIGHT(c)	2020 by XORkey B.V.
+%
+\documentclass[a4paper,twoside,draft]{article}
+\usepackage[header,page,titletoc,title]{appendix}
+\usepackage[english]{babel}
+\usepackage{algorithm}
+\usepackage{listings}
+\usepackage[noend]{algpseudocode}
+\usepackage{url}
+\usepackage{fancyhdr}
+\usepackage{varioref}
+\usepackage{epsfig}
+\usepackage{dialogue}
+\usepackage{attrib}
+\usepackage{tgheros,tgbonum}
+\usepackage{xcolor}
+\usepackage{dashrule}
+\usepackage{titlesec}
+% Page lay-out adjustments
+\setlength{\textwidth}{13.5cm}
+\addtolength{\textheight}{-0.6cm}
+\setlength{\topmargin}{-0.3cm}
+\addtolength{\footskip}{1.0cm}
+\addtolength{\oddsidemargin}{-0.5cm}
+\addtolength{\evensidemargin}{-0.3cm}
+% Color definitions
+\definecolor{darkxor}{RGB}{0,77,109}
+\definecolor{lightxor}{RGB}{118,180,207}
+% Table of contents
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{2}
+% The pages
+\pagestyle{fancyplain}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\headheight}{25pt}
+%\addtolength{\headwidth}{\marginparsep}
+%\addtolength{\headwidth}{\marginparwidth}
+%\newcommand{\chaptermark}[1]{\markboth{#1}{}}
+%\renewcommand{\sectionmark}[1]{\markboth{\thesection\ #1}{}}%
+%\renewcommand{\subsectionmark}[1]{\markright{\thesubsection\ #1}}%
+%\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}%
+%\rhead[\fancyplain{}{\bfseries\leftmark}]{\fancyplain{}{\bfseries\thepage}}%
+%\cfoot{Confidential | T.M.C. Ruiter | Version 7 }
+\newsavebox{\bolletjes}
+\sbox{\bolletjes}{\epsfig{file=XORkey_icons.eps,height=15pt}}
+\rhead[]{}
+\lhead[]{}
+\chead{\usebox{\bolletjes}}
+\cfoot{}
+\rfoot[\textcolor{darkxor}{\TIMO | Trusted Identification Method Online}]{\textcolor{darkxor}{\thepage}}
+\lfoot[\textcolor{darkxor}{\thepage}]{\textcolor{darkxor}{\TIMO | Trusted Identification Method Online}}
+%\titleformat{\chapter}[display]
+%  {\normalfont\sffamily\huge\bfseries}
+%    {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+%\titleformat{\section}{\normalfont\sffamily\Large\bfseries\color{darkxor}}{\thesection}{1em}{\centering}
+\titleformat{\section}{\normalfont\sffamily\Large\bfseries\color{darkxor}}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\sffamily\large\bfseries\color{darkxor}}{\thesubsection}{1em}{}
+%\titleformat{\subsubsection}{\normalfont\sffamily\large\bfseries\color{darkxor}}{\thesubsubsection}{1em}{}
+%\titleformat{\paragraph}{\normalfont\sffamily\normalfont\bfseries\color{darkxor}}{\theparagraph}{1em}{}
+\newcommand{\dashes}{\vspace*{-0.8em}\textcolor{lightxor}{\hdashrule[0.5ex][x]{\textwidth}{.4mm}{2.48mm}}}
+\newcommand{\tinydashes}{\vspace*{-0.8em}\textcolor{lightxor}{\hdashrule[0.5ex][x]{\textwidth}{.3mm}{1mm 2mm}}}
+\newcommand{\Section}[1]{\cleardoublepage\section{#1}\dashes\newline}
+\newcommand{\SectionWithoutText}[1]{\cleardoublepage\section{#1}\dashes\vspace*{-0.8em}}
+\newcommand{\SectionWithoutNumber}[1]{\cleardoublepage\section*{#1}\dashes\newline}
+\newcommand{\Subsection}[1]{\subsection{#1}\tinydashes\newline}
+\newcommand{\SubsectionWithoutText}[1]{\subsection{#1}\tinydashes\vspace*{-0.8em}}
+%\newcommand{\Subsection}[1]{\SubsectionWithoutText{#1}\newline}
+%\newcommand{\SubsectionWithoutText}[1]{\subsection{#1}\dashes}
+\renewcommand{\appendixpagename}{\sffamily\Large\bfseries\color{darkxor}Appendices\newline\dashes}

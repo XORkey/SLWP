@@ -1,0 +1,24 @@
+\subsection{The keyring}
+The keyring is a set of keys,
+stored somewhere,
+where each key is a random number.
+\subsubsection{Storing the keyring}
+Storing the keyring may be done as seemed fit.
+It may be stored as a file on disk,
+or individual keys may be put in a database.
+The level of security regarding the keyring must match the level of confidentiality required for the accounts it is used to log in.
+It is,
+however,
+not part of the proof of the security of this protocol.
+Frankly said:
+if you loose your keys,
+you're dead.
+\subsubsection{Keys on the keyring}
+The first key on the ring
+($Z[0]$)
+is 128 bits in size and is the keyring identifier and is not used for logging in.
+\par
+Other keys are all stored as a 128 bit value,
+but only a subset of its bits are actually used as a key,
+determined by the website.
+The protocol allows for keys of as little as a single bit.
