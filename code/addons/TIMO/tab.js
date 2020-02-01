@@ -1,8 +1,54 @@
-function colored_border(pixels, color)
+/*
+** FILE:		slwptab.js
+** DESCRIPTION:	JavaScript that is injected in every web page.
+**				This script determines if the page contains the Uh and Au elements used for the SLWP protocol.
+**				It reports this status to the main script in the browser.
+** AUTHOR:		ing. T.M.C. Ruiter
+** COPYRIGHT(c) 2019 by XORkey B.V.
+*/
+'use strict';
+
+function slwp_enabled()
 {
-	if (document.body)
-		document.body.style.border = pixels + 'px solid ' + color;
+	return document.getElementById('Uh') && document.getElementById('Au');
 }
+
+function getstate()
+{
+	if (slwp_enabled())
+	{
+		return 'slwp_enabled';
+	}
+	else
+		return 'slwp_disabled';
+}
+
+function handleBrowserMessage(request, sender, sendResponse)
+{
+	console.log(request);
+	if (request.action == 'get_state')
+	{
+		console.log('Checking if enabled...');
+		var tab_state = getstate();
+		switch (tab_state)
+		{
+		case 'slwp_enabled':
+			browser.runtime.sendMessage({state: tab_state, host: window.top.location.host});
+			return Promise.resolve({state: tab_state, host: window.top.location.host});
+		default:
+			console.log('...no. Bummer.');
+			return Promise.resolve({state: 'disabled', host: window.top.location.host});
+		}
+	}
+}
+
+/* Register handleBrowserMessage() to act on messages from the main script. */
+browser.runtime.onMessage.addListener(handleBrowserMessage);
+
+var tab_state = getstate();
+window.document.body.className = tab_state;
+
+browser.runtime.sendMessage({state: tab_state, host: window.top.location.host});
 
 /*
 runtime.onMessage('state',	function(color) {
@@ -17,7 +63,7 @@ runtime.onMessage('enabled',	function() {
 							else
 							{
 								console.log('...no. Bummer.');
-//								alert('Sorry, this website does not seem to be TIMO™ enabled yet.');
+//								alert('Sorry, this website does not seem to be SLWP™ enabled yet.');
 							}
 						});
 runtime.onMessage('haveKx',	function()
@@ -41,37 +87,3 @@ runtime.onMessage('get_logout_url',	function() {
 									}
 								});
 */
-
-function handleMessage(request, sender, sendResponse)
-{
-	console.log(request);
-	if (request.action == 'get_state')
-	{
-		console.log('Checking if enabled...');
-		if (document.getElementById('Uh') && document.getElementById('Au'))
-		{
-			browser.runtime.sendMessage({state: 'havekey', host: window.top.location.host});
-			return Promise.resolve({state: 'havekey', host: window.top.location.host});
-		}
-		else
-		{
-			console.log('...no. Bummer.');
-			return Promise.resolve({state: 'disabled'});
-		}
-	}
-}
-
-
-browser.runtime.onMessage.addListener(handleMessage);
-
-var tab_state = 'unknown';
-if (document.getElementById('Uh') && document.getElementById('Au'))
-{
-	tab_state = 'enabled';
-	// colored_border(3, 'orange');
-	window.document.body.class = 'slwp_enabled';
-}
-else
-	tab_state = 'disabled';
-
-browser.runtime.sendMessage({host: window.top.location.host, state: tab_state});

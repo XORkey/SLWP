@@ -1,12 +1,19 @@
+/*
+** FILE:		timo.js
+** DESCRIPTION:	Code that runs centrally in the browser, co-ordinating logins.
+**				It needs to talk to all the tabs, and also with a external program
+**				providing login keys.
+** AUTHOR:		ing. T.M.C. Ruiter
+** COPYRIGHT(c) 2019 by XORkey B.V.
+*/
 'use strict';
-
-function onError(error)
-{
-	console.error(`Error: ${error}`);
-}
 
 var UserId = String("Joepietralala");       // The UserID is fixed in this demo.
 
+/*
+** Hex32():
+**	Represent a value as a 32bit hexadecimal string, prepended with zeroes.
+*/
 function Hex32(n)
 {
     var prefix = ""; 
@@ -15,17 +22,23 @@ function Hex32(n)
             prefix += "0";
     return prefix + n.toString(16);
 }
+
+/*
+** Uh():
+**	Construct an Uh value.
+*/
 function Uh(KeyRingID, UID, host)
 {
-	var H0 = hash.SHA256(String(KeyRingID));		// 256 bits represented in 64 bytes.
-	var H1 = hash.SHA256(UID + host);			// Another 256 bit value represented as a
-											//                          64 bytes string.
+	var H0 = hash.SHA256(String(KeyRingID));
+										// 256 bits represented in 64 bytes.
+	var H1 = hash.SHA256(UID + host);	// Another 256 bit value represented as a 64
+										//                                 bytes string.
 	var Uh = "";
-	for (var i = 0; i < 8; i++)				// For each 8 bytes of H0 and H1: XOR both
-											//       and add the result as string to Uh.
+	for (var i = 0; i < 8; i++)			// For each 8 bytes of H0 and H1: XOR both and
+										//               add the result as string to Uh.
 		Uh += Hex32((parseInt(H0.substr(i * 8, 8), 16) ^ (parseInt(H1.substr(i * 8, 8), 16))) >>> 0);
-	return Uh;								// Also a 256 bit value represented as a 64
-											//                             bytes string.
+	return Uh;							// Also a 256 bit value represented as a 64
+										//                                 bytes string.
 }
 function Au(Ru, host)
 {
@@ -171,6 +184,7 @@ var tab_state = [];							// Remember the state for each tab.
 											//	{	host:	window.top.location.host (host part of the URL),
 											//		state:	one of
 											//				{	'unknown': we have no clue,
+											//					'missing': we see no Uh or Au anywhere,
 											//					'enabled': we have found Uh and Au on the page,
 											//					'havekey': we have found a key for 'host',
 											//					'wearein': we have successfully logged in.
@@ -181,31 +195,48 @@ var tab_state = [];							// Remember the state for each tab.
 											// Instead, it may indicate to the application that
 											// login was successful, or it may keep quiet about it.
 
+//
+// Tab Finite State Machine:
+//
+// U -> M on Au and Uh missing.
+// U,M -> E on Au and Uh found on tab
+// U,M -> H on Au and Uh found on tab and we have a key.
+//
+/* Do something when the login button is pressed. */
 function doLogin(tab)
 {
 	if (tab_state[tab.id] == undefined)
 		browser.tabs.sendMessage(tab.id, {action: 'get_state'});
-	var state = tab_state[tab.id].state;
-	switch (state)
+	else
 	{
-	default:
-		console.log('State: ' + state + '; no action.');
-		break;
+		var state = tab_state[tab.id].state;
+		switch (state)
+		{
+		default:
+			console.log('State: ' + state + '; no action.');
+			break;
+		}
 	}
 }
 
 browser.browserAction.onClicked.addListener(doLogin);
 
 
-function handleMessage(message, sender, response)
+/* Do something with messages from the tab. */
+function handleTabMessage(message, sender, response)
 {
-	console.log(sender.tab.id + ": " + message.host + " " + message.state);
+	function OnError(e) { console.log(`Error: ${e}`); }
+	// Each tab calls in for every page it serves.
+	// Give it some CSS to work with.
+	console.log("handleTabMessage(" + sender.tab.id + "): new page, so insertCSS");
+	var inserting = browser.tabs.insertCSS(sender.tab.id, { file: "content.css" });
+	inserting.then(null, OnError);
+	console.log("handleTabMessage(" + sender.tab.id + "): " + message.host + " " + message.state);
 	tab_state[sender.tab.id] = { host: message.host, state: message.state };
-	browser.tabs.insertCSS(sender.tab.id, { "file": "content.css" });
-	if (tab_state[sender.tab.id].state == 'disabled')
+	if (tab_state[sender.tab.id].state == 'slwp_disabled')
 		browser.browserAction.disable(sender.tab.id);
 	else
 		browser.browserAction.enable(sender.tab.id);
 }
 
-browser.runtime.onMessage.addListener(handleMessage);
+browser.runtime.onMessage.addListener(handleTabMessage);
