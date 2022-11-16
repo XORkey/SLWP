@@ -1,0 +1,115 @@
+\Subsection{User hash \(H_u\)}
+The user hash (\(H_u\)) serves as an improved replacement of the userid.
+Instead of a guessable string
+(an e-mail address or something derived from a person's name)
+we send a 256-bit hash value.
+\Subsubsection{Initial development of \(H_u\)}
+The user has a key ring, with keys of each website it can log in.
+We could use a hash of the key
+(e.g. at index 23 in the key ring)
+of the website to the \(H_u\) identifier:
+\[H_0 = \HSHA{Z[23]}\]
+\[H_u = H_0\]
+but that would be wrong for two reasons:
+the key can possibly be recovered using brute force,
+and we want to be able to refresh the keys every now and then, which would imply that \(H_u\) changes also.
+\par
+However, we could choose \(Z[0]\)
+(i.e. the first key in the ring)
+for this purpose.
+We have to declare it `unchangeable' but that is no problem.
+At the same time it can be the identifier of the key ring, and can be thought as bound the the individual that owns the key ring.
+So we compute it like this:
+\[H_0 = \HSHA{Z[0]}\]
+\[H_u = H_0\]
+\par
+The presented means of computing \(H_u\) yields a value that is totally unguessable (with \(2^{256}\) possible values), but the same for each login.
+Tracking users accross websites is easy when they use the same e-mail address as their userid.
+When using a hash value like above, the same can be done, with no extra effort.
+\par
+To remedy this, we could add something specific for each website.
+The host name part of the URL
+(a Fully Qualified Domain Name)
+is an perfect candidate for this:
+\[H_0 = \HSHA{Z[0] + \mathtt{FQDN}}\]
+\[H_u = H_0\]
+We now have a unique \(H_u\) value per website, but it is still a single factor login.
+Just the key ring is required to be able to login.
+\Subsubsection{Adding a userid}
+With the initial way of computing \(H_u\), it is easy to add a factor.
+We could add a hash of something the user knows: a user identifier, as already used for traditional logins.
+The value \(\HSHA{\mathtt{userid}}\) should do the trick.
+\par
+The userid may be the same for the login for each website;
+it may also differ for each but that leaves the user with the task of remembering them.
+The userid is NOT a password, because it is not stored on the server in any way, and it never changes.
+I could use just my name `Timo Ruiter' or my initials `TMCR', or, to make it a bit harder (or more fun)
+use my Japanese, Greek, or 17th century Dutch alter egos `Timoto Takahashi', `Martin Timodopoulos', or `Tinus Cornelisz'. 
+\par
+If we combine the two, using \XOR:
+\[H_0 = \HSHA{Z[0] + \mathtt{FQDN}}\]
+\[H_1 = \HSHA{\mathtt{userid}}\]
+\[H_u = \xor{H_0}{H_1}\]
+we now have something that is unique and multi-factor.
+It has two components: something the user knows (the userid) and something the user has (the key ring).
+\Subsubsection{Biometric data}
+We can increase complexity of the \(H_u\) value,
+e.g. by using biometric data instead of the userid.
+\begin{dialogue}
+\speak{Walter} Over the line, Smokey!  I'm sorry.  That's a foul.
+\speak{Smokey} Bullshit.  Eight, Dude.
+\speak{Walter} Excuse me!  Mark it zero.  Next frame.
+\speak{Smokey} Bullshit, Walter!
+\speak{Walter} This is not Nam.  This is bowling.  There are rules.
+\speak{Dude} Come on Walter, it's just--it's Smokey.  So his toe slipped over a little, it's just a game.
+\speak{Walter} This is a league game.  This determines who enters the next round-robin, am I wrong?
+\speak{Smokey} Yeah, but--
+\speak{Walter} Am I wrong!?
+\speak{Smokey} Yeah, but I wasn't over.  Gimme the marker, Dude,  I'm marking it an eight.
+\par\medskip\direct{Walter takes out a gun.}
+\speak{Walter} Smokey my friend, you're entering a world of pain.
+\attrib{The Big Lebowski}
+\end{dialogue}
+We set \(H_1\) to zero to eliminate it (\(\xor{a}{0} = a\)),
+\[H_1 = 0\]
+and use the output of a fingerprint reader.
+We then compute (in some way):
+\[H_2 = \HSHA{\mathtt{fingerprint}}\]
+as a third factor.
+\par
+We could add a voice recording:
+\begin{dialogue}
+\speak{Edna}	\direct{Into microphone} Edna Mode.
+\par\medskip\direct{Laser gun comes out from the ceiling and points at Helen, who gasps.}
+\speak{Edna} And guest.
+\par\medskip\direct{The laser gun retracts}
+\attrib{{Incredibles 2}\ \normalcitations\cite{fandom:incrediblestwo}}
+\end{dialogue}
+and compute (in some way):
+\[H_3 = \HSHA{\text{``Edna\ Mode\ldots\ and\ guest''}}\]
+or using a value supplied by a hardware token:
+\[H_4 = \HSHA{\mathtt{token\ value}}\]
+or still some other value:
+\[H_5 = \HSHA{\cdots}\]
+and combine them generally with:
+\[H_u = \bigoplus_{i=0}^n H_i\]
+(meaning \(H_u = \xor{\xor{\xor{\xor{H_0}{H_1}}{H_2}}{\cdots}}{H_n}\))
+as a genuine multifactor value.
+\par
+Using a hardware token that generates time based keys leads to ever changing \(H_u\) values.
+The way \(H_u\) is computed makes it easy to strip off the temporary value on the server side:
+\[{H_4}^{*} = \HSHA{\mathtt{token\ value}}\]
+\[{H_u}^{*} = \xor{H_u}{{H_4}^{*}}\]
+where this time the token value is generated by the server side component of the hardware token software.
+We can use \({H_u}^{*}\) as the key for account lookup.
+\Subsubsection{Implications of a multi-factor \(H_u\)}
+When using multiple factors, especially biometric ones, you need equipment that can provide them.
+We login using smartphones, and most have a fingerprint reader of some kind.
+With such a device it is fairly easy to use a fingerprint as a login factor.
+\par
+Switching to a desktop computer, and trying to login to the same site may prove difficult without an external fingerprint reader.
+On this computer, a hardware token may be available instead, using a USB interface, for example.
+Smartphones lack such an interface, for obvious reasons.
+\par
+It may be necessary to have more than one \(H_u\) value associated with a single account.
+This would allow the user to indicate its account by more than one multi-factor way.

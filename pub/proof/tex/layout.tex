@@ -5,20 +5,33 @@
 \documentclass[a4paper,twoside,draft]{article}
 \usepackage[header,page,titletoc,title]{appendix}
 \usepackage[english]{babel}
-\usepackage{amsthm,dashrule,relsize,varioref,xcolor}
+\usepackage{dialogue,attrib,achicago,abbrevs}
+\usepackage{relsize,varioref,amsthm}
+\usepackage{ifthen}
+% Equations
+\usepackage{amssymb,amsmath}
+\numberwithin{equation}{section}
 % Includes
-\newcommand{\includesection}[1]{\input{tex/#1}\newpage}
-\newcommand{\includesectionnopagebreak}[1]{\input{tex/#1}}
+\newcommand{\includesection}[1]{\input{tex/#1}}%\newpage}
+%\newcommand{\includesectionnopagebreak}[1]{\input{tex/#1}}
 % Color definitions
+\usepackage{xcolor}
 \definecolor{darkxor}{RGB}{0,77,109}
 \definecolor{lightxor}{RGB}{118,180,207}
 % Sections
+\usepackage{dashrule}
 \newcommand{\dashes}{\vspace*{-0.8em}\textcolor{lightxor}{\hdashrule[0.5ex][x]{\textwidth}{.4mm}{2.48mm}}}
 \newcommand{\tinydashes}{\vspace*{-0.8em}\textcolor{lightxor}{\hdashrule[0.5ex][x]{\textwidth}{.3mm}{1mm 2mm}}}
 \newcommand{\Section}[1]{\cleardoublepage\section{#1}\dashes\newline}
 \newcommand{\SectionWithoutText}[1]{\cleardoublepage\section{#1}\dashes\vspace*{-0.8em}}
 \newcommand{\SectionWithoutNumber}[1]{\cleardoublepage\section*{#1}\dashes\newline}
-\newcommand{\Subsection}[1]{\subsection{#1}\tinydashes\newline}
+\newcommand{\Subsection}[1]{\ifnum \value{subsection}>0{\clearpage}\fi\subsection{#1}\tinydashes\newline}
 \newcommand{\SubsectionWithoutText}[1]{\subsection{#1}\tinydashes\vspace*{-0.8em}}
+\newcommand{\Subsubsection}[1]{\subsubsection{#1}}
+\newcommand{\TIMO}{SLWP\textsuperscript{\texttrademark}}
+\newcommand{\XORkey}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern +.05em{\raisebox{-.3ex}{\em key}}}}}}
+\newcommand{\XORlogo}{\textsf{\em X\kern -.05em{\raisebox{.2ex}{$\oplus$}\kern -.15em{R\kern -1.01em{\raisebox{-1.12ex}{\em key}}}}}}
 
-\theoremstyle{remark} \newtheorem{comp}{Computation}
+%\theoremstyle{remark} \newtheorem{comp}{Computation}
+\newtheorem{moafu}{Assumption}% Mother of all fuck ups...
+\newtheorem{axiom}{Axiom}

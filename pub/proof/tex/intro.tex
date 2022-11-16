@@ -1,6 +1,9 @@
-\section{Introduction}
-This piece of text tries to proof that the \TIMO protocol is secure.
-\subsection{Applicability of the protocol}
+\Section{Introduction}
+This piece of text tries to prove that the \TIMO protocol is secure.
+\Subsection{Why this protocol}
+Using passwords for logins is the traditional way for authenticating a user.
+It is widely accepted that doing so is not very secure.
+\Subsection{Applicability of the protocol}
 The applicabitily of this protocol cannot be inferred directly from wether this proof holds or not.
 If it does,
 it would be implemented in an environment with many other things that influence the overall security.
@@ -10,44 +13,266 @@ If the proof is flawed in some way,
 or flawed in some case,
 it may still be implemented.
 Simply because it is an improvement over the current situation.
-\subsection{Assumptions}
+\Subsection{Axioms and assumptions}
 The field of application of this protocol can be defined by the extent the assumptions made here hold true.
 \subsubsection{Encryption Standards}
-The \TIMO protocol uses several standard encryption and hashing functions,%
-\footnote{For the record,
-we do not assume XOR to be among them.}
+The \TIMO protocol uses several standard encryption and hashing functions,
 and only in ways they are designed for.
 A weakness in any of them will cause great problems throughout the world,
 given the ubiquity of their use.
-We assume that it is quite irrelevant wether or not this weakness will impact this protocol,
-since everybody would be panicking about bigger things.
-\par
-The upshot of this is that,
-since in reality it is of course devastating if your foundations crumble,
-when the dust settles down this protocol is fixed with the rest,
+\begin{moafu}
+It is quite irrelevant that any weakness of standard encryption or hashing functions could impact this protocol,
+since everybody will be panicking about bigger things.
+\end{moafu}
+The upshot of all this freaking out is that%
+---since it is of course devastating if your foundations crumble---%
+when the dust settles this protocol is fixed with the rest,
 or as permanently flawed as the rest.
+\par
+That being said, we use encryption functions that are robust and dependable, according to todays insights.
+\begin{axiom}
+For hashing we consider \SHA\ to be a suitable algorithm.
+\end{axiom}
+\begin{axiom}
+For encryption, \AES\ and \RSA\ are considered adequate and robust.
+\end{axiom}
+Stronger variants are available and could be substituted when deemed necessary.
+\par\vspace{4mm}
+The protocol uses a random value as one of a key pair.
+The other key is the \AES\ encryption of that random value.
+The original random value is used as the key that is stored
+(possibly by the millions)
+in the accounts database on the website; the encrypted values are distributed among the users.
+It could equally be done the other way around:
+store the encrypted keys, and hand out the original randoms to the users.
+\begin{moafu}
+It is eqaually hard to find an \AES\ key given an encryption of an unknown value than it is to find an \AES\ key given a decryption of an unknown value.
+\end{moafu}
+\subsubsection{The use of \XOR}
+The \XOR\ operation
+(denoted with the $\oplus$ operator)
+is one of the basic logic tools.
+It is at the heart of almost any hash or encryption function,
+along with bit rotation \ROTR\ ($\ggg$) and \ROTL\ ($\lll$) and the \AND\ ($\wedge$) operator.
+\par
+Using \XOR\ to encrypt something is generally considered a bad thing,
+due to its easy reversibility ($\xor{\xor{a}{b}}{a} = b$).
+The keys in this protocol are random numbers, which are \XOR-red with nonces; random numbers used once.
+\begin{axiom}
+When reserved for operating on random numbers exclusively,
+the outcome of the \XOR\ operation is as random as its input.
+It is because of this trait that \XOR\ is deemed suitable as a means of `encryption' in this context.
+\end{axiom}
+Never is entropy lowered by applying \XOR\ in this case, either encrypting or decrypting.
+This means that you cannot tell, expoiting \XOR's reversibility, if you either have guessed the key right and obtained the nonce, or vice versa.
+It is all gibberish to begin with, and stays that way, decrypted or not.
+
+
+\par
+Site key 256 bits.
+Diversify the Secret key with the site key: \SHA{Ks + S[0]} (256 bits)
+Obfuscate the result: $\xor{upper 128 bits}{lower 128 bits}$.
+
+\subsubsection{Key lengths}
+\label{sec:key_length}
+The length of keys is generally considered an important aspect.
+The more bits, the better the key.
+\par
+That is true if such a key is used to encrypt data that is in any way predictable,
+like, for example, a piece of text.
+If the encrypted data has patterns of any kind,
+you can directly work with intermediate decryption attempts.
+Statistical analysis of resulting bit patterns can reveal if a certain key or method is getting close or closer.
+\par
+But all values encrypted with our keys are comprised of random bits only.
+This implies that any result of decryption has to be tried,
+to establish if the decryption was in any way successful.
+That would mean many login attempts
+(millions, billions, or more)
+which is infeasable.
+And that is just to crack a user key,
+which only gives you one login.
+
+\subsubsection{Minimum key length}
+With Secret keys in the HSM fixed on 256 bits to accommodate the \AES\ encryption,
+all other keys can be a lot smaller than that.
+Theoretically,
+a 1-bit key could suffice,
+but this obviously is not strong enough,
+as it would take only two attempts to test all possible values.
+\par
+To rule out any feasible brute force attempts
+(supposing that a site does not stop countless consecutive failed attempts)
+a key length of 32 bits should be more than adequate.
+\par
+In a setup of 12 Secret keys, changed monthly,
+you cannot login after a year's worth of trying,
+since your key has expired by then.
+\begin{moafu}
+To crack a key you will need to try each one individually.
+\end{moafu}
+You need to run every attempt through the Login server1
+since it is the Secret key,
+residing in its HSM,
+that will tell you if you are successful
+\par
+\begin{moafu}
+The probability of finding a user key increases linearly with the number of attempts.
+\end{moafu}
+This is due to the randomness of the key itself.
+You cannot increase the probalility of a hit by some strategy.
+\par
+After a month of continuous probing, the oldest Secret key is destroyed, and replaced with an entirely new one.
+The chances of ever finding a match is reduced to
+$11/12$,
+since there is a $1/12$ chance that one of the attempts already made would match the new key.
+After 6 months, the chances of ever finding a match
+(without repeating the entire series tried so far)
+is reduced to 50\%, as half of the keys are replaced by then.
+\begin{moafu}
+A single login attempt,
+exhausting 12 Secret keys each time,
+takes at least half a second if a data transfer between nodes takes 10ms.
+\end{moafu}
+Each attempt requires the client to send a request to the webserver (10ms),
+the webserver to send a request to the login server (10ms),
+the login server to do some processing and send a response (10ms),
+the webserver to do some processing and send a responses (10ms),
+and the client to do some processing and prepare for the next attempt (2ms).
+This is 42ms per attempt, and you need 12 of them each time.
+Give or take, this is about 500ms or half a second,
+which gives you an upper limit of 7200 test in one hour.
+\par
+Statistically, the average time to find a key is half the time to test them all.
+If you are kept busy, testing all keys, for at least two years the chances to find it within one year
+(after which further testing is useless)
+are 50\% at best.
+This is the upper limit; this is as good as it gets.
+\par
+Suppose you could keep up, and really do 7200 test per hour, and nothing is prohibiting you to carry on for a full year.
+Two years have 17520 hours in total,
+so $17520\times 7200=126,144,000$ attempts could be done within that time.
+A 28-bit key would require $2^{27}=132,217,728$ attempts, statistically, with a hit ratio of 50\%.
+\par
+However, you start out with a 50\% chance of finding the key.
+After a month, the chances are reduced by $1/12$, and be just shy of 46\%.
+After six months, it has been reduced down to 25\%.
+After eleven months, chances are just over 4\% to stumble upon the right key.
+\par
+But having 12 Secret keys would also give you 12 possibile hits with each attempt,
+dividing the time to find it by twelve.
+Adding another 4 bits to the key
+(32 bits in total)
+would expand the search area by 16, and would compensate for that.
+\par
+Finally, the killer of all this is of course parallelism.
+This can be achieved by a bot-net, turning zombie computers into key testers.
+If co-ordinated appropriately, each joining zombie will reduce the search area by 2, and a key may be found quickly.
+\par
+But a single failed login attempt can be detected easily, and it signifies an important thing:
+the user currently attemtping to login does not have the right key.
+Therefore, we can assume this user will not recover the right key in an instant,
+so further login attempts can be blocked for a minute or so.
+In this case, brute force attempts are useless, unless a denial of serivce is wanted.
+\begin{moafu}
+Failing to provide the right key for a login will trigger a delay,
+before another attempt can be made.
+\end{moafu}
+This will make keys with fewer than 32 bits still viable.
+If that is the case,
+keys can be a lot shorter,
+without making a brute force attempt an attractive option.
+
+\subsubsection{Maximum key length}
+There is no limit to the number of bits in a key,
+but using more and more bits for keys has its trade-offs.
+Keys longer than 64 bits require more processing,
+as they do not fit in CPU registers common today.
+But even keys longer than 32 bits may be suboptimal in some programming languages that are used to make client side login pages,
+or server side login programs.
+\par
+Part of the exchanged values are least significant parts of \SHA\ hashes.
+These give ample proof of having the right key,
+but reveal nothing of the hashed value---even if the hash function were reversible.
+Therefore,
+the number of bits of the user and site keys must not equal the number of bits of the hash result.
+\par
+There are of course hash functions that produce longer hashes,
+like \EMsub{SHA}{512},
+but putting more than,
+say,
+128 bits into a key brings no more security.
+\begin{moafu}
+If this scheme is somehow flawed,
+it most likely will not be because of insufficient key lengths.
+\end{moafu}
+As such,
+128-bit keys should be considered the maximum practical key length.
 \subsubsection{Hardware Security Modules}
+\begin{dialogue}
+\speak{Jen}		\direct{Holding an invoice.}
+				That's quite an expensive set of toys you have there, lads, your\ldots
+				\direct{Reads.}
+				H-S-Ms.
+\speak{Moss}	\textit{Thank} you for taking an interest!
+				For a whole week I was wondering if you'd notice.
+\speak{Jen}		Why on earth did you order two of those?
+\speak{Moss}	One is none, I always say.
+				\direct{Pauses.}
+				I keep asking myself why this sounds contradictory\ldots
+\speak{Roy}		Could we not have three? We all would sleep better. Moss?
+				\direct{\refer{Moss} nods.}
+\speak{Jen}		Could we do without, instead?
+\par\medskip\direct{With a firm look,
+				\refer{Jen} strides purposefuly towards the apparatus,
+				with her her hand reaching for the power plug.}
+\speak{Moss}	\direct{Looks up in horror.}
+				Impossible!
+\speak{Roy}		\direct{Lunges forward with a wild look to block \refer{Jen}'s path.}
+				Over my dead body!
+\speak{Jen}		\direct{Mildly disgusted.}
+				So that's where you keep your porn, then?
+\par\medskip\direct{\refer{Moss} rolls his eyes.}
+\speak{Roy}		Yeah, you've got us. 
+\attrib{The IT Crowd.\footnote{Ehm\ldots\ may just as well be.}}
+\end{dialogue}
 By design,
 an HSM is something to operate on data in a secure way.
 Typically,
 it stores cryptographic keys and computes hashes and encrypts data with them,
 all the while keeping those keys to itself.
-In other words,
-it is assumed that any key residing in an HSM will never leave it in plain text.
+\begin{moafu}
+Any key residing in a well configured HSM will never leave it in plain text.
+\end{moafu}
+This means that some effort must be put in to configure the HSM just right, in order not to loose what is dearest.
+\par
 There is of course a method of duplicating keys over several HSMs,
 but we assume
 (again)
 that these methods are unbreakable.
 \subsubsection{Human factors}
 The login servers are quite important,
-as they hold the secret keys that make it all work securely.
-In theory,%
-\footnote{Well,
-this is how I demoed it.}
+as they hold the key encryption keys that make it all work securely.
+In theory,\footnote{And in practice, since this is how I demoed it.}
 the whole service they offer can be replaced by a single bash script that calls some openssl commands,
 with all keys in a flat file on disk.
 We assume,
 however,
-that such a login service would not pass any audit that we also assume will be imposed on such key%
-\footnote{Pun intended.}
-element of the infrastructure.
+\begin{moafu}
+As such a key element of the infrastructure,
+any implementation of a login service will be imposed to audits that validate proper security measures have been taken.
+\end{moafu}
+A service without an HSM would not pass any audit.
+\Subsection{Notation}
+In the subsequent text and throughout the rest of the article the following notation will be used.
+\begin{itemize}
+\item The key ring will be considered an array $Z$, indexed by a ordinal number, starting at zero.
+\item The Key Encryption Keys (KEKs) for a site that are kept in the HSM will be considered an array as well, called $S$.
+It is indexed like $Z$ is.
+\item \(H_0=\HSHA{[Z[0]}\) means that $H_0$ will be the \SHA\ hash of $Z[0]$, the first value of the key ring.
+\item \(H_u=\xor{H_0}{H_1}\) means that $H_u$ will be the \XOR\ of values $H_0$ and $H_1$.
+\item \(A_u=\EAES{R_u + C_1}{K_u}\) means that $A_u$ will be the \AES\ encryption of a concatenation of $R_u$ with $C_1$, using $K_u$ as the encryption key.
+\item \(K_s=\DRSAm{K_y}{K_{LE}}\) means that $K_s$ will be the least $n$ significant bits of the \RSA\ decryption of $K_y$ with key $K_{LE}$.
+\item \(B_s=\SRSA{B_s}{K_{LS}}\) means signing the value $B_s$ with the \RSA\ key $K_{LS}$.
+\item \(\VRSA{B_u+\xor{B_s}{K_u}}{K_{ls}}\) means the verification operation of the value $B_u$ concatenated with the \XOR\ of $B_s$ and $K_u$, with the \RSA\ key $K_{ls}$.
+\end{itemize}

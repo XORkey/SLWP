@@ -1,22 +1,34 @@
-\subsection{The keyring}
-The keyring is a set of keys,
+\Subsection{Abundance of keys}
+There are many keys in this protocol.
+\par
+The keys the user has are stored on a key ring of some sort.
+The user has a different key for each site it has a login of.
+These keys are Data Encryption Keys (DEKs), although they only encrypt nonces.
+\par
+Like the user keys, the set of keys stored on the (web)site are also DEKs, and, again, are only used to encrypt nonces.
+For each account the site has a (single) unique key, although more than one userid hash ($H_u$) may be associated with an account (and the corresponding key).
+\par
+To get a user key (a DEK), you need a site key (also a DEK) and a Key Encryption Key (KEK), which is located in a HSM in the login server.
+Each login server has an array of KEKs for each site it services.
+\Subsection{The key ring}
+The key ring is a set of keys,
 stored somewhere,
 where each key is a random number.
-\subsubsection{Storing the keyring}
-Storing the keyring may be done as seemed fit.
+\subsubsection{Storing the key ring}
+Storing the key ring may be done as seemed fit.
 It may be stored as a file on disk,
 or individual keys may be put in a database.
-The level of security regarding the keyring must match the level of confidentiality required for the accounts it is used to log in.
+The level of security regarding the key ring must match the level of confidentiality required for the accounts it is used to log in.
 It is,
 however,
 not part of the proof of the security of this protocol.
 Frankly said:
 if you loose your keys,
 you're dead.
-\subsubsection{Keys on the keyring}
+\subsubsection{Keys on the key ring}
 The first key on the ring
 ($Z[0]$)
-is 128 bits in size and is the keyring identifier and is not used for logging in.
+is 128 bits in size and is the key ring identifier and is not used for logging in.
 \par
 Other keys are all stored as a 128 bit value,
 but only a subset of its bits are actually used as a key,

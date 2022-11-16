@@ -1,0 +1,23 @@
+\Section{Key operations}
+All server side operations that involve keys can be consolidated and separated from the comparison operations needed for the authentication processs.
+The same goes for the client side, which makes that we have four separate places for computations.
+That looks a bad idea at first sight, but it proves to be advantageous for security.
+\par
+We can divide the computations in two categories: simple comparisons and key operations.
+\par
+Maintaining and upholding good security needs expertise that does not come natural for many website owners and maintainers.
+Even if security has full attention and focus, with a team of experts at the controls, it still is hard to keep things safe.
+Simply because the site is almost directly connected to the wild wild west of the Internet; open for anyone, anytime.
+\par
+It is therefore not entirely unfortunate that we could separate all key operations away from the inherently vulnerable web site.
+Instead, we outsource this to a back office, or preferrably remote, server, then we could move most keys along with it.
+That server can be equipped with an HSM to store keys and compute values with it.
+\Subsection{Login server}
+The server that performs all key operations is called the login server in this authentication scheme.
+It does not need to be a separate server at all; the web server may perform this task, if need be.
+Having a dedicated server for this, however, is better for overall security because you can protect things better that way.
+\Subsection{Password manager}
+Although I like to use the phrase ``password'' as little as possible in this document for obvious reasons,
+I fear that even when this protocol is adapted globally and ubiquitously,
+any program that aides with logging in will be called a password manager,
+despite its inaptness.

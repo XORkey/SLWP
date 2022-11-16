@@ -1,6 +1,267 @@
-\section{Logging in}
-The basic idea is as follows:
-\begin{comp}
-\[a=\xor{x}{y}\]
-\end{comp}
-Done.
+\Section{Logging in}
+The \TIMO\ protocol has some main features that set it apart from other authentication protocols.
+We start here with the seeding ideas and deal with improving it later.
+%%%
+\Subsection{Basic ideas}
+A compromised account can be devastating.
+It is worth a considerable amount of money when you have a database full of usernames and their passwords, so hackers are always looking for ways to get them.
+What if there were no passwords (or equivalents) to be found?
+\par
+Another thing bothering me was the use of a string of very few characters to identify a single person out of millions.
+A traditional `userid' is typically either a short string of lowercase letters and numbers
+(e.g. jessica77)
+or an email address
+(jessica.chastain@hotmail.com).
+But this does not uniquely identify anyone, and anyone can misuse this for illicit purposes.
+%%%
+\Subsubsection{Eliminating passwords}
+You still need to be able to authenticate yourself, otherwise you cannot be granted access to your personal account.
+That implies that the website needs to store something to facilitate this basic process.
+However, it must not be something useable in and of itself; it has to have a counterpart that is in the posession of the individual user.
+This counterpart must be different but related.\footnote{Like the locket with Annie's supposed parents, in the film that bears her name.}
+\par
+The notion of having different keys for user and server is of paramount importance.
+It changes the server from a treasure trove (millions of passwords) to a dry desert (millions of useless keys).
+\par
+The website has a key for each user, which do not change in principle.
+The user has a key that is derived from the key the webserver has for that user.
+The user keys are derived from the site keys by encrypting it with another key.
+\par
+If we imagine a random 128-bit value and its \AES\ encryption, we could store that random value as the key for a user in the website's database and give the user its encrypted counterpart.
+With these keys we can design a protocol with which the user can prove it has the right key.
+This way, what is stored on the website's disks is no longer usable for logging in, as the key to encrypt them is nowhere to be found.
+As it turns out, the user can also verify the validity of the website (separate from any PKI scheme) with the same protocol.
+%%%
+\Subsubsection{The key ring}
+Passwords you can remember; keys you can't\footnote{Well, that is true for most people. Some are able to remember and recite well over 100.000 digits of \(\pi\) \cite{pi-world-ranking-list}, so what are a few 16 byte keys anyway?}.
+They need to be stored, and you get a key from every website you login to that supports this protocol.
+Before you know it, you have over 50 keys.
+\par
+All keys will be stored on a digital key ring, which is just a set of 128-bit random numbers.
+Each key is associated with a website and automatically selected.
+%%%
+\Subsubsection{The user identifier}
+\begin{dialogue}
+\speak{Centurion}	Where is Brian of Nazareth? I have an order for his release.
+\speak{Mr. Cheeky}	Uh, I am Brian of Nasareth!
+\speak{Brian}		What?
+\speak{Mr. Cheeky}	Yeah, I - I - I'm Brian of Nazareth.
+\speak{Centurion}	Take him down!
+\speak{Brian}	I'm Brian of Nazareth!
+\speak{Victim \#1}	Eh, I'm Brian!
+\speak{Mr. Big Nose}	I'm Brian!
+\speak{Victim \#2}	Look, I'm Brian!
+\speak{Brian}		I'm Brian!
+\speak{Victims}		I'm Brian!
+\speak{Gregory}		I'm Brian, and so's my wife!
+\attrib{Monty Python's ``Life of Brian''}
+\end{dialogue}
+There are several things that make traditional userid's cumbersome to use.
+\begin{itemize}
+\item Anyone can claim to be `Jessica' and try to login on her behalf.
+If her password has been compromised or guessed,
+the real Jessica may either have her privacy violated or her reputation destroyed.
+If `she' has committed a crime, Jessica has a hard time proving it was not her.
+\item They are in short supply (there are many Jessicas in the world, all (perhaps narcistically) preferring to use just 'jessica').
+\item Each website has its own set of userids, which may make `jessica77' available on one site, but not on the other.
+This leaves Jessica with many different userids, each of which she must remember, or write down.
+\item Especially email userids can be used to link accounts between different websites.
+Since email addresses are fairly unique, your browsing behaviour may be tracked through logins.
+\end{itemize}
+Since we are letting the computer join and aid the login process, why not compute some more and come up with a large, fairly random, value that is used to identify a person.
+One that is unique; not per person (like mail accounts), but to an account per user per webserver.
+\par
+Instead of sending a legible string, why not send something that is not relatable to a human: a 256 bit hash, for example.
+This hash could be made up of many things, and it has always been the task of a computer to match userids to accounts, so a hash value would do the trick just as well.
+\par
+The idea is that you cannot guess this value
+(only Jessica knows how to generate one)
+and that it may be compiled by using several sources,
+so this authentication protocol becomes genuinally multi-factor.
+%%%
+\Subsubsection{Login server}
+Designing and maintainig a website, especially large ones, is a specialist's job.
+Interoperability with payment systems requires specialists too.
+The same goes for the databases running the show.
+\par
+But securing keys and operating them is as much a specialist's job as any mentioned before, maybe more so.
+This is not something you do on the side and hope everything will be all right.
+Typically, none of all the specialists you have working on your website will have indepth knowledge of this field of expertise.
+\par
+As it turns out, all cryptographical operations can be singled out and combined into what is called a Login server.
+This also means that operating the Login server could be done by people other than those running the website traditionally
+(which can keep their job and do their thing without change).
+In fact, the whole business running Login servers can be put on the Internet as LaaS: Login as a Service.
+\par
+This service can be protected and secured by professionals that know nothing about websites,
+but all the more from securing Internet traffic,
+protecting keys in HSMs,
+do key rollovers,
+organize key ceremonies,
+generate certificates,
+and everything else you need to make the Login servers little bastions of security.
+
+\input{tex/user_hash.sub.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%
+\Subsection{A rudimentary login algorithm}
+The core idea of the algorithm is that the user must prove it is in the posession of a key that the server has issued.
+To do so, the server encrypts a random number (a nonce) with the key the user has.
+The user can prove it has that key by decrypting the nonce and returning a value derived from it, like a hash for instance.
+\par
+But, we do not want the web server to have all the user keys, or any other directly usable value, for that matter.
+This is the main inherent flaw of authentication using passwords.
+Instead, we make the user key a direct derivative of the site key.
+\par
+There are several ways to achieve this; we do it with a calculation similar to
+\[K_u = \EAES{K_s}{S}\]
+The key the user has (\(K_u\)) is the \AES\ encrypted value (with some key \(S\)) of the key the website has (\(K_s\)).
+More of this later.
+\par
+For symmetry, we ask the webserver to authenticate itself also, by similar means: decrypt the client's random value and send proof you did that with the right key.
+\par
+What follows is a step by step unrolling of the protocol, where each calculation is described.
+%%%
+\Subsubsection{Key length \(n\) indicated by the server}
+At the start of the login protocol the webserver indicates the key lenght \(n\) to the user.
+\[n\quad\Bigl\lvert\thickspace\text{with}\thickspace 1\le{n}\le128\]
+This is the length of the keys we are going to use.
+Not always the maximum is chosen; a value of 32 bit is a valid and convenient choice also.
+%%%
+\Subsubsection{Computing \(A_u\) by the user}
+We need one of our keys, stored on the key ring, to help us with the calculations.
+A lookup is done to get the key for the website.
+Suppose we find it at index 47 and compute:
+\begin{equation}\label{rud:uku}
+K_u = \mtpn{Z[47]}
+\end{equation}
+where the leftmost (most significant) $128 - n$ bits are stripped with the modulo operation.
+This yields a key of precisely $n$ bits, as instigated by the website.
+\par
+Then, the user generates a random number, also of \(n\) bits, and encrypts it with the key it has for that website:
+\begin{equation}\label{rud:uru}
+R_u = random(n)
+\end{equation}
+\begin{equation}\label{rud:au}
+A_u = \xor{R_u}{K_u}
+\end{equation}
+\par
+Which makes this an \(n\)-bit value.
+We use \(A_u\) as a challenge for the website: please decrypt it and send proof you have found \(R_u\).
+%%%
+\Subsubsection{Computing \(B_u\) by the user}
+As proof of having found \(R_u\), we expect a value in return of our \(A_u\), which proves that we are dealing with the right website.
+Just sending a 256-bit hash value
+\(B_u = \HSHA{R_u}\)
+would expose \(K_u\).
+With some effort, all n-bit random numbers could be checked and \(K_u\) computed.
+\par
+By taking just the least \(n\) significant bits of the hash:
+\(B_u = \mtpn{\HSHA{R_u}}\)
+our random number is now hidden in a large set of \(2^{256-n}\) possible values.
+That, in itself, does not hide it completely.
+Especially with a large \(n\), there may be few (if any) collisions, so a brute force attack may still be fruitful.
+Taking it \(\bmod\ 2^n\) does give us the opportunity to encrypt it with \(K_u\):
+\begin{equation}\label{rud:bu}
+B_u = \xor{\mtpn{\HSHA{R_u}}}{K_u}
+\end{equation}
+\par
+Possibly many random numbers yield the same hash (taken \(\bmod\ 2^n\)).
+This is no problem, because we use this random value only once, ever.
+Producing this hash value is ample proof that the website has the right key.
+\par
+The \(B_u\) value is kept in memory, until the server returns its computations.
+The \(A_u\) value is sent to the server, along with the generated \(H_u\) value that was built in an earlier step.
+%%%%
+\Subsubsection{Computing \(B_s\), \(P_s\), and \(Q_s\) on the server}
+Upon receiving \(A_u\) the server will try to decrypt it.
+For that, it needs the user key \(K_u\), which it can obtain using the site key \(K_s\), which is stored in the accounts database under index \(H_u\):
+\begin{equation}
+K_s = account\_lookup(H_u)
+\end{equation}
+\par
+So, the next cacluations are needed: first get hold of the user key \(K_u\) and then extract the user random \(R_u\).
+\begin{equation}\label{rud:sku}
+K_u = \EAES{K_s}{S}
+\end{equation}
+\begin{equation}\label{rud:sru}
+R_u = \xor{A_u}{K_u}
+\end{equation}
+Having obtained the \(R_u\) value, we can now compute the value that the user expect us to return.
+Note that the \(B_s\) value is computed exactly like \eqref{rud:bu}.
+\begin{equation}\label{rud:bs}
+B_s = \xor{\mtpn{\HSHA{R_u}}}{K_u}
+\end{equation}
+The value \(B_s\) is stored in memory for a short while.
+\par
+Next, we generate challenge \(P_s\) for the user:
+\begin{equation}\label{rud:rs}
+R_s = random(n)
+\end{equation}
+\begin{equation}\label{rud:ps}
+P_s = \xor{R_s}{K_u}
+\end{equation}
+The \(Q_s\) value will be the expected return value, which is computed slightly different than \eqref{rud:bs}, now using \(R_u\).
+This makes the protocol asymmetrical by design.
+\begin{equation}\label{rud:qs}
+Q_s = \xor{\mtpn{\HSHA{R_s}}}{R_u}
+\end{equation}
+\par
+We keep \(Q_s\) for later use; the values \(B_s\) and \(P_s\) are sent to the user and can be erased from memory right thereafter.
+%%%
+\Subsubsection{Validating \(B_u\) and computing \(Q_u\) by the user}
+The user should assert that value \(B_s\) is  matching \(B_u\);
+if not, the login has failed.
+\par
+If they match, we then can compute \(Q_u\) as a response to \(P_s\):
+\begin{equation}
+R_s = \xor{P_s}{K_u}
+\end{equation}
+Having extracted \(R_s\) we compute \(Q_u\) just like \eqref{rud:qs}:
+\begin{equation}
+Q_u = \xor{\mtpn{\HSHA{R_s}}}{R_u}
+\end{equation}
+This value is returned to the website to complete the authentication process.
+%%%
+\Subsubsection{Finalizing authentication on the server}
+When the user sends a \(Q_u\) that matches \(Q_s\), we have sucessfully completed the authentication process.
+The user is now logged in.
+
+
+
+\Subsection{Introduction of the login server}
+The actions of the server in the presented rudimentary login scheme can be thought of as two separate things: computation and comparison.
+Granting a login is a comparison of two values.
+Before this can take place, some computations must be done with keys and random values.
+\par
+Because of these two distinct functions,
+the two may be split and implemented on two separate servers,
+which are able to communicate securly with each other.
+Henceforth, the server granting logins
+is referred to as 'web server',
+which has always the target system for this protocol.
+The server that does all the computations is called the 'login server' from now on, as it computes login values.
+\par
+The logic of granting logins is already in place for web servers that use passwords.
+In the case of passwords, this too is a comparison of values that decides whether or not you are authenticated.
+This logic can be expanded with a different comparison in case this protocol is used, which is not a great change.
+\par
+Having a separate login server has many advantages,
+mainly security-wise.
+The function of the web server stays what it was before,
+and the security measures taken to protect it needs little or no altering.
+\par
+The calculations with, and (most importantly) the storage of secret keys can be done with a Hardware Security Module (HSM).
+The login server can be built around it, tightly hardened, and put somewhere away from direct access from the Internet.
+It could be placed in the back office, like database servers are.
+But it could also be positioned on highly accessible spots on the Internet, like in datacentres directly connected to Internet Exchanges.
+A multitude of login servers on such places could offer a redundant login-as-a-service (LAAS) for the smallest up to the largest sites on the Internet.
+\par
+The communication from web server to login server is flowing over the Internet,
+through IPsec tunnels between the web server's outer firewall and the firewalls that secure each of the selected login servers.
+Depending on the size of the web site, this number of login servers can range from just two (redundancy only) to dozens (for redundancy, geographic reachability, and handling the shear load of logins per second).
+\par
+If the service is a true LAAS, then it could be provided by somebody other than the web site owner.
+Then, login servers can be put to use for more than one web server.
+The firewall for an individual login server will terminate several IPsec tunnels, one for each web site.
+Each login server could be operated on high capacity, and revenues are generated for each serviced login request.
