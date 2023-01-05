@@ -105,8 +105,18 @@ and everything else you need to make the Login servers little bastions of securi
 
 %%%%%%%%%%%%%%%%%%%%%%
 \Subsection{A rudimentary login algorithm}
+\begin{dialogue}
+\speak{Dr. Strange}	I went forward in time, to view alternate futures. To see all the possible outcomes of the coming conflict.
+\speak{Star-Lord}   How many did you see?
+\speak{Dr. Strange}	14,000,605.
+\speak{Iron Man}	How many did we win?
+\speak{Dr. Strange}	One.
+\attrib{Avengers: Infinity War}
+\end{dialogue}
 The core idea of the algorithm is that the user must prove it is in the posession of a key that the server has issued.
-To do so, the server encrypts a random number (a nonce) with the key the user has.
+To do so, there is an almost limitless number of approaches to pursue, but not all will be fruitful.
+\par
+In the solution we are disussing now, the server encrypts a random number (a nonce) with the key the user has.
 The user can prove it has that key by decrypting the nonce and returning a value derived from it, like a hash for instance.
 \par
 But, we do not want the web server to have all the user keys, or any other directly usable value, for that matter.
@@ -128,7 +138,7 @@ At the start of the login protocol the webserver indicates the key lenght \(n\) 
 This is the length of the keys we are going to use.
 Not always the maximum is chosen; a value of 32 bit is a valid and convenient choice also.
 %%%
-\Subsubsection{Computing \(A_u\) by the user}
+\Subsubsection{Computing challenge \(A_u\) by the user}
 We need one of our keys, stored on the key ring, to help us with the calculations.
 A lookup is done to get the key for the website.
 Suppose we find it at index 47 and compute:
@@ -147,9 +157,9 @@ A_u = \xor{R_u}{K_u}
 \end{equation}
 \par
 Which makes this an \(n\)-bit value.
-We use \(A_u\) as a challenge for the website: please decrypt it and send proof you have found \(R_u\).
+We use \(A_u\) as a challenge for the website: please decrypt it and send proof you have found our \(R_u\).
 %%%
-\Subsubsection{Computing \(B_u\) by the user}
+\Subsubsection{Computing response \(B_u\) by the user}
 As proof of having found \(R_u\), we expect a value in return of our \(A_u\), which proves that we are dealing with the right website.
 Just sending a 256-bit hash value
 \(B_u = \HSHA{R_u}\)
@@ -170,10 +180,10 @@ Possibly many random numbers yield the same hash (taken \(\bmod\ 2^n\)).
 This is no problem, because we use this random value only once, ever.
 Producing this hash value is ample proof that the website has the right key.
 \par
-The \(B_u\) value is kept in memory, until the server returns its computations.
-The \(A_u\) value is sent to the server, along with the generated \(H_u\) value that was built in an earlier step.
+The user keeps the \(B_u\) value in memory, until the server returns its computations.
 %%%%
 \Subsubsection{Computing \(B_s\), \(P_s\), and \(Q_s\) on the server}
+The \(A_u\) value is sent to the server, along with the generated \(H_u\) value that was built in an earlier step.
 Upon receiving \(A_u\) the server will try to decrypt it.
 For that, it needs the user key \(K_u\), which it can obtain using the site key \(K_s\), which is stored in the accounts database under index \(H_u\):
 \begin{equation}
@@ -184,6 +194,8 @@ So, the next cacluations are needed: first get hold of the user key \(K_u\) and 
 \begin{equation}\label{rud:sku}
 K_u = \EAES{K_s}{S}
 \end{equation}
+The key \(S\) is the secret key.
+We will be discussing this at length later.
 \begin{equation}\label{rud:sru}
 R_u = \xor{A_u}{K_u}
 \end{equation}
@@ -226,42 +238,3 @@ This value is returned to the website to complete the authentication process.
 \Subsubsection{Finalizing authentication on the server}
 When the user sends a \(Q_u\) that matches \(Q_s\), we have sucessfully completed the authentication process.
 The user is now logged in.
-
-
-
-\Subsection{Introduction of the login server}
-The actions of the server in the presented rudimentary login scheme can be thought of as two separate things: computation and comparison.
-Granting a login is a comparison of two values.
-Before this can take place, some computations must be done with keys and random values.
-\par
-Because of these two distinct functions,
-the two may be split and implemented on two separate servers,
-which are able to communicate securly with each other.
-Henceforth, the server granting logins
-is referred to as 'web server',
-which has always the target system for this protocol.
-The server that does all the computations is called the 'login server' from now on, as it computes login values.
-\par
-The logic of granting logins is already in place for web servers that use passwords.
-In the case of passwords, this too is a comparison of values that decides whether or not you are authenticated.
-This logic can be expanded with a different comparison in case this protocol is used, which is not a great change.
-\par
-Having a separate login server has many advantages,
-mainly security-wise.
-The function of the web server stays what it was before,
-and the security measures taken to protect it needs little or no altering.
-\par
-The calculations with, and (most importantly) the storage of secret keys can be done with a Hardware Security Module (HSM).
-The login server can be built around it, tightly hardened, and put somewhere away from direct access from the Internet.
-It could be placed in the back office, like database servers are.
-But it could also be positioned on highly accessible spots on the Internet, like in datacentres directly connected to Internet Exchanges.
-A multitude of login servers on such places could offer a redundant login-as-a-service (LAAS) for the smallest up to the largest sites on the Internet.
-\par
-The communication from web server to login server is flowing over the Internet,
-through IPsec tunnels between the web server's outer firewall and the firewalls that secure each of the selected login servers.
-Depending on the size of the web site, this number of login servers can range from just two (redundancy only) to dozens (for redundancy, geographic reachability, and handling the shear load of logins per second).
-\par
-If the service is a true LAAS, then it could be provided by somebody other than the web site owner.
-Then, login servers can be put to use for more than one web server.
-The firewall for an individual login server will terminate several IPsec tunnels, one for each web site.
-Each login server could be operated on high capacity, and revenues are generated for each serviced login request.

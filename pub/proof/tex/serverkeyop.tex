@@ -1,0 +1,81 @@
+\Section{Server key operations}
+The actions of the server in the presented rudimentary login scheme can be thought of as two separate things: computation and comparison.
+Granting a login is an authentication process that is a comparison of two values, basically.
+Before this can take place, some computations must be done with keys and random values.
+\par
+Maintaining and upholding good security needs expertise that does not come natural for many website owners and maintainers.
+Even if security has full attention and focus, with a team of experts at the controls, it still is hard to keep things safe.
+Simply because the site is almost directly connected to the wild wild west of the Internet; open for anyone, anytime.
+\par
+It is therefore not entirely unfortunate that we can separate all key operations away from the inherently vulnerable web server.
+Instead, we outsource this to a back office, or preferrably remote, server; we then could move most keys along with it.
+That looks a bad idea at first sight---increasing complexity, but it proves to be greatly advantageous for security.
+
+\Subsection{Introduction of the login server}
+All server side operations that involve keys can be consolidated and separated from the comparison operations needed for the authentication processs.
+Instead of implenting this protocol on a single server
+(which is still possible if you want to)
+we move almost all computations to a separate server.
+\par
+The function of the web server stays exactly what it was before (serving pages),
+and the security measures taken to protect it needs little or no altering.
+\par
+The logic of granting logins is already in place for web servers that use passwords.
+In the case of passwords, this too is a comparison of values that decides whether or not you are authenticated.
+This logic can be expanded with a different comparison in case this protocol is used, which is not a great change.
+\par
+Henceforth, the server granting logins
+is simply referred to as 'web server',
+which has always been the target system for this protocol.
+The server that does all the computations is called the 'login server' from now on, as it computes login values.
+\Subsubsection{Securing the login server}
+Having a separate login server has many advantages, mainly security-wise.
+The calculations with, and (most importantly) the storage of secret keys can be done with a Hardware Security Module (HSM).
+The login server can be built around it, tightly hardened, and put somewhere away from open access from the Internet.
+\par
+In most implementations, the login server will be an unpenetrable bastion on the Internet.
+It would be a 'dark' node that hardly iteracts with anything:
+it has IP addresses that are not listed in the DNS and drops almost any packet you throw at it.
+It could be considered a WIMP: a weakly interacting massively protected server.
+Only hardcoded IPsec tunnels exist with its protective external firewall, allowing traffic to and from contracted web servers only.
+In dark mode, it emanates and absorbes zero Internet traffic.
+Only in maintenance mode the node comes to life, for updates, for instance.
+No IPsec tunnels are active during that time, so no service is provided until the system goes 'dark' again.
+\Subsubsection{Login as a Service}
+A login server could be placed in the back office, like database servers are.
+But it could also be positioned on highly accessible spots on the Internet, like in datacentres less than a millisecond away from an Internet Exchange.
+A multitude of login servers on such places could offer a redundant login-as-a-service (LAAS) for the smallest, up to the largest sites on the Internet.
+\par
+The communication from web server to login server is flowing over the Internet,
+through IPsec tunnels between the web server's outer firewall and the firewalls that secure each of the selected login servers.
+Depending on the size of the web site, this number of login servers can range from just one (for testing) or two (redundancy only) to dozens.
+Having many would provide for redundancy, geographic reachability, and the ability to handling the shear load of logins per second.
+\par
+If the service is a true LAAS, then it could be provided by somebody other than the web site owner.
+Then, any of the login servers can be put to use for more than one web server.
+The firewall for an individual login server will terminate several IPsec tunnels, one for each web site.
+Each login server could be operated on high capacity, and revenues are generated for each serviced login request.
+\par
+\Subsubsection{Maintaining the login server}
+As is true for securing a web server; securing a login server takes effort, expertise, and experience.
+However, apart from 'effort', the expertise and experience are quite different.
+\par
+True, you need to run updates, and check your firewall logs, but there are a miriad of things you do not have to worry about when you run a website.
+Most of them boil down to what lengths you go protecting your keys.
+\par
+Maintaining a login server is not for the faint at heart.
+You need full transparency for all your processes and procedures regarding the handling of your keys.
+For if they are compromised, you are dead instantly.
+Scritinised regularly by authors, where they must find not a speck of dust on any of your cupboards; the house freshly ventilated, an apple pie in the oven.
+\begin{dialogue}
+\speak{Punk} You wanna buy some death sticks?
+\speak{Obi-Wan Kenobi}	\direct{Waves his hands.} You don't want to sell me death sticks.
+\speak{Punk}	I don't want to sell you death sticks.
+\speak{Obi-Wan Kenobi} You want to go home and rethink your life.
+\speak{Punk}	I want to go home and rethink my life.
+\attrib{Star Wars: Episode II - Attack of the Clones}
+\end{dialogue}
+The only thing you want to achieve regarding this is 'absolute trust'.
+But trust comes on foot and goes on the Millennium Falcon.
+\par
+Establishing and maintaining trust at this level is a challenge that you cannot \XOR\ yourself out of.

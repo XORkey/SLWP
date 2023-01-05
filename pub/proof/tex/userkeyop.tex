@@ -1,0 +1,12 @@
+\Section{User key operations}
+\Subsection{Password manager}
+Although I like to use the phrase ``password'' as little as possible in this document for obvious reasons,
+I fear that even when this protocol is adapted globally and ubiquitously,
+any program that aides with logging in will be called a password manager,
+despite its inaptness.
+That is because there allways will be passwords.
+Not all passwords are bad in all circumstances; better alternatives are not always better suited.
+\Subsubsection{Passwords and keys}
+The password manager will provide keys to the browser of the user that wants to login, just as it presents passwords now.
+The only thing different in this scenario that it will inject a key in an appropriate HTML input element on the login page, instead of a password.
+The login logic on that page (most likely JavaScript for years to come) will handle the local calculations, and there you have it.
