@@ -1,0 +1,41 @@
+1. Link source code naar MAMP directory:
+	ln -s /User/timo/src/slwp/com/xorkey.login login.xorkey.com
+	ln -s /User/timo/src/slwp/com/xorkey/www/shtml www.xorkey.com
+
+2. Registreer domeinnamen op localhost in /etc/hosts
+	127.0.0.1	login.xorkey.com www.xorkey.com localhost
+	::1			login.xorkey.com www.xorkey.com localhost
+
+3. Creeer twee self-signed certificaten
+	openssl req -x509 -newkey rsa:4096 -keyout www.xorkey.com.pem -out www.xorkey.com.pem -days 1000 -nodes -subj '/CN=www.xorkey.com'
+	openssl req -x509 -newkey rsa:4096 -keyout demo.xorkey.com.pem -out demo.xorkey.com.pem -days 1000 -nodes -subj '/CN=demo.xorkey.com'
+	openssl req -x509 -newkey rsa:4096 -keyout login.xorkey.com.pem -out login.xorkey.com.pem -days 1000 -nodes -subj '/CN=login.xorkey.com'
+	Verplaats ze naar /Applications/MAMP/conf/server
+
+4. Creeer virtual hosts in extra/httpd-vhosts.conf
+		NameVirtualHost *:443
+
+		<VirtualHost *:443>
+			ServerName www.xorkey.com
+			DocumentRoot "/Applications/MAMP/htdocs/www.xorkey.com"
+			ErrorLog "/Applications/MAMP/logs/www.xorkey.com-error-log"
+			CustomLog "/Applications/MAMP/logs/www.xorkey.com-access-log" common
+			SSLEngine on
+			SSLCertificateFile "/Applications/MAMP/conf/server/www.xorkey.com.pem"
+			SSLCertificateKeyFile "/Applications/MAMP/conf/server/www.xorkey.com.pem"
+		</VirtualHost>
+		<VirtualHost *:443>
+			ServerName login.xorkey.com
+			DocumentRoot "/Applications/MAMP/htdocs/login.xorkey.com"
+			ErrorLog "/Applications/MAMP/logs/login.xorkey.com-error-log"
+			CustomLog "/Applications/MAMP/logs/login.xorkey.com-access-log" common
+			SSLEngine on
+			SSLCertificateFile "/Applications/MAMP/conf/server/login.xorkey.com.pem"
+			SSLCertificateKeyFile "/Applications/MAMP/conf/server/login.xorkey.com.pem"
+		</VirtualHost>
+
+5. Enable SHTML voor simpele website van XORkey.
+	Voeg 'Options +Includes' to aan de VirtualHost sectie van www.xorkey.com.
+	Enable opties in httpd.conf:
+	    AddType text/html .shtml
+		AddOutputFilter INCLUDES .shtml
