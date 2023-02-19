@@ -1,8 +1,12 @@
-.slwp_enabled
+.missing
+{
+	border: 3px solid red;
+}
+.enabled
 {
 	border: 3px solid orange;
 }
-.slwp_havekey
+.havekey
 {
 	border: 3px solid green;
 }

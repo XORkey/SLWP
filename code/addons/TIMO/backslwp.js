@@ -4,7 +4,7 @@
 **				It needs to talk to all the tabs, and also with a external program
 **				providing login keys.
 ** AUTHOR:		ing. T.M.C. Ruiter
-** COPYRIGHT(c) 2019 by XORkey B.V.
+** COPYRIGHT(c) 2019-2020 by XORkey B.V.
 */
 'use strict';
 
@@ -24,20 +24,20 @@ function Hex32(n)
 }
 
 /*
-** Uh():
-**	Construct an Uh value.
+** Hu():
+**	Construct an Hu value.
 */
-function Uh(KeyRingID, UID, host)
+function Hu(KeyRingID, UID, host)
 {
 	var H0 = hash.SHA256(String(KeyRingID));
 										// 256 bits represented in 64 bytes.
 	var H1 = hash.SHA256(UID + host);	// Another 256 bit value represented as a 64
 										//                                 bytes string.
-	var Uh = "";
+	var Hu = "";
 	for (var i = 0; i < 8; i++)			// For each 8 bytes of H0 and H1: XOR both and
-										//               add the result as string to Uh.
-		Uh += Hex32((parseInt(H0.substr(i * 8, 8), 16) ^ (parseInt(H1.substr(i * 8, 8), 16))) >>> 0);
-	return Uh;							// Also a 256 bit value represented as a 64
+										//               add the result as string to Hu.
+		Hu += Hex32((parseInt(H0.substr(i * 8, 8), 16) ^ (parseInt(H1.substr(i * 8, 8), 16))) >>> 0);
+	return Hu;							// Also a 256 bit value represented as a 64
 										//                                 bytes string.
 }
 function Au(Ru, host)
@@ -153,7 +153,7 @@ function doLogin()
 									{
 										state = 'creating';
 										worker.port.emit('create_account',
-															Uh(keyring.GetKey(''), UserId, url_host),
+															Hu(keyring.GetKey(''), UserId, url_host),
 															keyring.DummyKey(url_host));
 									});
 		worker.port.on('created', function() { state = 'havekey'; });
@@ -166,8 +166,8 @@ function doLogin()
 								data.url('login.js')]
 		});
 		worker.port.emit('login');
-		worker.port.on('getUhAu',	function(url_host, Ru) {
-										worker.port.emit('UhAu', Uh(keyring.GetKey(''), UserId, url_host), Au(Ru, url_host));
+		worker.port.on('getHuAu',	function(url_host, Ru) {
+										worker.port.emit('HuAu', Hu(keyring.GetKey(''), UserId, url_host), Au(Ru, url_host));
 									});
 		break;
 	default:
@@ -179,14 +179,15 @@ function doLogin()
 
 /*------------------------------*/
 
-var tab_state = [];							// Remember the state for each tab.
+var tab_states = [];						// Remember the state for each tab.
 											// Tab State is an Object:
 											//	{	host:	window.top.location.host (host part of the URL),
 											//		state:	one of
 											//				{	'unknown': we have no clue,
-											//					'missing': we see no Uh or Au anywhere,
-											//					'enabled': we have found Uh and Au on the page,
+											//					'missing': we see no Hu or Au anywhere,
+											//					'enabled': we have found Hu and Au on the page,
 											//					'havekey': we have found a key for 'host',
+											//					'failure': we have not been able to log in.
 											//					'wearein': we have successfully logged in.
 											//				}
 											//	}
@@ -198,20 +199,33 @@ var tab_state = [];							// Remember the state for each tab.
 //
 // Tab Finite State Machine:
 //
-// U -> M on Au and Uh missing.
-// U,M -> E on Au and Uh found on tab
-// U,M -> H on Au and Uh found on tab and we have a key.
+// U -> M on Au and Hu missing.
+// U,M -> E on Au and Hu found on tab
+// U,M -> H on Au and Hu found on tab and we have a key.
 //
 /* Do something when the login button is pressed. */
 function doLogin(tab)
 {
-	if (tab_state[tab.id] == undefined)
-		browser.tabs.sendMessage(tab.id, {action: 'get_state'});
+	console.log("doLogin(" + tab.id + ")");
+	if (tab_states[tab.id] == undefined)
+		browser.tabs.sendMessage(tab.id, {action: 'get_state'})
+			.catch(e => console.log('Failed: ' + e));
 	else
 	{
-		var state = tab_state[tab.id].state;
+		var state = tab_states[tab.id].state;
+		var host = tab_states[tab.id].host;
 		switch (state)
 		{
+		case "enabled":
+			if (keyring.GetKey(host) != null)
+			{
+				tab_states[tab.id].state = 'havekey';
+				browser.tabs.sendMessage(tab.id, {action: 'set_state', state: 'havekey'});
+			}
+			else
+				console.log('We have no key for host ' + host);
+			break;
+		case "missing":
 		default:
 			console.log('State: ' + state + '; no action.');
 			break;
@@ -219,24 +233,32 @@ function doLogin(tab)
 	}
 }
 
-browser.browserAction.onClicked.addListener(doLogin);
-
-
-/* Do something with messages from the tab. */
-function handleTabMessage(message, sender, response)
+function handleTabMessage(message, sender, sendResponse)
 {
-	function OnError(e) { console.log(`Error: ${e}`); }
+	console.log(message.greeting);
 	// Each tab calls in for every page it serves.
 	// Give it some CSS to work with.
-	console.log("handleTabMessage(" + sender.tab.id + "): new page, so insertCSS");
-	var inserting = browser.tabs.insertCSS(sender.tab.id, { file: "content.css" });
-	inserting.then(null, OnError);
-	console.log("handleTabMessage(" + sender.tab.id + "): " + message.host + " " + message.state);
-	tab_state[sender.tab.id] = { host: message.host, state: message.state };
-	if (tab_state[sender.tab.id].state == 'slwp_disabled')
+	browser.tabs.insertCSS(sender.tab.id, { file: "content.css" })
+		.then( null, e => console.log(`SLWP Error: ${e}`));
+	tab_states[sender.tab.id] = { host: message.host, state: message.tab_state };
+	if (tab_states[sender.tab.id].state == "missing")
+	{
 		browser.browserAction.disable(sender.tab.id);
+		browser.browserAction.setTitle({tabId: sender.tab.id, title: "TIMO is disabled on this tab."});
+	}
 	else
+	{
 		browser.browserAction.enable(sender.tab.id);
+		browser.browserAction.setTitle({tabId: sender.tab.id, title: "TIMO is ENABLED on this tab."});
+	}
+	sendResponse({response: "Hi there from handleTabMessage()!", tabid: sender.tab.id });
 }
 
+/*
+**	SETUP
+*/
+var keyring = new KeyRing();
+browser.browserAction.onClicked.addListener(doLogin);
+										// Start the login process when the browser button is clicked.
 browser.runtime.onMessage.addListener(handleTabMessage);
+										// React to messages from tabs.

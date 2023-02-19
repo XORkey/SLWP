@@ -4,51 +4,54 @@
 **				This script determines if the page contains the Uh and Au elements used for the SLWP protocol.
 **				It reports this status to the main script in the browser.
 ** AUTHOR:		ing. T.M.C. Ruiter
-** COPYRIGHT(c) 2019 by XORkey B.V.
+** COPYRIGHT(c) 2019-2020 by XORkey B.V.
 */
 'use strict';
 
-function slwp_enabled()
-{
-	return document.getElementById('Uh') && document.getElementById('Au');
-}
+function slwp_enabled()	{ return document.getElementById('Hu') && document.getElementById('Au'); }
 
-function getstate()
-{
-	if (slwp_enabled())
-	{
-		return 'slwp_enabled';
-	}
-	else
-		return 'slwp_disabled';
-}
+function getstate()		{ return slwp_enabled() ? 'enabled' : 'missing'; }
 
 function handleBrowserMessage(request, sender, sendResponse)
 {
-	console.log(request);
-	if (request.action == 'get_state')
+	switch (request.action)
 	{
+	case 'get_state':
 		console.log('Checking if enabled...');
 		var tab_state = getstate();
 		switch (tab_state)
 		{
-		case 'slwp_enabled':
+		case 'enabled':
 			browser.runtime.sendMessage({state: tab_state, host: window.top.location.host});
 			return Promise.resolve({state: tab_state, host: window.top.location.host});
 		default:
 			console.log('...no. Bummer.');
 			return Promise.resolve({state: 'disabled', host: window.top.location.host});
 		}
+		break;
+	case 'set_state':
+		window.document.body.classList.remove('enabled');
+		window.document.body.classList.add(request.state);
+		break;
 	}
 }
 
 /* Register handleBrowserMessage() to act on messages from the main script. */
 browser.runtime.onMessage.addListener(handleBrowserMessage);
 
-var tab_state = getstate();
-window.document.body.className = tab_state;
+var initial_tab_state = getstate();
+window.document.body.classList.add(initial_tab_state);		// Activate the injected CSS.
 
-browser.runtime.sendMessage({state: tab_state, host: window.top.location.host});
+var tabid = 0;
+browser.runtime.sendMessage(
+		{
+			greeting: "Hello browser, this is " + window.top.location.host + "!",
+			tab_state: initial_tab_state,
+			host: window.top.location.host
+		})
+	.then(message => { console.log("Response: " + message.response); tabid = message.tabid; })
+	.catch(e => console.log("sendMessage error: " + e))
+	.finally(() => console.log("Script tabslwp.js loaded on tab[" + tabid + "]: initial_tab_state: " + initial_tab_state));
 
 /*
 runtime.onMessage('state',	function(color) {

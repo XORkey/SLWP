@@ -1,4 +1,28 @@
-function KeyRing(filename)
+class HostKey {
+	constructor(host, key) {
+		this._host = host;
+		this._key = key;
+	}
+	get host()	{ return this._host; }
+	get key()	{ return this._key; }
+	set key(k)	{ this._key = k >>> 0; }
+}
+class KeyRing {
+	constructor() {
+		this.Z = [new HostKey(SHA256("KeyRingID"), uRandom32())];
+		console.log(this.Z[0].key);
+		this.AddKey(new HostKey(SHA256("demo.xorkey.com"), uRandom32()));
+	}
+	AddKey(hk)					{	this.Z.push(hk); }
+	GetKey(host = "KeyRingID")	{	var h = this.Z.find((v) => v.host === SHA256(host));
+									return h === undefined ? h : h.key;
+								}
+	Update(host, key)			{	var h = this.Z.find((v) => v.host === SHA256(host));
+									h.key = key;
+								}
+}
+
+function OldKeyRing(filename)
 {
 	this.z = [];							// An array with hash-key combinations.
 	this.filename = filename;				// The location on storage.
@@ -102,8 +126,9 @@ function KeyRing(filename)
 	if (fileIO.exists(this.filename))
 		this.Read();
 }
-
+/*
 var default_keyring_file = '/Users/timo/.keyring';
 var Z = new KeyRing(default_keyring_file);
 
 module.exports = Z;
+*/
