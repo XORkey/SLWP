@@ -1,11 +1,12 @@
-\Section{Logging in}
+\Section{A new way of logging in}
 The \TIMO\ protocol has some main features that set it apart from other authentication protocols.
 We start here with the seeding ideas and deal with improving it later.
 %%%
 \Subsection{Basic ideas}
 A compromised account can be devastating.
 It is worth a considerable amount of money when you have a database full of usernames and their passwords, so hackers are always looking for ways to get them.
-What if there were no passwords (or equivalents) to be found?
+I was thinking: 'What if there were no passwords (or equivalents) to be found?'
+That thought ultimately lead to this authentication protocol, which reiies more on computation than on human's memorizing capabilities.
 \par
 Another thing bothering me was the use of a string of very few characters to identify a single person out of millions.
 A traditional `userid' is typically either a short string of lowercase letters and numbers
@@ -13,34 +14,58 @@ A traditional `userid' is typically either a short string of lowercase letters a
 or an email address
 (jessica.chastain@hotmail.com).
 But this does not uniquely identify anyone, and anyone can misuse this for illicit purposes.
+\par
+As one thing leads to another, the following ideas emerged simultaneously as a complementary set.
 %%%
 \Subsubsection{Eliminating passwords}
+If you do away with passwords altogether, what are you left with?
 You still need to be able to authenticate yourself, otherwise you cannot be granted access to your personal account.
 That implies that the website needs to store something to facilitate this basic process.
 However, it must not be something useable in and of itself; it has to have a counterpart that is in the posession of the individual user.
-This counterpart must be different but related.\footnote{Like the locket with Annie's supposed parents, in the film that bears her name.}
+This counterpart must be different but related, like the two parts of Annie's locket.
+\begin{dialogue}
+\speak{Annie}
+No! No please don't make me take my locket off. I don't want a new one.
+\direct{Fingers her locket.}
+This locket, my Mom and Dad left me when... when they left me at the Orphanage.
+\attrib{Annie, 1982}
+\end{dialogue}
 \par
 The notion of having different keys for user and server is of paramount importance.
 It changes the server from a treasure trove (millions of passwords) to a dry desert (millions of useless keys).
 \par
-The website has a key for each user, which do not change in principle.
+The website has a unique key for each user, which do not change in principle.
 The user has a key that is derived from the key the webserver has for that user.
-The user keys are derived from the site keys by encrypting it with another key.
+The user keys are derived from the site keys by encrypting (it with another and altogether different key).
 \par
 If we imagine a random 128-bit value and its \AES\ encryption, we could store that random value as the key for a user in the website's database and give the user its encrypted counterpart.
 With these keys we can design a protocol with which the user can prove it has the right key.
 This way, what is stored on the website's disks is no longer usable for logging in, as the key to encrypt them is nowhere to be found.
 As it turns out, the user can also verify the validity of the website (separate from any PKI scheme) with the same protocol.
+\par
+The protocol that initially emerged from my ponderings is discussed  in §\ref{rudimentary-login}.
 %%%
 \Subsubsection{The key ring}
-Passwords you can remember; keys you can't\footnote{Well, that is true for most people. Some are able to remember and recite well over 100.000 digits of \(\pi\) \cite{pi-world-ranking-list}, so what are a few 16 byte keys anyway?}.
-They need to be stored, and you get a key from every website you login to that supports this protocol.
+Passwords you can remember; keys you can't\footnote{Well, that is true for most people.
+Some are able to remember and recite well over 100.000 digits of \(\pi\) \cite{pi-world-ranking-list}, so what are a few 16 byte keys anyway?}.
+The website uses a database to store its site keys;
+the user needs something similar.
+The user gets a key from every website it will login to, if it supports this protocol.
 Before you know it, you have over 50 keys.
 \par
-All keys will be stored on a digital key ring, which is just a set of 128-bit random numbers.
+In this scheme, all keys will be stored on a digital key ring, which is just a set of 128-bit random numbers.
 Each key is associated with a website and automatically selected.
+The key ring itself is identified by its first key (key zero).
+Instead of calculating login values with it, it is used for the computation of the user hash.
+\par
+The key ring can be put on the user's harddisk as a blob of data.
+It could be stored on a special USB device with fingerprint protection.
+It could be stored in the Cloud.
+\par
+It is up to the user to select the right protection for their keys.
+
 %%%
-\Subsubsection{The user identifier}
+\Subsubsection{The user hash}
 \begin{dialogue}
 \speak{Centurion}	Where is Brian of Nazareth? I have an order for his release.
 \speak{Mr. Cheeky}	Uh, I am Brian of Nasareth!
@@ -54,7 +79,7 @@ Each key is associated with a website and automatically selected.
 \speak{Brian}		I'm Brian!
 \speak{Victims}		I'm Brian!
 \speak{Gregory}		I'm Brian, and so's my wife!
-\attrib{Monty Python's ``Life of Brian''}
+\attrib{Monty Python's ``Life of Brian'', 1979}
 \end{dialogue}
 There are several things that make traditional userid's cumbersome to use.
 \begin{itemize}
@@ -78,17 +103,25 @@ The idea is that you cannot guess this value
 (only Jessica knows how to generate one)
 and that it may be compiled by using several sources,
 so this authentication protocol becomes genuinally multi-factor.
+\par
+The creation of this hash is briefly touched in \ref{initial_user_hash} and described fully later in \ref{full_user_hash}.
 %%%
 \Subsubsection{Login server}
-Designing and maintainig a website, especially large ones, is a specialist's job.
-Interoperability with payment systems requires specialists too.
-The same goes for the databases running the show.
+Having a protocol that eliminates passwords is great, but leaves you with a big challenge: instead of passwords you now need to secure your keys.
+Your website stores site keys in its database, but they are of no real value by design.
+This, howeer, is not the case for the key that turns site keys into user keys.
 \par
-But securing keys and operating them is as much a specialist's job as any mentioned before, maybe more so.
-This is not something you do on the side and hope everything will be all right.
-Typically, none of all the specialists you have working on your website will have indepth knowledge of this field of expertise.
+This key can be put inside an Hardware Security Module (HSM) so nobody can really get to it.
+However, if the HSM is accessible directly from the website's servers, you can probably use the key anyway.
 \par
-As it turns out, all cryptographical operations can be singled out and combined into what is called a Login server.
+As it turnes out, all cryptographical operations of the protocol can be singled out and combined into what is called a Login server.
+This server is separate from the web server and can be placed in the back office, or somewhere on the Internet.
+Now, the protcol is performed by two servers instead of one, and the changes needed on the webserver to implement the protocol minimized.
+\par
+Being able to separate functions into a login server gives many benefits.
+This will be discussed in \ref{login_server_benefits}.
+\par
+
 This also means that operating the Login server could be done by people other than those running the website traditionally
 (which can keep their job and do their thing without change).
 In fact, the whole business running Login servers can be put on the Internet as LaaS: Login as a Service.
@@ -101,20 +134,30 @@ organize key ceremonies,
 generate certificates,
 and everything else you need to make the Login servers little bastions of security.
 
-\input{tex/user_hash.sub.tex}
+Designing and maintainig a website, especially large ones, is a specialist's job.
+Interoperability with payment systems requires specialists too.
+The same goes for the databases running the show.
+\par
+But securing keys and operating them is as much a specialist's job as any mentioned before, maybe more so.
+This is not something you do on the side and hope everything will be all right.
+Typically, none of all the specialists you have working on your website will have indepth knowledge of this field of expertise.
+
+\input{tex/initial_user_hash.sub.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%
-\Subsection{A rudimentary login algorithm}
+\Subsection{A rudimentary login algorithm}\label{rudimentary-login}
+The core idea of the algorithm is that the user must prove it is in the posession of a key that the server has issued.
+To do so, there is an almost limitless number of approaches to pursue, but not all will be fruitful.
 \begin{dialogue}
 \speak{Dr. Strange}	I went forward in time, to view alternate futures. To see all the possible outcomes of the coming conflict.
 \speak{Star-Lord}   How many did you see?
 \speak{Dr. Strange}	14,000,605.
 \speak{Iron Man}	How many did we win?
 \speak{Dr. Strange}	One.
-\attrib{Avengers: Infinity War}
+\attrib{Avengers: Infinity War, 2018}
 \end{dialogue}
-The core idea of the algorithm is that the user must prove it is in the posession of a key that the server has issued.
-To do so, there is an almost limitless number of approaches to pursue, but not all will be fruitful.
+Without the Time Stone at my disposal,
+it took quite some time to traverse all possible paths a protocol may take to come up with something that works.
 \par
 In the solution we are disussing now, the server encrypts a random number (a nonce) with the key the user has.
 The user can prove it has that key by decrypting the nonce and returning a value derived from it, like a hash for instance.

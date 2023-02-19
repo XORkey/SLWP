@@ -1,0 +1,48 @@
+\Subsection{Initial User hash}\label{initial_user_hash}
+The user hash (denoted with \(H_u\)) serves as an improved replacement of the userid.
+Instead of a guessable string
+(an e-mail address or something derived from a person's name)
+we send a 256-bit hash value.
+\par
+The ultimate purpose of this hash is to act as a search key into the accounts database of the website,
+just as a userid would do in the traditional way of logging in.
+The result of this search would be the site key that is used in the login computations.
+\Subsubsection{Hash seed}
+The user has a key ring, with keys of each website it can log in.
+We could use a hash of the key
+(e.g. at index 23 in the key ring)
+of the website to the \(H_u\) identifier:
+\[H_0 = \HSHA{Z[23]}\]
+but that would be wrong for two reasons:
+the key can possibly be recovered using brute force,
+and we want to be able to refresh the keys every now and then, which would imply that \(H_u\) changes also.
+\par
+However, we could choose \(Z[0]\)
+(i.e. the first key in the ring)
+for this purpose.
+We have to declare it `unchangeable' but that is no problem.
+At the same time it can be the identifier of the key ring, and can be thought as bound the the individual that owns the key ring.
+So we compute it like this:
+\[H_0 = \HSHA{Z[0]}\]
+\par
+The presented means of computing \(H_u\) yields a value that is totally unguessable (with \(2^{256}\) possible values), but the same for each login.
+Tracking users accross websites is easy when they use the same e-mail address as their userid.
+When using a hash value like above, the same can be done, with no extra effort.
+\par
+To remedy this, we could add something specific for each website.
+The host name part of the URL
+(a Fully Qualified Domain Name)
+is an perfect candidate for this:
+\begin{equation}
+H_0 = \HSHA{Z[0] + \mathtt{FQDN}}
+\end{equation}
+\begin{equation}
+H_u = H_0
+\end{equation}
+We now have a unique \(H_u\) value per website, but it is still a single factor login.
+Just the key ring is required to be able to login.
+\Subsubsection{Adding more factors}
+As the \(H_u\) value is a 256-bit hash, we can add more factors with great ease.
+If each factor is presented as another 256-bit value, each of them can be added to the seed factor with the \XOR\ operator.
+The number of factors is unlimited this way.
+We will discuss this in \ref{full_user_hash}.

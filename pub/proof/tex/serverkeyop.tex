@@ -1,7 +1,11 @@
 \Section{Server key operations}
-The actions of the server in the presented rudimentary login scheme can be thought of as two separate things: computation and comparison.
+The actions of the server in the presented rudimentary login scheme in section \ref{rudimentary-login}
+can be thought of as three separate things:
+lookup,
+computation and comparison.
 Granting a login is an authentication process that is a comparison of two values, basically.
 Before this can take place, some computations must be done with keys and random values.
+And before that, a key needs to be looked up first.
 \par
 Maintaining and upholding good security needs expertise that does not come natural for many website owners and maintainers.
 Even if security has full attention and focus, with a team of experts at the controls, it still is hard to keep things safe.
@@ -10,6 +14,42 @@ Simply because the site is almost directly connected to the wild wild west of th
 It is therefore not entirely unfortunate that we can separate all key operations away from the inherently vulnerable web server.
 Instead, we outsource this to a back office, or preferrably remote, server; we then could move most keys along with it.
 That looks a bad idea at first sight---increasing complexity, but it proves to be greatly advantageous for security.
+
+\Subsection{Server side login computations}
+The following computations, using keys, are performed on the server side.
+Here is a recap.
+\par
+The \(K_u\) value is computed with (\ref{rud:sku}):
+\[K_u = \EAES{K_s}{S}\]
+Then, we compute \(R_u\) with (\ref{rud:sru}):
+\[R_u = \xor{A_u}{K_u}\]
+Followed by \(B_s\) with (\ref{rud:bs}):
+\[B_s = \xor{\mtpn{\HSHA{R_u}}}{K_u}\]
+Next, we generate challenge \(P_s\) with (\ref{rud:rs}) and (\ref{rud:ps}):
+\[R_s = random(n)\]
+\[P_s = \xor{R_s}{K_u}\]
+Finally,we compute the \(Q_s\) value with (\ref{rud:qs}):
+\[Q_s = \xor{\mtpn{\HSHA{R_s}}}{R_u}\]
+\par
+It are those computations that can be singled out and done somewhere other than the web server.
+\par
+The site key \(K_s\) is stored in the web server's database and not particularly interesting or valueable.
+But we need to focus on \(S\) and the resulting \(K_u\) keys.
+
+\par
+When we split up the server side operations in two,
+the web server needs to do very little.
+After receiving \(H_u\) and \(A_u\) from the user,
+all that is needed is to lookup \(K_s\)
+(the site key for the user),
+send it to the login server,
+along with \(A_u\).
+\par
+The login server will return values \(B_s\), \(P_s\), and \(Q_s\);
+where \(Q_s\) is remembered and the others sent back to the user.
+\par
+The user then returns \(Q_u\) which the web server compares with \(Q_s\).
+If they are equal, the user is authenticated.
 
 \Subsection{Introduction of the login server}
 All server side operations that involve keys can be consolidated and separated from the comparison operations needed for the authentication processs.
